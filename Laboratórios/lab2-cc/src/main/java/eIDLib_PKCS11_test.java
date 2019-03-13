@@ -92,10 +92,12 @@ public class eIDLib_PKCS11_test {
             mechanism.pParameter = null;
             pkcs11.C_SignInit(p11_session, mechanism, signatureKey);
 
-
+            // Generate KeyPair
             KeyPairGenerator keypair = KeyPairGenerator.getInstance("RSA");
             keypair.initialize(2048);
             KeyPair keyPair = keypair.generateKeyPair();
+
+            // Certificate KeyPair with our custom certificate from PT-CC
             CustomCertificate customCertificate = new CustomCertificate(cert.getSigAlgName(), keyPair.getPublic(), "ABC");
             byte[] customCertificateBytes = customCertificate.toBytes();
             byte[] customCertificateSignature = pkcs11.C_Sign(p11_session, customCertificateBytes);
@@ -103,11 +105,23 @@ public class eIDLib_PKCS11_test {
             System.out.println("            //signature:" + encoder.encode(customCertificateSignature));
 
             Signature sign = Signature.getInstance(cert.getSigAlgName());
-            sign.initVerify(cert);
-            sign.update(customCertificateBytes);
-            boolean verify1 = sign.verify(customCertificateSignature);
-            System.out.println("Verified: " + verify1);
 
+            // Sign
+            sign.initSign(keyPair.getPrivate());
+            byte[] benfica = "benfica".getBytes(Charset.forName("UTF-8"));
+            sign.update(benfica);
+            byte[] benficaSigned = sign.sign();
+
+            sign.initVerify(customCertificate.getPublicKey());
+            sign.update(benfica);
+            boolean benficaVerified = sign.verify(benficaSigned);
+            if (benficaVerified) {
+                sign.initVerify(cert);
+                sign.update(customCertificateBytes);
+                boolean verify1 = sign.verify(customCertificateSignature);
+                System.out.println("Verified: " + verify1);
+            } else
+                System.out.println("Signature from KeyPair not trusted by certificate.");
 
             // sign
             System.out.println("            //sign");

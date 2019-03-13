@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="14ec03cc-5d18-4106-853f-21fd36175b86" name="Default Changelist" comment="" />
+    <list default="true" id="14ec03cc-5d18-4106-853f-21fd36175b86" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/eIDLib_PKCS11_test.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/eIDLib_PKCS11_test.java" afterDir="false" />
+    </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -21,8 +24,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/eIDLib_PKCS11_test.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="388">
-              <caret line="109" lean-forward="true" selection-start-line="109" selection-end-line="109" />
+            <state relative-caret-position="-289">
+              <caret line="92" column="18" selection-start-line="92" selection-start-column="12" selection-end-line="92" selection-end-column="18" />
             </state>
           </provider>
         </entry>
@@ -35,6 +38,9 @@
         <option value="Class" />
       </list>
     </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -51,49 +57,22 @@
     <option name="width" value="980" />
     <option name="height" value="1050" />
   </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
       <pane id="Scope" />
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="lab2-cc" type="b2602c69:ProjectViewProjectNode" />
-              <item name="lab2-cc" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="lab2-cc" type="b2602c69:ProjectViewProjectNode" />
-              <item name="lab2-cc" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="lab2-cc" type="b2602c69:ProjectViewProjectNode" />
-              <item name="lab2-cc" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="lab2-cc" type="b2602c69:ProjectViewProjectNode" />
-              <item name="lab2-cc" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
+      <pane id="PackagesPane" />
+      <pane id="ProjectPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1552412342600" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../Lab2/eIDLib_PKCS11_test/eIDLib_PKCS11_test/lib/pteidlibj.jar!/" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/pteidlibj.jar!/" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="nodejs_package_manager_path" value="npm" />
@@ -149,17 +128,18 @@
       <workItem from="1552400429021" duration="10008000" />
       <workItem from="1552427454957" duration="1175000" />
       <workItem from="1552475096694" duration="370000" />
+      <workItem from="1552476440023" duration="1293000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="13720000" />
+    <option name="totallyTimeSpent" value="15013000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="848" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25973153" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.26308724" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -197,13 +177,7 @@
     <option name="version" value="1" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://$PROJECT_DIR$/../eIDLib_PKCS11_test/eIDLib_PKCS11_test/lib/pteidlibj.jar!/pteidlib/PTEID_Pin.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="7" column="13" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="jar://$PROJECT_DIR$/../eIDLib_PKCS11_test/eIDLib_PKCS11_test/lib/pteidlibj.jar!/pteidlib/PTEID_Pin.class" />
     <entry file="file://$PROJECT_DIR$/photo.jp2" />
     <entry file="jar://C:/Program Files/Java/jdk1.8.0_202/src.zip!/java/lang/Object.java">
       <provider selected="true" editor-type-id="text-editor">
@@ -217,13 +191,7 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/hs_err_pid8944.log" />
-    <entry file="jar://$PROJECT_DIR$/../eIDLib_PKCS11_test/eIDLib_PKCS11_test/lib/pteidlibj.jar!/pteidlib/pteid.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="147">
-          <caret line="130" selection-start-line="130" selection-end-line="130" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="jar://$PROJECT_DIR$/../eIDLib_PKCS11_test/eIDLib_PKCS11_test/lib/pteidlibj.jar!/pteidlib/pteid.class" />
     <entry file="file://$PROJECT_DIR$/src/main/java/aaaa.java" />
     <entry file="jar://C:/Program Files/Java/jdk1.8.0_202/src.zip!/java/security/SignatureSpi.java">
       <provider selected="true" editor-type-id="text-editor">
@@ -264,13 +232,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://C:/Program Files/Java/jdk1.8.0_202/src.zip!/java/security/Signature.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="114">
-          <caret line="486" column="22" selection-start-line="486" selection-start-column="22" selection-end-line="486" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/CustomCertificate.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="476">
@@ -281,10 +242,31 @@
         </state>
       </provider>
     </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_202/src.zip!/java/lang/StringCoding.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="326" column="18" selection-start-line="326" selection-start-column="18" selection-end-line="326" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_202/src.zip!/java/lang/String.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="433">
+          <caret line="957" column="31" selection-start-line="957" selection-start-column="31" selection-end-line="957" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_202/src.zip!/java/security/Signature.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="365">
+          <caret line="579" column="24" selection-start-line="579" selection-start-column="24" selection-end-line="579" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/eIDLib_PKCS11_test.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="388">
-          <caret line="109" lean-forward="true" selection-start-line="109" selection-end-line="109" />
+        <state relative-caret-position="-289">
+          <caret line="92" column="18" selection-start-line="92" selection-start-column="12" selection-end-line="92" selection-end-column="18" />
         </state>
       </provider>
     </entry>
