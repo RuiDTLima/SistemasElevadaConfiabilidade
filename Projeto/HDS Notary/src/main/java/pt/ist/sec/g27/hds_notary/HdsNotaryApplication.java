@@ -9,5 +9,4 @@ public class HdsNotaryApplication {
     public static void main(String[] args) {
         SpringApplication.run(HdsNotaryApplication.class, args);
     }
-
 }

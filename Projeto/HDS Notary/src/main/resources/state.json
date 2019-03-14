@@ -1,0 +1,57 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "alice",
+      "pubKey": "alice.pub"
+    },
+    {
+      "id": 2,
+      "name": "bob",
+      "pubKey": "bob.pub"
+    },
+    {
+      "id": 3,
+      "name": "eve",
+      "pubKey": "eve.pub"
+    }
+  ],
+  "goods": [
+    {
+      "id": 1,
+      "owner-id": 1,
+      "name": "house",
+      "state": "not-on-sale"
+    },
+    {
+      "id": 2,
+      "owner-id": 1,
+      "name": "car",
+      "state": "not-on-sale"
+    },
+    {
+      "id": 3,
+      "owner-id": 2,
+      "name": "motorcicle",
+      "state": "not-on-sale"
+    },
+    {
+      "id": 4,
+      "owner-id": 2,
+      "name": "pool table",
+      "state": "not-on-sale"
+    },
+    {
+      "id": 5,
+      "owner-id": 1,
+      "name": "makeup set",
+      "state": "not-on-sale"
+    },
+    {
+      "id": 6,
+      "owner-id": 2,
+      "name": "phone",
+      "state": "not-on-sale"
+    }
+  ]
+}
