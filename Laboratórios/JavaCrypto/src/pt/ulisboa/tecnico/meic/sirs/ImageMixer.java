@@ -10,19 +10,21 @@ public class ImageMixer {
 
     /**
      * Converts a BufferedImage into a byte[]
+     *
      * @param image the image to convert
      * @return a byte array with the pixels from the image (one pixel is one bit)
      */
     private static byte[] imageToByteArray(BufferedImage image) {
         DataBuffer imageDataBuffer = image.getRaster().getDataBuffer();
-        return ((DataBufferByte)imageDataBuffer).getData();
+        return ((DataBufferByte) imageDataBuffer).getData();
     }
 
     /**
      * Applies a function passed as an argument to the byte[] representations of two image files
-     * @param image1FilePath filesystem location of the first image file
-     * @param image2FilePath filesystem location of the second image file
-     * @param outputImageFilePath filesystem location of the output image file
+     *
+     * @param image1FilePath       filesystem location of the first image file
+     * @param image2FilePath       filesystem location of the second image file
+     * @param outputImageFilePath  filesystem location of the output image file
      * @param manipulationFunction an object implementing the manipulationFunction method, to be applied to the images
      * @throws IOException
      */
@@ -42,10 +44,12 @@ public class ImageMixer {
         BufferedImage outputImage = getImageFromArray(outputBytes, image1.getWidth(), image1.getHeight());
         writeImageToFile(outputImage, outputImageFilePath);
     }
+
     /**
      * Applies a function passed as an argument to the byte[] representations of one image file
-     * @param imageFilePath filesystem location of the image file
-     * @param outputImageFilePath filesystem location of the output image file
+     *
+     * @param imageFilePath        filesystem location of the image file
+     * @param outputImageFilePath  filesystem location of the output image file
      * @param manipulationFunction an object implementing the manipulationFunction method, to be applied to the image
      * @throws IOException
      */
@@ -62,17 +66,36 @@ public class ImageMixer {
         writeImageToFile(outputImage, outputImageFilePath);
     }
 
+    // needs to enlarge the image (RSA ocupies more space)
+    public static void mixRSA(String imageFilePath, String outputImageFilePath, ByteArrayMixer manipulationFunction) throws IOException {
+        // get the bytes from the image
+        BufferedImage image = ImageIO.read(new File(imageFilePath));
+        byte[] imageBytes = imageToByteArray(image);
+
+        // apply the manipulationFunction to the byte array of the image
+        byte[] outputBytes = manipulationFunction.mix(imageBytes, null);
+
+        float ratio = (float) outputBytes.length / (float) imageBytes.length;
+        int newWidth = (int) Math.ceil((float) image.getWidth() * ratio);
+        int newHeight = image.getHeight();
+
+        // convert the output byte array into an image and write it to disk
+        BufferedImage outputImage = getImageFromArray(outputBytes, newWidth, newHeight);
+        writeImageToFile(outputImage, outputImageFilePath);
+    }
+
     /**
      * Creates an image file with randomized pixels
+     *
      * @param imageFilePath filesystem location of the image file
      */
     public static void createRandomImage(String imageFilePath, int width, int height) {
-        byte[] imageArray = new byte[width*height];
+        byte[] imageArray = new byte[width * height];
 
         // generate random pixels on array
         // (we multiply by 2^8=256 because one byte equals 8 pixels)
-        for (int p = 0; p < width*height; p++) {
-            imageArray[p] = (byte)(Math.random() * 256);
+        for (int p = 0; p < width * height; p++) {
+            imageArray[p] = (byte) (Math.random() * 256);
         }
 
         // convert the output byte array into an image and write it to disk
@@ -83,15 +106,16 @@ public class ImageMixer {
     /**
      * Takes a flat array of width*height pixels, and turns it into a BufferedImage.
      * This is only ready to deal with images with a colormap of 1 bit. Proceed at your own risk.
+     *
      * @param pixels the input array with the pixels
-     * @param width the width of the image to generate
+     * @param width  the width of the image to generate
      * @param height the height of the image to generate
      * @return the BufferedImage corresponding to the input array
      */
     private static BufferedImage getImageFromArray(byte[] pixels, int width, int height) {
         // create a binary color model, with a b/w colormap, where white (index 0) is the transparent color
         // I sure hope there's an easier way of accomplishing this...
-        byte[] colorMap = { (byte) 0xff, (byte) 0x00 };
+        byte[] colorMap = {(byte) 0xff, (byte) 0x00};
         IndexColorModel colorModel = new IndexColorModel(1, 2, colorMap, colorMap, colorMap, 0);
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY, colorModel);
         DataBuffer dataBuffer = new DataBufferByte(pixels, pixels.length);
@@ -103,8 +127,9 @@ public class ImageMixer {
 
     /**
      * Write a BufferedImage to a PNG file.
+     *
      * @param image the BufferedImage to write to disk
-     * @param file the filesystem location of the image file
+     * @param file  the filesystem location of the image file
      */
     private static void writeImageToFile(BufferedImage image, String file) {
         try {

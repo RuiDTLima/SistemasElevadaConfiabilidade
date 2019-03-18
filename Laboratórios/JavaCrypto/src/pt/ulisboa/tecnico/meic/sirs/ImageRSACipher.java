@@ -18,6 +18,10 @@ public class ImageRSACipher {
 
         RSACipherByteArrayMixer cipher = new RSACipherByteArrayMixer(Cipher.ENCRYPT_MODE);
         cipher.setParameters(keyFile);
-        ImageMixer.mix(inputFile, outputFile, cipher);
+        try {
+            ImageMixer.mixRSA(inputFile, outputFile, cipher);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }
