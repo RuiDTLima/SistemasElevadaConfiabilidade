@@ -3,7 +3,6 @@ package pt.ist.sec.g27.hds_notary.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Good {
-
     private int id;
 
     @JsonProperty("owner-id")
@@ -25,5 +24,13 @@ public class Good {
 
     public State getState() {
         return state;
+    }
+
+    public void setOwnerId(int ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public void setState(State state) {
+        this.state = state;
     }
 }

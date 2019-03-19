@@ -2,14 +2,12 @@ package pt.ist.sec.g27.hds_notary.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import pt.ist.sec.g27.hds_notary.SecurityUtils;
-
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 
 public class User {
-
     private int id;
     private String name;
 

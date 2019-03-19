@@ -21,7 +21,7 @@
       "id": 1,
       "owner-id": 1,
       "name": "house",
-      "state": "not-on-sale"
+      "state": "on-sale"
     },
     {
       "id": 2,
@@ -32,7 +32,7 @@
     {
       "id": 3,
       "owner-id": 2,
-      "name": "motorcicle",
+      "name": "motorcycle",
       "state": "not-on-sale"
     },
     {
