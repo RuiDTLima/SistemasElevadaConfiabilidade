@@ -58,4 +58,25 @@ public class Controller {
         // TODO return correct response.
         return "ok";
     }
+
+    @PostMapping("/transferGood/{id}")
+    public String transferGood(@PathVariable("id") int goodId, HttpServletRequest request) {
+
+        // TODO
+
+        // Important:
+
+        // Put the good' as NOT_ON_SALE
+        // Change the ownership of the good
+        // Receive a possible response of the Notary?
+
+        // Less important:
+
+        // Possible check Yes/No question before authorizing to sell
+        // User can choose to transfer by mistake
+
+        return "ok";
+
+    }
+
 }
