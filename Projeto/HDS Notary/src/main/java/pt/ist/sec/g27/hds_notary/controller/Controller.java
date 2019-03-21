@@ -3,12 +3,14 @@ package pt.ist.sec.g27.hds_notary.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pt.ist.sec.g27.hds_notary.Exceptions.UnauthorizedException;
 import pt.ist.sec.g27.hds_notary.model.ErrorModel;
+import pt.ist.sec.g27.hds_notary.aop.VerifyAndSign;
+import pt.ist.sec.g27.hds_notary.model.Body;
 import pt.ist.sec.g27.hds_notary.model.GoodPair;
 import pt.ist.sec.g27.hds_notary.model.Notary;
 import pt.ist.sec.g27.hds_notary.model.State;
@@ -28,14 +30,15 @@ public class Controller {
         this.notary = notary;
     }
 
-    @GetMapping("/getStateOfGood/{id}")
-    public GoodPair getStateOfGood(@PathVariable("id") int id) {
-        GoodPair goodPair = Arrays.stream(notary.getGoods())
-                .filter(good -> good.getId() == id)
+    @VerifyAndSign
+    @PostMapping("/getStateOfGood")
+    public GoodPair getStateOfGood(@RequestBody Body body) {
+        final int goodId = body.getGoodId();
+        return Arrays.stream(notary.getGoods())
+                .filter(good -> good.getId() == goodId)
                 .findFirst()
                 .map(good -> new GoodPair(good.getOwnerId(), good.getState()))
                 .orElse(null);
-        return goodPair;
     }
 
     @PostMapping("/intentionToSell/{id}")
