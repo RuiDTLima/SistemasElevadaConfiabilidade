@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -36,7 +37,8 @@ public class SecurityUtils {
 
     private static byte[] read(String pubKeyPath) throws IOException {
         ClassLoader classLoader = SecurityUtils.class.getClassLoader();
-        try (FileInputStream inputStream = new FileInputStream(classLoader.getResource(pubKeyPath).getFile())) {
+        URL resource = classLoader.getResource("keys/" + pubKeyPath);
+        try (FileInputStream inputStream = new FileInputStream(resource.getFile())) {
             byte[] encoded = new byte[inputStream.available()];
             inputStream.read(encoded);
             return encoded;

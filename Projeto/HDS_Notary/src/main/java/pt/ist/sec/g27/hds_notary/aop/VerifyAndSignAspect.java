@@ -5,11 +5,16 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import pt.ist.sec.g27.hds_notary.SecurityUtils;
+import pt.ist.sec.g27.hds_notary.model.Message;
+import pt.ist.sec.g27.hds_notary.model.Notary;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.security.PublicKey;
 
 @Aspect
 @Component
@@ -17,16 +22,24 @@ public class VerifyAndSignAspect {
 
     private final static Logger log = LoggerFactory.getLogger(VerifyAndSignAspect.class);
 
+    private final Notary notary;
+
+    @Autowired
+    public VerifyAndSignAspect(Notary notary) {
+        this.notary = notary;
+    }
+
     @Around("@annotation(pt.ist.sec.g27.hds_notary.aop.VerifyAndSign)")
     public Object logExecutionTime(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-        before();
+        before(proceedingJoinPoint.getArgs());
         Object returnedValue = proceedingJoinPoint.proceed();
         return after(returnedValue);
     }
 
     private Object after(Object returnedValue) throws Exception {
         /*try {
-            return SecurityUtils.sign(objectToByteArray(returnedValue));
+            byte[] sign = SecurityUtils.sign(objectToByteArray(returnedValue));
+            return new Message((Body) returnedValue, sign);
         } catch (Exception e) {
             log.warn("Cannot sign the returned object.", e);
             throw e;
@@ -34,16 +47,26 @@ public class VerifyAndSignAspect {
         return returnedValue;
     }
 
-    private void before() throws Exception {
-        /*boolean verified;
+    private void before(Object[] args) throws Exception {
+        if (args == null || args.length == 0 || !(args[0] instanceof Message))
+            throw new Exception("The incoming message is not acceptable."); // TODO change exception
+        boolean verified = verifyAllMessages((Message) args[0]);
+        if (!verified)
+            throw new Exception("This message is not authentic."); // TODO change exception
+    }
+
+    private boolean verifyAllMessages(Message message) {
+        if (message == null) return true;
+        int userId = message.getBody().getOwnerId();
+        boolean verified;
         try {
-            verified = SecurityUtils.verify(#### update this ####);
+            PublicKey publicKey = notary.getUser(userId).getPublicKey();
+            verified = SecurityUtils.verify(publicKey, objectToByteArray(message.getBody()), message.getSignature());
         } catch (Exception e) {
             log.warn("Cannot verify the incoming message.", e);
-            throw e;
+            return false;
         }
-        if (!verified)
-            throw new Exception("This message is not authentic.");*/ // TODO change exception
+        return verified && verifyAllMessages(message.getBody().getMessage());
     }
 
     private static byte[] objectToByteArray(Object object) throws IOException {

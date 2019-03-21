@@ -25,6 +25,28 @@ public class Body {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Message message;
 
+    public Body() {
+    }
+
+    public Body(int buyerId, int goodId) {
+        this.buyerId = buyerId;
+        this.goodId = goodId;
+    }
+
+    public Body(int ownerId, Message message) {
+        this.ownerId = ownerId;
+        this.message = message;
+    }
+
+    public Body(int ownerId, State state) {
+        this.ownerId = ownerId;
+        this.state = state.getState();
+    }
+
+    public Body(String response) {
+        this.response = response;
+    }
+
     public int getOwnerId() {
         return ownerId;
     }
@@ -47,24 +69,5 @@ public class Body {
 
     public Message getMessage() {
         return message;
-    }
-
-    public Body(int buyerId, int goodId) {
-        this.buyerId = buyerId;
-        this.goodId = goodId;
-    }
-
-    public Body(int ownerId, Message message) {
-        this.ownerId = ownerId;
-        this.message = message;
-    }
-
-    public Body(int ownerId, State state) {
-        this.ownerId = ownerId;
-        this.state = state.getState();
-    }
-
-    public Body(String response) {
-        this.response = response;
     }
 }

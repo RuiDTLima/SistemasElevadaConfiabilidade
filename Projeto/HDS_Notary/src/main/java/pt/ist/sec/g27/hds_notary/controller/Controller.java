@@ -25,8 +25,8 @@ public class Controller {
 
     @VerifyAndSign
     @PostMapping("/getStateOfGood")
-    public Body getStateOfGood(@RequestBody Body body) {
-        final int goodId = body.getGoodId();
+    public Body getStateOfGood(@RequestBody Message message) {
+        final int goodId = message.getBody().getGoodId();
         return Arrays.stream(notary.getGoods())
                 .filter(good -> good.getId() == goodId)
                 .findFirst()
@@ -63,7 +63,7 @@ public class Controller {
                 .findFirst()
                 .orElse(null);
 
-        if(g == null)
+        if (g == null)
             throw new NotFoundException(
                     new ErrorModel(
                             "Good not found!"
@@ -71,14 +71,14 @@ public class Controller {
             );
 
         // Check if owner id coincides
-        if(g.getOwnerId() == body.getOwnerId())
+        if (g.getOwnerId() == body.getOwnerId())
             throw new ForbiddenException(
                     new ErrorModel(
-                        "Good does not belong to seller!"
+                            "Good does not belong to seller!"
                     )
             );
 
-        if(g.getState() != State.ON_SALE)
+        if (g.getState() != State.ON_SALE)
             return new Body("No");
 
         g.setState(State.NOT_ON_SALE);
