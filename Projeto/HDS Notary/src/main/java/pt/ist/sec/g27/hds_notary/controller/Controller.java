@@ -29,19 +29,19 @@ public class Controller {
 
     @VerifyAndSign
     @PostMapping("/getStateOfGood")
-    public GoodPair getStateOfGood(@RequestBody Body body) {
+    public Body getStateOfGood(@RequestBody Body body) {
         final int goodId = body.getGoodId();
         return Arrays.stream(notary.getGoods())
                 .filter(good -> good.getId() == goodId)
                 .findFirst()
-                .map(good -> new GoodPair(good.getOwnerId(), good.getState()))
+                .map(good -> new Body(good.getOwnerId(), good.getState()))
                 .orElse(null);
     }
 
     @VerifyAndSign
     @PostMapping("/intentionToSell")
-    public String intentionToSell(@RequestBody Body body) {
-        int userId = body.getUserId();
+    public Body intentionToSell(@RequestBody Body body) {
+        int userId = body.getBuyerId();
         int goodId = body.getGoodId();
 
         log.info(String.format("The public key of the user %d was successfully obtained.", userId));
@@ -55,8 +55,7 @@ public class Controller {
         log.info(String.format("The good %d is owned by the user %d", goodId, userId));
 
         good.setState(State.ON_SALE);
-        // TODO return correct response.
-        return "ok";
+        return new Body("YES");
     }
 
     @VerifyAndSign
