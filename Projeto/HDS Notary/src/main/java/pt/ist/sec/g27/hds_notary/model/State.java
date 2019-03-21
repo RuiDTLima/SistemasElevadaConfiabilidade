@@ -7,8 +7,7 @@ public enum State {
     NOT_ON_SALE("not-on-sale"),
 
     @JsonProperty("on-sale")
-    ON_SALE("on-sale"),
-    VENDING("vending");
+    ON_SALE("on-sale");
 
     private final String state;
 
