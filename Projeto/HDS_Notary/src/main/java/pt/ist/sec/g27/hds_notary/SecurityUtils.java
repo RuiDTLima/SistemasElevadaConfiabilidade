@@ -23,6 +23,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 public class SecurityUtils {
     private final static Logger log = LoggerFactory.getLogger(SecurityUtils.class);
@@ -41,7 +42,7 @@ public class SecurityUtils {
         try (FileInputStream inputStream = new FileInputStream(resource.getFile())) {
             byte[] encoded = new byte[inputStream.available()];
             inputStream.read(encoded);
-            return encoded;
+            return Base64.getDecoder().decode(encoded);
         } catch (IOException e) {
             log.warn("An error occurred while reading a file.", e);
             throw e;

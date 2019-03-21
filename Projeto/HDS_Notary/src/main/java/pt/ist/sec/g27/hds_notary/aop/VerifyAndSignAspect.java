@@ -48,11 +48,11 @@ public class VerifyAndSignAspect {
     }
 
     private void before(Object[] args) throws Exception {
-        if (args == null || args.length == 0 || !(args[0] instanceof Message))
-            throw new Exception("The incoming message is not acceptable."); // TODO change exception
-        boolean verified = verifyAllMessages((Message) args[0]);
+        /*if (args == null || args.length == 0 || !(args[0] instanceof Message))
+            throw new Exception("The incoming message is not acceptable.");*/ // TODO change exception
+        /*boolean verified = verifyAllMessages((Message) args[0]);
         if (!verified)
-            throw new Exception("This message is not authentic."); // TODO change exception
+            throw new Exception("This message is not authentic.");*/ // TODO change exception
     }
 
     private boolean verifyAllMessages(Message message) {
