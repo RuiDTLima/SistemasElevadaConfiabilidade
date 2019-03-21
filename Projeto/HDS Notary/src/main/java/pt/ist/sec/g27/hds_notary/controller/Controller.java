@@ -7,10 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pt.ist.sec.g27.hds_notary.Exceptions.UnauthorizedException;
+import pt.ist.sec.g27.hds_notary.model.ErrorModel;
 import pt.ist.sec.g27.hds_notary.model.GoodPair;
 import pt.ist.sec.g27.hds_notary.model.Notary;
 import pt.ist.sec.g27.hds_notary.model.State;
-
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -39,19 +40,9 @@ public class Controller {
 
     @PostMapping("/intentionToSell/{id}")
     public String intentionToSell(@PathVariable("id") int goodId, HttpServletRequest request) {
-        int userId = (int) request.getAttribute("id");
 
-        try {
-            notary.getUser(userId).getPublicKey();
-        } catch (NoSuchAlgorithmException | IOException | InvalidKeySpecException e) {
-            log.warn(String.format("There was an error while trying to obtain the public key of the user %d.", userId));
 
-            // TODO add error return;
-        }
-
-        log.info(String.format("The public key of the user %d was successfully obtained.", userId));
-
-        // TODO validate request signature.
+        // log.info(String.format("The public key of the user %d was successfully obtained.", userId));
 
         notary.getGood(goodId).setState(State.ON_SALE);
 
