@@ -7,7 +7,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
 import pt.ist.sec.g27.hds_notary.Exceptions.ForbiddenException;
+import pt.ist.sec.g27.hds_notary.Exceptions.NotFoundException;
+import pt.ist.sec.g27.hds_notary.Exceptions.UnauthorizedException;
 import pt.ist.sec.g27.hds_notary.aop.VerifyAndSign;
 import pt.ist.sec.g27.hds_notary.model.*;
 
@@ -56,23 +59,37 @@ public class Controller {
         return "ok";
     }
 
-    @PostMapping("/transferGood/{id}")
-    public String transferGood(@PathVariable("id") int goodId, HttpServletRequest request) {
+    @VerifyAndSign
+    @PostMapping("/transferGood")
+    public Body transferGood(@RequestBody Body body) {
 
-        // TODO
+        Good g = Arrays.stream(notary.getGoods())
+                .filter(x -> x.getId() == body.getGoodId())
+                .findFirst()
+                .orElse(null);
 
-        // Important:
+        if(g == null)
+            throw new NotFoundException(
+                    new ErrorModel(
+                            "Good not found!"
+                    )
+            );
 
-        // Put the good' as NOT_ON_SALE
-        // Change the ownership of the good
-        // Receive a possible response of the Notary?
+        // Check if owner id coincides
+        if(g.getOwnerId() == body.getOwnerId())
+            throw new ForbiddenException(
+                    new ErrorModel(
+                        "Good does not belong to seller!"
+                    )
+            );
 
-        // Less important:
+        if(g.getState() != State.ON_SALE)
+            return new Body("No");
 
-        // Possible check Yes/No question before authorizing to sell
-        // User can choose to transfer by mistake
+        g.setState(State.NOT_ON_SALE);
+        g.setOwnerId(body.getBuyerId());
 
-        return "ok";
+        return new Body("Yes");;
 
     }
 
