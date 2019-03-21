@@ -7,17 +7,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import pt.ist.sec.g27.hds_notary.Exceptions.UnauthorizedException;
-import pt.ist.sec.g27.hds_notary.model.ErrorModel;
+import pt.ist.sec.g27.hds_notary.Exceptions.ForbiddenException;
 import pt.ist.sec.g27.hds_notary.aop.VerifyAndSign;
-import pt.ist.sec.g27.hds_notary.model.Body;
-import pt.ist.sec.g27.hds_notary.model.GoodPair;
-import pt.ist.sec.g27.hds_notary.model.Notary;
-import pt.ist.sec.g27.hds_notary.model.State;
+import pt.ist.sec.g27.hds_notary.model.*;
+
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 @RestController
@@ -41,14 +35,23 @@ public class Controller {
                 .orElse(null);
     }
 
-    @PostMapping("/intentionToSell/{id}")
-    public String intentionToSell(@PathVariable("id") int goodId, HttpServletRequest request) {
+    @VerifyAndSign
+    @PostMapping("/intentionToSell")
+    public String intentionToSell(@RequestBody Body body) {
+        int userId = body.getUserId();
+        int goodId = body.getGoodId();
 
+        log.info(String.format("The public key of the user %d was successfully obtained.", userId));
 
-        // log.info(String.format("The public key of the user %d was successfully obtained.", userId));
+        Good good = notary.getGood(goodId);// .setState(State.ON_SALE);
+        if (good.getOwnerId() != userId) {
+            log.warn(String.format("The state of the good %d could not be changed by the user %d.", goodId, userId));
+            throw new ForbiddenException(new ErrorModel("The state of the good could not be changed."));
+        }
 
-        notary.getGood(goodId).setState(State.ON_SALE);
+        log.info(String.format("The good %d is owned by the user %d", goodId, userId));
 
+        good.setState(State.ON_SALE);
         // TODO return correct response.
         return "ok";
     }
