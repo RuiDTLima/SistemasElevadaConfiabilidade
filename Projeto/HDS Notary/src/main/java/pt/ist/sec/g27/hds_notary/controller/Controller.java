@@ -3,18 +3,14 @@ package pt.ist.sec.g27.hds_notary.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpClientErrorException;
 import pt.ist.sec.g27.hds_notary.Exceptions.ForbiddenException;
 import pt.ist.sec.g27.hds_notary.Exceptions.NotFoundException;
-import pt.ist.sec.g27.hds_notary.Exceptions.UnauthorizedException;
 import pt.ist.sec.g27.hds_notary.aop.VerifyAndSign;
 import pt.ist.sec.g27.hds_notary.model.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 
 @RestController
@@ -88,7 +84,7 @@ public class Controller {
         g.setState(State.NOT_ON_SALE);
         g.setOwnerId(body.getBuyerId());
 
-        return new Body("Yes");;
+        return new Body("Yes");
 
     }
 
