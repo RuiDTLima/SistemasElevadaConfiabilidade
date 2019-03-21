@@ -17,6 +17,12 @@ public class Body {
     private int goodId;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String state;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String response;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Message message;
 
     public int getOwnerId() {
@@ -31,6 +37,14 @@ public class Body {
         return goodId;
     }
 
+    public String getState() {
+        return state;
+    }
+
+    public String getResponse() {
+        return response;
+    }
+
     public Message getMessage() {
         return message;
     }
@@ -43,5 +57,14 @@ public class Body {
     public Body(int ownerId, Message message) {
         this.ownerId = ownerId;
         this.message = message;
+    }
+
+    public Body(int ownerId, State state) {
+        this.ownerId = ownerId;
+        this.state = state.getState();
+    }
+
+    public Body(String response) {
+        this.response = response;
     }
 }
