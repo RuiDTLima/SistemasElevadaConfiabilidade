@@ -4,13 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Body {
-    @JsonProperty("owner-id")
+    @JsonProperty("user-id")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private int ownerId;
-
-    @JsonProperty("buyer-id")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private int buyerId;
+    private int userId;
 
     @JsonProperty("good-id")
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -28,18 +24,18 @@ public class Body {
     public Body() {
     }
 
-    public Body(int buyerId, int goodId) {
-        this.buyerId = buyerId;
+    public Body(int userId, int goodId) {
+        this.userId = userId;
         this.goodId = goodId;
     }
 
-    public Body(int ownerId, Message message) {
-        this.ownerId = ownerId;
+    public Body(int userId, Message message) {
+        this.userId = userId;
         this.message = message;
     }
 
-    public Body(int ownerId, State state) {
-        this.ownerId = ownerId;
+    public Body(int userId, State state) {
+        this.userId = userId;
         this.state = state.getState();
     }
 
@@ -47,12 +43,8 @@ public class Body {
         this.response = response;
     }
 
-    public int getOwnerId() {
-        return ownerId;
-    }
-
-    public int getBuyerId() {
-        return buyerId;
+    public int getUserId() {
+        return userId;
     }
 
     public int getGoodId() {

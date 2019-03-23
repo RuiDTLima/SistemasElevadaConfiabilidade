@@ -7,9 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import pt.ist.sec.g27.hds_notary.Exceptions.UnauthorizedException;
 import pt.ist.sec.g27.hds_notary.SecurityUtils;
-import pt.ist.sec.g27.hds_notary.model.Message;
-import pt.ist.sec.g27.hds_notary.model.Notary;
+import pt.ist.sec.g27.hds_notary.model.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -43,30 +43,45 @@ public class VerifyAndSignAspect {
         } catch (Exception e) {
             log.warn("Cannot sign the returned object.", e);
             throw e;
-        }*/ // TODO remove the comments, not the code, when using the PT-CC, and remove the return intruction.
+        }*/ // TODO remove the comments, not the code, when using the PT-CC, and remove the return instruction.
         return returnedValue;
     }
 
     private void before(Object[] args) throws Exception {
-        /*if (args == null || args.length == 0 || !(args[0] instanceof Message))
-            throw new Exception("The incoming message is not acceptable.");*/ // TODO change exception
-        /*boolean verified = verifyAllMessages((Message) args[0]);
+        // TODO Check exceptions
+        if (args == null || args.length == 0 || !(args[0] instanceof Message))
+            throw new Exception("The incoming message is not acceptable.");
+        boolean verified = verifyAllMessages((Message) args[0]);
         if (!verified)
-            throw new Exception("This message is not authentic.");*/ // TODO change exception
+            throw new UnauthorizedException(new ErrorModel("This message is not authentic."));
     }
 
     private boolean verifyAllMessages(Message message) {
+        // TODO check exceptions
         if (message == null) return true;
-        int userId = message.getBody().getOwnerId();
+        Body body = message.getBody();
+        if (body == null) return false;
+        int userId = body.getUserId();
+        User user = notary.getUser(userId);
+        if (user == null) {
+            log.info("User does not exist.");
+            throw new UnauthorizedException(new ErrorModel("The user with id " + userId + " does not exist."));
+        }
+        PublicKey publicKey;
+        try {
+            publicKey = user.getPublicKey();
+        } catch (Exception e) {
+            log.info("Cannot find/load the public key of one user");
+            throw new UnauthorizedException(new ErrorModel("Cannot find/load the public key of the user"));
+        }
         boolean verified;
         try {
-            PublicKey publicKey = notary.getUser(userId).getPublicKey();
-            verified = SecurityUtils.verify(publicKey, objectToByteArray(message.getBody()), message.getSignature());
+            verified = SecurityUtils.verify(publicKey, objectToByteArray(body), message.getSignature());
         } catch (Exception e) {
-            log.warn("Cannot verify the incoming message.", e);
-            return false;
+            log.info("Cannot verify the incoming message.", e);
+            throw new UnauthorizedException(new ErrorModel("Something went wrong while verifying the signature"));
         }
-        return verified && verifyAllMessages(message.getBody().getMessage());
+        return verified && verifyAllMessages(body.getMessage());
     }
 
     private static byte[] objectToByteArray(Object object) throws IOException {

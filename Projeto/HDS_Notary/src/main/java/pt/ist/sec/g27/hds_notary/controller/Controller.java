@@ -29,9 +29,9 @@ public class Controller {
         final int goodId = message.getBody().getGoodId();
         return Arrays.stream(notary.getGoods())
                 .filter(good -> good.getId() == goodId)
-                .findFirst()
                 .map(good -> new Body(good.getOwnerId(), good.getState()))
-                .orElse(null);
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(new ErrorModel("The id that you specify does not exist.")));
     }
 
     @VerifyAndSign
