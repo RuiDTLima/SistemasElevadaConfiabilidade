@@ -56,17 +56,10 @@ public class Controller {
 
     @VerifyAndSign
     @PostMapping("/transferGood")
-    public Body transferGood(@RequestBody Message message) {
-
-        Body sellerBody = message.getBody();
-        Body buyerBody = sellerBody.getMessage().getBody();
-
-        int goodId = buyerBody.getGoodId();
-        int buyerId = buyerBody.getUserId();
-        int sellerId = sellerBody.getUserId();
+    public Body transferGood(@RequestBody Body body) {
 
         Good g = Arrays.stream(notary.getGoods())
-                .filter(x -> x.getId() == goodId)
+                .filter(x -> x.getId() == body.getGoodId())
                 .findFirst()
                 .orElse(null);
 
@@ -78,7 +71,7 @@ public class Controller {
             );
 
         // Check if owner id coincides
-        if (g.getOwnerId() != sellerId)
+        if (g.getOwnerId() == body.getOwnerId())
             throw new ForbiddenException(
                     new ErrorModel(
                             "Good does not belong to seller!"
@@ -89,7 +82,7 @@ public class Controller {
             return new Body("No");
 
         g.setState(State.NOT_ON_SALE);
-        g.setOwnerId(buyerId);
+        g.setOwnerId(body.getBuyerId());
 
         return new Body("Yes");
 
