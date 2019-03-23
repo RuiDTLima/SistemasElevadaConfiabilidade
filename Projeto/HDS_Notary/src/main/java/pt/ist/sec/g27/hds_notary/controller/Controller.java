@@ -61,12 +61,20 @@ public class Controller {
         Body sellerBody = message.getBody();
         Body buyerBody = sellerBody.getMessage().getBody();
 
-        int goodId = buyerBody.getGoodId();
+        int buyerGoodId = buyerBody.getGoodId();
+        int sellerGoodId = sellerBody.getGoodId();
         int buyerId = buyerBody.getUserId();
         int sellerId = sellerBody.getUserId();
 
+        if(buyerGoodId != sellerGoodId)
+            throw new ForbiddenException(
+                    new ErrorModel(
+                            "Seller good ID does not match buyers good ID!"
+                    )
+            );
+
         Good g = Arrays.stream(notary.getGoods())
-                .filter(x -> x.getId() == goodId)
+                .filter(x -> x.getId() == buyerGoodId)
                 .findFirst()
                 .orElse(null);
 
