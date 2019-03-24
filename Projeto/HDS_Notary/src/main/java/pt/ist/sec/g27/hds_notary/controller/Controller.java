@@ -37,12 +37,12 @@ public class Controller {
     @VerifyAndSign
     @PostMapping("/intentionToSell")
     public Body intentionToSell(@RequestBody Body body) {
-        int userId = body.getBuyerId();
+        int userId = body.getUserId();
         int goodId = body.getGoodId();
 
         log.info(String.format("The public key of the user %d was successfully obtained.", userId));
 
-        Good good = notary.getGood(goodId);// .setState(State.ON_SALE);
+        Good good = notary.getGood(goodId);
         if (good.getOwnerId() != userId) {
             log.warn(String.format("The state of the good %d could not be changed by the user %d.", goodId, userId));
             throw new ForbiddenException(new ErrorModel("The state of the good could not be changed."));
@@ -100,7 +100,5 @@ public class Controller {
         g.setOwnerId(buyerId);
 
         return new Body("Yes");
-
     }
-
 }
