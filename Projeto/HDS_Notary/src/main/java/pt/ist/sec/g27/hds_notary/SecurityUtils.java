@@ -23,7 +23,6 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 
 public class SecurityUtils {
     private final static Logger log = LoggerFactory.getLogger(SecurityUtils.class);
