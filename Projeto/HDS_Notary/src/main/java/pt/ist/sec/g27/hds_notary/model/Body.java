@@ -21,7 +21,7 @@ public class Body implements Serializable {
     private String response;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String exceptionResponse;
+    private Exception exceptionResponse;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Message message;
@@ -64,11 +64,15 @@ public class Body implements Serializable {
         return response;
     }
 
-    public String getExceptionResponse() {
+    public Exception getExceptionResponse() {
         return exceptionResponse;
     }
 
     public Message getMessage() {
         return message;
+    }
+
+    public void setExceptionResponse(Exception exceptionResponse) {
+        this.exceptionResponse = exceptionResponse;
     }
 }

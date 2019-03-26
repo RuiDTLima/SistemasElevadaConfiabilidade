@@ -11,6 +11,8 @@ import pt.ist.sec.g27.hds_notary.Exceptions.NotFoundException;
 import pt.ist.sec.g27.hds_notary.aop.VerifyAndSign;
 import pt.ist.sec.g27.hds_notary.model.*;
 
+import java.io.IOException;
+import java.security.SignedObject;
 import java.util.Arrays;
 
 @RestController
@@ -36,7 +38,15 @@ public class Controller {
 
     @VerifyAndSign
     @PostMapping("/intentionToSell")
-    public Body intentionToSell(@RequestBody Body body) {
+    public Body intentionToSell(@RequestBody SignedObject message) {
+        Body body = null;
+        try {
+            body = (Body)message.getObject();
+        } catch (IOException | ClassNotFoundException e) {
+            log.warn("The message received as a body was not correctly implemented.", e);
+            return null;
+        }
+
         int userId = body.getUserId();
         int goodId = body.getGoodId();
 
@@ -45,7 +55,9 @@ public class Controller {
         Good good = notary.getGood(goodId);
         if (good.getOwnerId() != userId) {
             log.warn(String.format("The state of the good %d could not be changed by the user %d.", goodId, userId));
-            throw new ForbiddenException(new ErrorModel("The state of the good could not be changed."));
+            Body exceptionBody = new Body();
+            exceptionBody.setExceptionResponse(new ForbiddenException(new ErrorModel("The state of the good could not be changed.")));
+            return exceptionBody;
         }
 
         log.info(String.format("The good %d is owned by the user %d", goodId, userId));
