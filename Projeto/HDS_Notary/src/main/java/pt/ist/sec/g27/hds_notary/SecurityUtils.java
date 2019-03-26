@@ -36,13 +36,13 @@ public class SecurityUtils {
         return rsa.generatePublic(x509EncodedKeySpec);
     }
 
-    private static byte[] read(String pubKeyPath) throws IOException {
+    private static byte[] read(String keyPath) throws IOException {
         ClassLoader classLoader = SecurityUtils.class.getClassLoader();
-        URL resource = classLoader.getResource("keys/" + pubKeyPath);
+        URL resource = classLoader.getResource("keys/" + keyPath);
         try (FileInputStream inputStream = new FileInputStream(resource.getFile())) {
             byte[] encoded = new byte[inputStream.available()];
             inputStream.read(encoded);
-            return Base64.getDecoder().decode(encoded);
+            return encoded;
         } catch (IOException e) {
             log.warn("An error occurred while reading a file.", e);
             throw e;

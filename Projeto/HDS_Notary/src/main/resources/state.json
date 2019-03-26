@@ -3,17 +3,20 @@
     {
       "id": 1,
       "name": "alice",
-      "pubKey": "alice.pub"
+      "pubKey": "alice.pub",
+      "port": 8081
     },
     {
       "id": 2,
       "name": "bob",
-      "pubKey": "bob.pub"
+      "pubKey": "bob.pub",
+      "port": 8082
     },
     {
       "id": 3,
       "name": "eve",
-      "pubKey": "eve.pub"
+      "pubKey": "eve.pub",
+      "port": 8083
     }
   ],
   "goods": [

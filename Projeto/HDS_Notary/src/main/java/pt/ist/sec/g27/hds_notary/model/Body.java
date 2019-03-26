@@ -3,7 +3,9 @@ package pt.ist.sec.g27.hds_notary.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Body {
+import java.io.Serializable;
+
+public class Body implements Serializable {
     @JsonProperty("user-id")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private int userId;
@@ -17,6 +19,9 @@ public class Body {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String response;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String exceptionResponse;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Message message;
@@ -57,6 +62,10 @@ public class Body {
 
     public String getResponse() {
         return response;
+    }
+
+    public String getExceptionResponse() {
+        return exceptionResponse;
     }
 
     public Message getMessage() {

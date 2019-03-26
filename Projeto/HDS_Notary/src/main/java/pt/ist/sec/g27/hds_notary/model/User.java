@@ -2,6 +2,7 @@ package pt.ist.sec.g27.hds_notary.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import pt.ist.sec.g27.hds_notary.SecurityUtils;
+
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -14,6 +15,7 @@ public class User {
     @JsonProperty("pubKey")
     private String pubKeyPath;
     private PublicKey publicKey; // TODO temos de ignorar no parse do json com anotacao???
+    private int port;
 
     public User() {
     }
@@ -33,10 +35,6 @@ public class User {
         return name;
     }
 
-    public String getPubKeyPath() {
-        return pubKeyPath;
-    }
-
     public PublicKey getPublicKey() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
         if (this.publicKey != null)
             return this.publicKey;
@@ -44,7 +42,7 @@ public class User {
         return this.publicKey;
     }
 
-    public void setPublicKey(PublicKey publicKey) {
-        this.publicKey = publicKey;
+    public int getPort() {
+        return port;
     }
 }

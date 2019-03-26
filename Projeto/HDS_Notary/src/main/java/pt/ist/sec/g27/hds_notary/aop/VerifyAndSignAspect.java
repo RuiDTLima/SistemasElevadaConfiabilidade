@@ -11,10 +11,9 @@ import pt.ist.sec.g27.hds_notary.Exceptions.UnauthorizedException;
 import pt.ist.sec.g27.hds_notary.SecurityUtils;
 import pt.ist.sec.g27.hds_notary.model.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.security.PublicKey;
+
+import static pt.ist.sec.g27.hds_notary.Utils.objectToByteArray;
 
 @Aspect
 @Component
@@ -82,16 +81,5 @@ public class VerifyAndSignAspect {
             throw new UnauthorizedException(new ErrorModel("Something went wrong while verifying the signature"));
         }
         return verified && verifyAllMessages(body.getMessage());
-    }
-
-    private static byte[] objectToByteArray(Object object) throws IOException {
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream(); ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-            oos.writeObject(object);
-            oos.flush();
-            return bos.toByteArray();
-        } catch (IOException e) {
-            log.warn("Your object needs to implement the interface Serializable. Your object is: " + object.toString(), e);
-            throw e;
-        }
     }
 }
