@@ -10,9 +10,7 @@ import org.springframework.stereotype.Component;
 import pt.ist.sec.g27.hds_notary.Exceptions.UnauthorizedException;
 import pt.ist.sec.g27.hds_notary.SecurityUtils;
 import pt.ist.sec.g27.hds_notary.model.*;
-
 import java.security.PublicKey;
-
 import static pt.ist.sec.g27.hds_notary.Utils.objectToByteArray;
 
 @Aspect

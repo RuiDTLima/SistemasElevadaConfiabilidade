@@ -38,14 +38,8 @@ public class Controller {
 
     @VerifyAndSign
     @PostMapping("/intentionToSell")
-    public Body intentionToSell(@RequestBody SignedObject message) {
-        Body body = null;
-        try {
-            body = (Body)message.getObject();
-        } catch (IOException | ClassNotFoundException e) {
-            log.warn("The message received as a body was not correctly implemented.", e);
-            return null;
-        }
+    public Body intentionToSell(@RequestBody Message message) {
+        Body body = message.getBody();
 
         int userId = body.getUserId();
         int goodId = body.getGoodId();

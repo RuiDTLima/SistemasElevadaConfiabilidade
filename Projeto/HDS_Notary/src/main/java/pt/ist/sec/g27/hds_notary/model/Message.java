@@ -1,6 +1,8 @@
 package pt.ist.sec.g27.hds_notary.model;
 
-public class Message {
+import java.io.Serializable;
+
+public class Message implements Serializable {
     private Body body;
     private byte[] signature;
 
@@ -19,4 +21,6 @@ public class Message {
     public byte[] getSignature() {
         return signature;
     }
+
+
 }
