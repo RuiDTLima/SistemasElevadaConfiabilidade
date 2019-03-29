@@ -5,20 +5,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import pt.ist.sec.g27.hds_client.model.*;
+import pt.ist.sec.g27.hds_client.model.AppState;
+import pt.ist.sec.g27.hds_client.model.Body;
+import pt.ist.sec.g27.hds_client.model.Me;
+import pt.ist.sec.g27.hds_client.model.User;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 
 @SpringBootApplication
 public class HdsClientApplication {
     private final static String STATE_PATH = "state.json";
     private static final Logger log = LoggerFactory.getLogger(HdsClientApplication.class);
+    private static final RestClient restClient = new RestClient();
 
     private static AppState appState;
 
-    public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
+    public static void main(String[] args) {
         ObjectMapper mapper = new ObjectMapper();
         try {
             ClassLoader classLoader = HdsClientApplication.class.getClassLoader();
@@ -30,28 +33,6 @@ public class HdsClientApplication {
         SpringApplication.run(HdsClientApplication.class, args);
         HdsClientApplication hdsClientApplication = new HdsClientApplication();
         hdsClientApplication.run();
-
-        /*KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-        keyGen.initialize(1024);
-
-        KeyPair keys = keyGen.generateKeyPair();
-
-        PrivateKey privKey = keys.getPrivate();
-
-
-        PublicKey pubKey = keys.getPublic();
-
-
-        FileOutputStream privFos = new FileOutputStream("alice.key");
-        privFos.write(privKey.getEncoded());
-        privFos.close();
-
-
-
-        FileOutputStream pubFos = new FileOutputStream("alice.pub");
-        pubFos.write(pubKey.getEncoded());
-        pubFos.close();*/
-
     }
 
     private void run() {
@@ -117,15 +98,20 @@ public class HdsClientApplication {
     }
 
     private void intentionToSell(String[] params) throws Exception {
-        RestClient restClient = new RestClient();
         Me me = appState.getMe();
         Body body = new Body(me.getId(), Integer.parseInt(params[0]));
-        Message message = new Message(body, me.getPrivateKey());
         User notary = appState.getNotary();
-        Body receivedBody = restClient.post(notary, "/intentionToSell", message);
+        Body receivedBody;
+
+        try {
+            receivedBody = restClient.post(notary, "/intentionToSell", body, me.getPrivateKey());
+        } catch (UnverifiedException e) {
+            log.info(e.getMessage(), e);
+            throw e;
+        }
 
         if (receivedBody == null) {
-            String unsignedMessage = "The response received is not originate from the notary.";
+            String unsignedMessage = "The server cannot respond.";
             log.info(unsignedMessage);
             System.out.println(unsignedMessage);
         } else if (receivedBody.getExceptionResponse() != null) {

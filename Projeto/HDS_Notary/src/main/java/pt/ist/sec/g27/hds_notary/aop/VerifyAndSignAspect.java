@@ -1,5 +1,7 @@
 package pt.ist.sec.g27.hds_notary.aop;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -10,7 +12,9 @@ import org.springframework.stereotype.Component;
 import pt.ist.sec.g27.hds_notary.Exceptions.UnauthorizedException;
 import pt.ist.sec.g27.hds_notary.SecurityUtils;
 import pt.ist.sec.g27.hds_notary.model.*;
+
 import java.security.PublicKey;
+
 import static pt.ist.sec.g27.hds_notary.Utils.objectToByteArray;
 
 @Aspect
@@ -20,10 +24,12 @@ public class VerifyAndSignAspect {
     private final static Logger log = LoggerFactory.getLogger(VerifyAndSignAspect.class);
 
     private final Notary notary;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public VerifyAndSignAspect(Notary notary) {
+    public VerifyAndSignAspect(Notary notary, ObjectMapper objectMapper) {
         this.notary = notary;
+        this.objectMapper = objectMapper;
     }
 
     @Around("@annotation(pt.ist.sec.g27.hds_notary.aop.VerifyAndSign)")
@@ -34,14 +40,14 @@ public class VerifyAndSignAspect {
     }
 
     private Object after(Object returnedValue) throws Exception {
-        /*try {
+        try {
             byte[] sign = SecurityUtils.sign(objectToByteArray(returnedValue));
             return new Message((Body) returnedValue, sign);
         } catch (Exception e) {
             log.warn("Cannot sign the returned object.", e);
             throw e;
-        }*/ // TODO remove the comments, not the code, when using the PT-CC, and remove the return instruction.
-        return returnedValue;
+        } // TODO remove the comments, not the code, when using the PT-CC, and remove the return instruction.
+        //return returnedValue;
     }
 
     private void before(Object[] args) throws Exception {
@@ -55,9 +61,13 @@ public class VerifyAndSignAspect {
 
     private boolean verifyAllMessages(Message message) {
         // TODO check exceptions
-        if (message == null) return true;
+        if (message == null)
+            return true;
+
         Body body = message.getBody();
-        if (body == null) return false;
+        if (body == null)
+            return false;
+
         int userId = body.getUserId();
         User user = notary.getUser(userId);
         if (user == null) {
@@ -71,12 +81,19 @@ public class VerifyAndSignAspect {
             log.info("Cannot find/load the public key of one user");
             throw new UnauthorizedException(new ErrorModel("Cannot find/load the public key of the user"));
         }
+        byte[] jsonBody;
+        try {
+            jsonBody = objectMapper.writeValueAsBytes(body);
+        } catch (JsonProcessingException e) {
+            log.info("An error occurred while trying to convert object to string", e);
+            throw new UnauthorizedException(new ErrorModel("Something went wrong while verifying the signature."));
+        }
         boolean verified;
         try {
-            verified = SecurityUtils.verify(publicKey, objectToByteArray(body), message.getSignature());
+            verified = SecurityUtils.verify(publicKey, jsonBody, message.getSignature());
         } catch (Exception e) {
             log.info("Cannot verify the incoming message.", e);
-            throw new UnauthorizedException(new ErrorModel("Something went wrong while verifying the signature"));
+            throw new UnauthorizedException(new ErrorModel("Something went wrong while verifying the signature."));
         }
         return verified && verifyAllMessages(body.getMessage());
     }
