@@ -173,7 +173,6 @@ public class HdsClientApplication {
 
         User owner = appState.getUser(userId);
         Body body = new Body(userId, goodId);
-        Me me = appState.getMe();
 
         Body receivedBody = restClient.post(owner, "/buyGood", body, me.getPrivateKey());
 
