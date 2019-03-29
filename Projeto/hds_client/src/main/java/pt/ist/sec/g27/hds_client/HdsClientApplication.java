@@ -7,7 +7,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import pt.ist.sec.g27.hds_client.model.AppState;
 import pt.ist.sec.g27.hds_client.model.Body;
-import pt.ist.sec.g27.hds_client.model.Me;
 import pt.ist.sec.g27.hds_client.model.User;
 
 import java.io.IOException;
@@ -20,14 +19,33 @@ public class HdsClientApplication {
     private static final RestClient restClient = new RestClient();
 
     private static AppState appState;
+    private static User me;
 
     public static void main(String[] args) {
+        int userId;
+        try {
+            if (args.length == 0) {
+                System.out.println("You need to specify your user id.");
+                return;
+            }
+            userId = Integer.parseInt(args[0]);
+        } catch (Exception e) {
+            System.out.println("The argument needs to be an int.");
+            return;
+        }
+
         ObjectMapper mapper = new ObjectMapper();
         try {
             ClassLoader classLoader = HdsClientApplication.class.getClassLoader();
             appState = mapper.readValue(classLoader.getResource(STATE_PATH), AppState.class);
         } catch (IOException e) {
             log.error("An error occurred.", e);
+            return;
+        }
+        me = appState.getUser(userId);
+        if (!me.validateUser()) {
+            log.warn("The user tried to access the system with an invalid state.");
+            System.out.println("The private key to the given user was not provided in the state.");
             return;
         }
         SpringApplication.run(HdsClientApplication.class, args);
@@ -98,7 +116,6 @@ public class HdsClientApplication {
     }
 
     private void intentionToSell(String[] params) throws Exception {
-        Me me = appState.getMe();
         Body body = new Body(me.getId(), Integer.parseInt(params[0]));
         User notary = appState.getNotary();
         Body receivedBody;
@@ -123,8 +140,29 @@ public class HdsClientApplication {
         }
     }
 
-    private void getStateOfGood(String[] paramsd) {
+    private void getStateOfGood(String[] params) throws Exception {
+        Body body = new Body(me.getId(), Integer.parseInt(params[0]));
+        User notary = appState.getNotary();
+        Body receivedBody;
+        try {
+            receivedBody = restClient.post(notary, "/getStateOfGood", body, me.getPrivateKey());
+        } catch (UnverifiedException e) {
+            log.info(e.getMessage(), e);
+            throw e;
+        }
 
+        if (receivedBody == null) {
+            String unsignedMessage = "The server cannot respond.";
+            log.info(unsignedMessage);
+            System.out.println(unsignedMessage);
+        } else if (receivedBody.getExceptionResponse() != null) {
+            log.info(receivedBody.getExceptionResponse());
+            System.out.println(receivedBody.getExceptionResponse());
+        } else {
+            String message = String.format("The good with id %d is owned by user with id %d and his state is %s.", body.getGoodId(), receivedBody.getUserId(), receivedBody.getState());
+            log.info(message);
+            System.out.println(message);
+        }
     }
 
     private void buyGood(String[] params) {

@@ -1,15 +1,17 @@
 {
-  "me": {
-    "id": 1,
-    "name": "alice",
-    "privKey": "alice.key"
-  },
   "users": [
     {
       "id": 0,
       "name": "notary",
       "pubKey": "notary.pub",
       "port": 8080
+    },
+    {
+      "id": 1,
+      "name": "alice",
+      "pubKey": "alice.pub",
+      "privKey": "alice.key",
+      "port": 8081
     },
     {
       "id": 2,
