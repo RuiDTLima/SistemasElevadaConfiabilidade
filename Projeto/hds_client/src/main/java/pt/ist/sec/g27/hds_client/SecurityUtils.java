@@ -48,9 +48,9 @@ public class SecurityUtils {
             signature.initSign(privateKey);
             signature.update(toSign);
             return signature.sign();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.warn("Something related to sign not worked properly.", e);
-            throw new Exception(e);// TODO change this to the correct exception
+            throw e;// TODO change this to the correct exception
         }
     }
 

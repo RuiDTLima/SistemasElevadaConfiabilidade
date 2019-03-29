@@ -3,14 +3,10 @@ package pt.ist.sec.g27.hds_notary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pt.gov.cartaodecidadao.pteid;
-import pteidlib.PTEID_Certif;
-import pteidlib.PteidException;
 import sun.security.pkcs11.wrapper.*;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -18,9 +14,6 @@ import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.Signature;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -37,43 +30,38 @@ public class SecurityUtils {
 
     private static byte[] read(String keyPath) throws IOException {
         ClassLoader classLoader = SecurityUtils.class.getClassLoader();
-        URL resource = classLoader.getResource("keys/" + keyPath);
+        String path = "keys/" + keyPath;
+        URL resource = classLoader.getResource(path);
+        log.info("Trying to obtain key from: " + path);
         try (FileInputStream inputStream = new FileInputStream(resource.getFile())) {
             byte[] encoded = new byte[inputStream.available()];
+            log.info("Reading...");
             inputStream.read(encoded);
             return encoded;
-        } catch (IOException e) {
-            log.warn("An error occurred while reading a file.", e);
-            throw e;
         }
     }
 
     public static byte[] sign(byte[] toSign) throws Exception {
-        try {
-            PKCS11 pkcs11 = init();
-            long p11_session = signInit(pkcs11);
-            return pkcs11.C_Sign(p11_session, toSign);
-            // X509Certificate cert = getCertFromByteArray(getCertificateInBytes(0));
-        } catch (Throwable e) {
-            log.warn("Something related to sign not worked properly.", e);
-            throw new Exception(e);// TODO change this to the correct exception
-        }
+        log.info("Initialize library to sign.");
+        PKCS11 pkcs11 = init();
+        log.info("Initialize session to sign.");
+        long p11_session = signInit(pkcs11);
+        log.info("Signing...");
+        return pkcs11.C_Sign(p11_session, toSign);
     }
 
     public static boolean verify(PublicKey publicKey, byte[] notSigned, byte[] signed) throws Exception {
-        try {
-            Signature signature = Signature.getInstance(ALGORITHM_FOR_VERIFY);
-            signature.initVerify(publicKey);
-            signature.update(notSigned);
-            return signature.verify(signed);
-        } catch (Exception e) {
-            log.warn("Something related to verify not worked properly.", e);
-            throw e;// TODO change this to the correct exception
-        }
+        Signature signature = Signature.getInstance(ALGORITHM_FOR_VERIFY);
+        log.info("Initialize signature verification.");
+        signature.initVerify(publicKey);
+        log.info("Updating signature.");
+        signature.update(notSigned);
+        log.info("Verifying signature.");
+        return signature.verify(signed);
     }
 
     private static PKCS11 init() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, pt.gov.cartaodecidadao.PteidException {
-        System.loadLibrary("pteidlibj"); // TODO necessary?
+        System.loadLibrary("pteidlibj");
         // Initializes the eID Lib
         pteid.Init("");
         // Don't check the integrity of the ID, address and photo (!)
@@ -104,9 +92,6 @@ public class SecurityUtils {
         //Open the PKCS11 session
         long p11_session = pkcs11.C_OpenSession(0, PKCS11Constants.CKF_SERIAL_SESSION, null, null);
 
-        // Token login
-        pkcs11.C_Login(p11_session, 1, null); // TODO necessary?
-
         // Get available keys
         CK_ATTRIBUTE[] attributes = new CK_ATTRIBUTE[1];
         attributes[0] = new CK_ATTRIBUTE();
@@ -125,19 +110,5 @@ public class SecurityUtils {
         mechanism.pParameter = null;
         pkcs11.C_SignInit(p11_session, mechanism, signatureKey);
         return p11_session;
-    }
-
-    // Returns the n-th certificate, starting from 0
-    private static byte[] getCertificateInBytes(int n) throws PteidException {
-        PTEID_Certif[] certs = pteidlib.pteid.GetCertificates();
-
-        // Gets the byte[] with the n-th certif
-        return certs[n].certif;
-    }
-
-    private static X509Certificate getCertFromByteArray(byte[] certificateEncoded) throws CertificateException {
-        CertificateFactory f = CertificateFactory.getInstance("X.509");
-        InputStream in = new ByteArrayInputStream(certificateEncoded);
-        return (X509Certificate) f.generateCertificate(in);
     }
 }

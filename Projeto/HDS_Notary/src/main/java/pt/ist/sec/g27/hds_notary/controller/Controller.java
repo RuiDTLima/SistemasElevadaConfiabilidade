@@ -11,8 +11,6 @@ import pt.ist.sec.g27.hds_notary.Exceptions.NotFoundException;
 import pt.ist.sec.g27.hds_notary.aop.VerifyAndSign;
 import pt.ist.sec.g27.hds_notary.model.*;
 
-import java.io.IOException;
-import java.security.SignedObject;
 import java.util.Arrays;
 
 @RestController
@@ -27,7 +25,7 @@ public class Controller {
 
     @VerifyAndSign
     @PostMapping("/getStateOfGood")
-    public Body getStateOfGood(@RequestBody Message message) {
+    public Object getStateOfGood(@RequestBody Message message) {
         final int goodId = message.getBody().getGoodId();
         return Arrays.stream(notary.getGoods())
                 .filter(good -> good.getId() == goodId)
@@ -38,7 +36,7 @@ public class Controller {
 
     @VerifyAndSign
     @PostMapping("/intentionToSell")
-    public Body intentionToSell(@RequestBody Message message) {
+    public Object intentionToSell(@RequestBody Message message) {
         Body body = message.getBody();
 
         int userId = body.getUserId();
@@ -62,8 +60,7 @@ public class Controller {
 
     @VerifyAndSign
     @PostMapping("/transferGood")
-    public Body transferGood(@RequestBody Message message) {
-
+    public Object transferGood(@RequestBody Message message) {
         Body sellerBody = message.getBody();
         Body buyerBody = sellerBody.getMessage().getBody();
 
@@ -72,7 +69,7 @@ public class Controller {
         int buyerId = buyerBody.getUserId();
         int sellerId = sellerBody.getUserId();
 
-        if(buyerGoodId != sellerGoodId)
+        if (buyerGoodId != sellerGoodId)
             throw new ForbiddenException(
                     new ErrorModel(
                             "Seller good ID does not match buyers good ID!"

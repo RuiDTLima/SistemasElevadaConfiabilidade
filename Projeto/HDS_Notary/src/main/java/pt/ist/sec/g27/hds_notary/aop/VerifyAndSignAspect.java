@@ -11,11 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pt.ist.sec.g27.hds_notary.Exceptions.UnauthorizedException;
 import pt.ist.sec.g27.hds_notary.SecurityUtils;
+import pt.ist.sec.g27.hds_notary.Utils;
 import pt.ist.sec.g27.hds_notary.model.*;
 
 import java.security.PublicKey;
-
-import static pt.ist.sec.g27.hds_notary.Utils.objectToByteArray;
 
 @Aspect
 @Component
@@ -33,7 +32,7 @@ public class VerifyAndSignAspect {
     }
 
     @Around("@annotation(pt.ist.sec.g27.hds_notary.aop.VerifyAndSign)")
-    public Object logExecutionTime(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+    public Object callHandler(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         before(proceedingJoinPoint.getArgs());
         Object returnedValue = proceedingJoinPoint.proceed();
         return after(returnedValue);
@@ -41,7 +40,7 @@ public class VerifyAndSignAspect {
 
     private Object after(Object returnedValue) throws Exception {
         try {
-            byte[] sign = SecurityUtils.sign(objectToByteArray(returnedValue));
+            byte[] sign = SecurityUtils.sign(Utils.jsonObjectToByteArray(returnedValue));
             return new Message((Body) returnedValue, sign);
         } catch (Exception e) {
             log.warn("Cannot sign the returned object.", e);
