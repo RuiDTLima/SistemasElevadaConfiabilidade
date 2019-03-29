@@ -11,6 +11,8 @@ import pt.ist.sec.g27.hds_client.model.Me;
 import pt.ist.sec.g27.hds_client.model.User;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Scanner;
 
 @SpringBootApplication
@@ -67,18 +69,10 @@ public class HdsClientApplication {
                         case "buyGood":
                             if (!validateParams(params, 2)) {
                                 log.info(String.format("To invoke buyGood there need to be passed two ids. It was passed %d ids.", params.length));
-                                System.out.println("To invoke buyGood there need to be passed two ids.");
+                                System.out.println("To invoke buyGood there need to be passed two ids, the id of the good and the owner, respectively.");
                                 break;
                             }
                             buyGood(params);
-                            break;
-                        case "transferGood":
-                            if (!validateParams(params, 2)) {
-                                log.info(String.format("To invoke transferGood there need to be passed two ids. It was passed %d ids.", params.length));
-                                System.out.println("To invoke transferGood there need to be passed two ids.");
-                                break;
-                            }
-                            transferGood(params);
                             break;
                         case "exit":
                             System.exit(0);
@@ -123,16 +117,38 @@ public class HdsClientApplication {
         }
     }
 
-    private void getStateOfGood(String[] paramsd) {
-
+    private void getStateOfGood(String[] params) {
     }
 
-    private void buyGood(String[] params) {
+    private void buyGood(String[] params) throws Exception {
+        int goodId, userId;
 
-    }
+        try {
+            goodId = Integer.parseInt(params[0]);
+            userId = Integer.parseInt(params[1]);
+        } catch (NumberFormatException e) {
+            log.warn("The provided id was not an integer.");
+            System.out.println("The id you provide must be an integer.");
+            return;
+        }
 
-    private void transferGood(String[] params) {
+        User owner = appState.getUser(userId);
+        Body body = new Body(userId, goodId);
+        Me me = appState.getMe();
 
+        Body receivedBody = restClient.post(owner, "/buyGood", body, me.getPrivateKey());
+
+        if (receivedBody == null) {
+            String unsignedMessage = "The server could not respond.";
+            log.info(unsignedMessage);
+            System.out.println(unsignedMessage);
+        } else if (receivedBody.getExceptionResponse() != null) {
+            log.info(receivedBody.getExceptionResponse());
+            System.out.println(receivedBody.getExceptionResponse());
+        } else {
+            log.info(String.format("The buy operation of the good with id %d from the user with id %d return the response %s", body.getGoodId(), body.getUserId(), receivedBody.getResponse()));
+            System.out.println(receivedBody.getResponse());
+        }
     }
 
     private boolean validateParams(String[] params, int length) {
