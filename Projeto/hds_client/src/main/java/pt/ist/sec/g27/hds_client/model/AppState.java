@@ -5,7 +5,6 @@ import java.util.Arrays;
 public class AppState {
     private static final String EXCEPTION_MESSAGE = "There is an error with the state file. Must contain notary information with id 0.";
 
-    private Me me;
     private User[] users;
     private Good[] goods;
 
@@ -23,10 +22,6 @@ public class AppState {
 
     public Good getGood(int goodId) {
         return Arrays.stream(goods).filter(good -> good.getId() == goodId).findFirst().orElse(null);
-    }
-
-    public Me getMe() {
-        return me;
     }
 
     public User getNotary() {
