@@ -9,10 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import pt.ist.sec.g27.hds_notary.Exceptions.UnauthorizedException;
+import pt.ist.sec.g27.hds_notary.exceptions.UnauthorizedException;
+import pt.ist.sec.g27.hds_notary.model.*;
 import pt.ist.sec.g27.hds_notary.utils.SecurityUtils;
 import pt.ist.sec.g27.hds_notary.utils.Utils;
-import pt.ist.sec.g27.hds_notary.model.*;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -20,7 +20,6 @@ import java.security.PublicKey;
 @Aspect
 @Component
 public class VerifyAndSignAspect {
-
     private final static Logger log = LoggerFactory.getLogger(VerifyAndSignAspect.class);
 
     private final Notary notary;
@@ -35,7 +34,12 @@ public class VerifyAndSignAspect {
     @Around("@annotation(pt.ist.sec.g27.hds_notary.aop.VerifyAndSign)")
     public Object callHandler(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         before(proceedingJoinPoint.getArgs());
-        Object returnedValue = proceedingJoinPoint.proceed();
+        Object returnedValue;
+        try {
+            returnedValue = proceedingJoinPoint.proceed();
+        } catch (Throwable e) {
+            returnedValue = new Body("Something went wrong.");
+        }
         return after(returnedValue);
     }
 

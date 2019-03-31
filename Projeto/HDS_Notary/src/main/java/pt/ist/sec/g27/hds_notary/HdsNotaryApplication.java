@@ -8,8 +8,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import pt.ist.sec.g27.hds_notary.model.Notary;
 
-import java.io.IOException;
-
 @SpringBootApplication
 public class HdsNotaryApplication {
     private final static String STATE_PATH = "state.json";

@@ -18,18 +18,7 @@ public class User {
     private PublicKey publicKey; // TODO temos de ignorar no parse do json com anotacao???
     private int port;
 
-    public String getPubKeyPath() {
-        return pubKeyPath;
-    }
-
     public User() {
-    }
-
-    public User(int id, String name, String pubKeyPath) {
-        this.id = id;
-        this.name = name;
-        this.pubKeyPath = pubKeyPath;
-        this.publicKey = null;
     }
 
     public int getId() {

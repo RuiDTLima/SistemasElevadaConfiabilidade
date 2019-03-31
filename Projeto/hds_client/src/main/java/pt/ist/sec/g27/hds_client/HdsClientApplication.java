@@ -98,7 +98,6 @@ public class HdsClientApplication {
                     intentionToSell(params);
                 break;
             case "getStateOfGood":
-
                 if (validateParams(params,
                         1,
                         String.format("To invoke getStateOfGood there needs to be passed one id. It was passed %d ids.", params.length),

@@ -75,6 +75,4 @@ public class Body implements Serializable {
     public void setExceptionResponse(Exception exceptionResponse) {
         this.exceptionResponse = exceptionResponse;
     }
-
-
 }

@@ -7,14 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import pt.ist.sec.g27.hds_notary.Exceptions.ForbiddenException;
-import pt.ist.sec.g27.hds_notary.Exceptions.NotFoundException;
 import pt.ist.sec.g27.hds_notary.HdsNotaryApplication;
 import pt.ist.sec.g27.hds_notary.aop.VerifyAndSign;
+import pt.ist.sec.g27.hds_notary.exceptions.ForbiddenException;
+import pt.ist.sec.g27.hds_notary.exceptions.NotFoundException;
 import pt.ist.sec.g27.hds_notary.model.*;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -22,10 +21,13 @@ import java.util.Arrays;
 public class Controller {
     private static final String STATE_PATH = "state.json";
     private static final Logger log = LoggerFactory.getLogger(Controller.class);
+
+    private final ObjectMapper mapper;
     private final Notary notary;
 
     @Autowired
-    public Controller(Notary notary) {
+    public Controller(ObjectMapper objectMapper, Notary notary) {
+        this.mapper = objectMapper;
         this.notary = notary;
     }
 
@@ -117,8 +119,6 @@ public class Controller {
     }
 
     private void saveState() {
-        ObjectMapper mapper = new ObjectMapper();
-
         try {
             // Writing to a file
             ClassLoader classLoader = HdsNotaryApplication.class.getClassLoader();
