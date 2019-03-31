@@ -1,4 +1,4 @@
-package pt.ist.sec.g27.hds_client;
+package pt.ist.sec.g27.hds_client.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

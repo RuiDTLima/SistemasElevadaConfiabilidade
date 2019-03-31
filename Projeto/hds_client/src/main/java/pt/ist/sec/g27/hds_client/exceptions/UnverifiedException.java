@@ -1,4 +1,4 @@
-package pt.ist.sec.g27.hds_client;
+package pt.ist.sec.g27.hds_client.exceptions;
 
 public class UnverifiedException extends RuntimeException {
 
