@@ -6,6 +6,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
+import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
+import pt.ist.sec.g27.hds_client.utils.Utils;
 import pt.ist.sec.g27.hds_client.model.Body;
 import pt.ist.sec.g27.hds_client.model.Message;
 import pt.ist.sec.g27.hds_client.model.User;
@@ -32,12 +35,16 @@ public class RestClient {
         String json = mapper.writeValueAsString(message);
         HttpEntity<String> requestEntity = new HttpEntity<>(json, headers);
         ResponseEntity<String> responseEntity = rest.exchange(server + user.getPort() + uri, HttpMethod.POST, requestEntity, String.class);
+
         if (!responseEntity.getStatusCode().is2xxSuccessful())
             return null;
+
         Message receivedMessage = mapper.readValue(responseEntity.getBody(), Message.class);
         boolean verify = SecurityUtils.verify(user.getPublicKey(), Utils.jsonObjectToByteArray(receivedMessage.getBody()), receivedMessage.getSignature());
+
         if (!verify)
             throw new UnverifiedException("The response received did not originate from the notary.");
+
         return receivedMessage.getBody();
     }
 }

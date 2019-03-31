@@ -5,21 +5,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
 import pt.ist.sec.g27.hds_client.model.AppState;
 import pt.ist.sec.g27.hds_client.model.Body;
+import pt.ist.sec.g27.hds_client.model.Good;
 import pt.ist.sec.g27.hds_client.model.User;
-
-import java.io.IOException;
 import java.util.Scanner;
+import java.util.stream.Stream;
 
 @SpringBootApplication
 public class HdsClientApplication {
-    private final static String STATE_PATH = "state.json";
+    private static final String STATE_PATH = "state.json";
     private static final Logger log = LoggerFactory.getLogger(HdsClientApplication.class);
     private static final RestClient restClient = new RestClient();
 
     private static AppState appState;
     private static User me;
+
+    public static User getMe() {
+        return me;
+    }
+
+    public static Stream<Good> getMyGoods() {
+        return appState.getUsersGood(me.getId());
+    }
 
     public static void main(String[] args) {
         int userId;
@@ -35,20 +44,24 @@ public class HdsClientApplication {
         }
 
         ObjectMapper mapper = new ObjectMapper();
+
         try {
             ClassLoader classLoader = HdsClientApplication.class.getClassLoader();
             appState = mapper.readValue(classLoader.getResource(STATE_PATH), AppState.class);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("An error occurred.", e);
             return;
         }
+
         me = appState.getUser(userId);
         if (!me.validateUser()) {
             log.warn("The user tried to access the system with an invalid state.");
             System.out.println("The private key to the given user was not provided in the state.");
             return;
         }
+
         SpringApplication.run(HdsClientApplication.class, args);
+
         HdsClientApplication hdsClientApplication = new HdsClientApplication();
         hdsClientApplication.run();
     }
@@ -65,45 +78,47 @@ public class HdsClientApplication {
                     System.arraycopy(temp, 1, params, 0, params.length);
                     log.info(String.format("Received the input %s.", input));
 
-                    switch (command) {
-                        case "intentionToSell":
-                            if (!validateParams(params, 1)) {
-                                log.info(String.format("To invoke intentionToSell there need to be passed one id. It was passed %d ids.", params.length));
-                                System.out.println("To invoke intentionToSell there need to be passed one id.");
-                                break;
-                            }
-                            intentionToSell(params);
-                            break;
-                        case "getStateOfGood":
-                            if (!validateParams(params, 1)) {
-                                log.info(String.format("To invoke getStateOfGood there need to be passed one id. It was passed %d ids.", params.length));
-                                System.out.println("To invoke getStateOfGood there need to be passed one id.");
-                                break;
-                            }
-                            getStateOfGood(params);
-                            break;
-                        case "buyGood":
-                            if (!validateParams(params, 2)) {
-                                log.info(String.format("To invoke buyGood there need to be passed two ids. It was passed %d ids.", params.length));
-                                System.out.println("To invoke buyGood there need to be passed two ids, the id of the good and the owner, respectively.");
-                                break;
-                            }
-                            buyGood(params);
-                            break;
-                        case "exit":
-                            System.exit(0);
-                            break;
-                        default:
-                            log.info(String.format("Command %s not found.", command));
-                            System.out.println("Unknown command.");
-                            break;
-                    }
+                    commands(command, params);
                 } catch (Throwable e) {
                     log.warn("Something went wrong.", e);
                     if (!input.equals(""))
                         log.warn(input);
                 }
             }
+        }
+    }
+
+    private void commands(String command, String[] params) throws Exception {
+        switch (command) {
+            case "intentionToSell":
+                if (validateParams(params,
+                        1,
+                        String.format("To invoke intentionToSell there needs to be passed one id. It was passed %d ids.", params.length),
+                        "To invoke intentionToSell there needs to be passed one id."))
+                    intentionToSell(params);
+                break;
+            case "getStateOfGood":
+
+                if (validateParams(params,
+                        1,
+                        String.format("To invoke getStateOfGood there needs to be passed one id. It was passed %d ids.", params.length),
+                        "To invoke getStateOfGood there needs to be passed one id."))
+                    getStateOfGood(params);
+                break;
+            case "buyGood":
+                if (validateParams(params,
+                        2,
+                        String.format("To invoke buyGood there needs to be passed two ids. It was passed %d ids.", params.length),
+                        "To invoke buyGood there needs to be passed two ids, the id of the good and the owner, respectively."))
+                buyGood(params);
+                break;
+            case "exit":
+                System.exit(0);
+                break;
+            default:
+                log.info(String.format("Command %s not found.", command));
+                System.out.println("Unknown command.");
+                break;
         }
     }
 
@@ -119,14 +134,7 @@ public class HdsClientApplication {
             throw e;
         }
 
-        if (receivedBody == null) {
-            String unsignedMessage = "The server cannot respond.";
-            log.info(unsignedMessage);
-            System.out.println(unsignedMessage);
-        } else if (receivedBody.getExceptionResponse() != null) {
-            log.info(receivedBody.getExceptionResponse());
-            System.out.println(receivedBody.getExceptionResponse());
-        } else {
+        if (isValidResponse(receivedBody)) {
             log.info(String.format("The good with id %d is on sale.", body.getGoodId()));
             System.out.println(receivedBody.getResponse());
         }
@@ -143,15 +151,12 @@ public class HdsClientApplication {
             throw e;
         }
 
-        if (receivedBody == null) {
-            String unsignedMessage = "The server cannot respond.";
-            log.info(unsignedMessage);
-            System.out.println(unsignedMessage);
-        } else if (receivedBody.getExceptionResponse() != null) {
-            log.info(receivedBody.getExceptionResponse());
-            System.out.println(receivedBody.getExceptionResponse());
-        } else {
-            String message = String.format("The good with id %d is owned by user with id %d and his state is %s.", body.getGoodId(), receivedBody.getUserId(), receivedBody.getState());
+        if (isValidResponse(receivedBody)) {
+            String message = String.format("The good with id %d is owned by user with id %d and his state is %s.",
+                    body.getGoodId(),
+                    receivedBody.getUserId(),
+                    receivedBody.getState());
+
             log.info(message);
             System.out.println(message);
         }
@@ -174,20 +179,34 @@ public class HdsClientApplication {
 
         Body receivedBody = restClient.post(owner, "/buyGood", body, me.getPrivateKey());
 
-        if (receivedBody == null) {
-            String unsignedMessage = "The server could not respond.";
-            log.info(unsignedMessage);
-            System.out.println(unsignedMessage);
-        } else if (receivedBody.getExceptionResponse() != null) {
-            log.info(receivedBody.getExceptionResponse());
-            System.out.println(receivedBody.getExceptionResponse());
-        } else {
+         if (isValidResponse(receivedBody)) {
             log.info(String.format("The buy operation of the good with id %d from the user with id %d return the response %s", body.getGoodId(), body.getUserId(), receivedBody.getResponse()));
             System.out.println(receivedBody.getResponse());
         }
     }
 
-    private boolean validateParams(String[] params, int length) {
-        return params.length == length;
+    private boolean validateParams(String[] params, int length, String logMessage, String outputMessage) {
+        if (params.length == length)
+            return true;
+        log.info(logMessage);
+        System.out.println(outputMessage);
+        return false;
+    }
+
+    private boolean isValidResponse(Body body) {
+        if (body == null) {
+            String unsignedMessage = "The server could not respond.";
+            log.info(unsignedMessage);
+            System.out.println(unsignedMessage);
+            return false;
+        }
+
+        if (body.getExceptionResponse() != null) {
+            log.info(body.getExceptionResponse());
+            System.out.println(body.getExceptionResponse());
+            return false;
+        }
+
+        return true;
     }
 }

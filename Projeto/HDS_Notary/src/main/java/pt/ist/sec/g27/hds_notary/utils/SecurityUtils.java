@@ -1,4 +1,4 @@
-package pt.ist.sec.g27.hds_notary;
+package pt.ist.sec.g27.hds_notary.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

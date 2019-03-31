@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pt.ist.sec.g27.hds_notary.Exceptions.UnauthorizedException;
-import pt.ist.sec.g27.hds_notary.SecurityUtils;
-import pt.ist.sec.g27.hds_notary.Utils;
+import pt.ist.sec.g27.hds_notary.utils.SecurityUtils;
+import pt.ist.sec.g27.hds_notary.utils.Utils;
 import pt.ist.sec.g27.hds_notary.model.*;
 
 import java.security.PrivateKey;
@@ -57,13 +57,13 @@ public class VerifyAndSignAspect {
         // TODO Check exceptions
         if (args == null || args.length == 0 || !(args[0] instanceof Message))
             throw new Exception("The incoming message is not acceptable.");
+
         boolean verified = verifyAllMessages((Message) args[0]);
         if (!verified)
             throw new UnauthorizedException(new ErrorModel("This message is not authentic."));
     }
 
     private boolean verifyAllMessages(Message message) {
-        // TODO check exceptions
         if (message == null)
             return true;
 
@@ -73,10 +73,12 @@ public class VerifyAndSignAspect {
 
         int userId = body.getUserId();
         User user = notary.getUser(userId);
+
         if (user == null) {
             log.info("User does not exist.");
             throw new UnauthorizedException(new ErrorModel("The user with id " + userId + " does not exist."));
         }
+
         PublicKey publicKey;
         try {
             publicKey = user.getPublicKey();
@@ -84,13 +86,15 @@ public class VerifyAndSignAspect {
             log.info("Cannot find/load the public key of one user");
             throw new UnauthorizedException(new ErrorModel("Cannot find/load the public key of the user"));
         }
+
         byte[] jsonBody;
         try {
             jsonBody = objectMapper.writeValueAsBytes(body);
         } catch (JsonProcessingException e) {
-            log.info("An error occurred while trying to convert object to string", e);
+            log.info("An error occurred while trying to convert object to string", e);  //  TODO check exception message and when it occurs
             throw new UnauthorizedException(new ErrorModel("Something went wrong while verifying the signature."));
         }
+
         boolean verified;
         try {
             verified = SecurityUtils.verify(publicKey, jsonBody, message.getSignature());
@@ -98,6 +102,7 @@ public class VerifyAndSignAspect {
             log.info("Cannot verify the incoming message.", e);
             throw new UnauthorizedException(new ErrorModel("Something went wrong while verifying the signature."));
         }
+
         return verified && verifyAllMessages(body.getMessage());
     }
 }

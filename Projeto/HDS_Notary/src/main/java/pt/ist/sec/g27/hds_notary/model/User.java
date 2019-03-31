@@ -1,7 +1,8 @@
 package pt.ist.sec.g27.hds_notary.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import pt.ist.sec.g27.hds_notary.SecurityUtils;
+import pt.ist.sec.g27.hds_notary.utils.SecurityUtils;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -16,6 +17,10 @@ public class User {
     private String pubKeyPath;
     private PublicKey publicKey; // TODO temos de ignorar no parse do json com anotacao???
     private int port;
+
+    public String getPubKeyPath() {
+        return pubKeyPath;
+    }
 
     public User() {
     }
@@ -35,6 +40,7 @@ public class User {
         return name;
     }
 
+    @JsonIgnore
     public PublicKey getPublicKey() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
         if (this.publicKey != null)
             return this.publicKey;

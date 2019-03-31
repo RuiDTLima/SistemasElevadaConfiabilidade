@@ -1,5 +1,6 @@
 package pt.ist.sec.g27.hds_notary.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,13 +9,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pt.ist.sec.g27.hds_notary.Exceptions.ForbiddenException;
 import pt.ist.sec.g27.hds_notary.Exceptions.NotFoundException;
+import pt.ist.sec.g27.hds_notary.HdsNotaryApplication;
 import pt.ist.sec.g27.hds_notary.aop.VerifyAndSign;
 import pt.ist.sec.g27.hds_notary.model.*;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 
 @RestController
 public class Controller {
+    private static final String STATE_PATH = "state.json";
     private static final Logger log = LoggerFactory.getLogger(Controller.class);
     private final Notary notary;
 
@@ -55,6 +61,9 @@ public class Controller {
         log.info(String.format("The good %d is owned by the user %d", goodId, userId));
 
         good.setState(State.ON_SALE);
+
+        saveState();
+
         return new Body("YES");
     }
 
@@ -102,6 +111,22 @@ public class Controller {
         g.setState(State.NOT_ON_SALE);
         g.setOwnerId(buyerId);
 
+        saveState();
+
         return new Body("Yes");
+    }
+
+    private void saveState() {
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            // Writing to a file
+            ClassLoader classLoader = HdsNotaryApplication.class.getClassLoader();
+            File file = new File(classLoader.getResource(STATE_PATH).getFile());
+            mapper.writeValue(file, notary);
+            log.info("The state has been updated.");
+        } catch (IOException e) {
+            log.error("There was an error while trying to save the state.", e);
+        }
     }
 }

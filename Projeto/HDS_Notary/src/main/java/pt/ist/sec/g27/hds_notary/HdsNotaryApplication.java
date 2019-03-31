@@ -22,7 +22,7 @@ public class HdsNotaryApplication {
         try {
             ClassLoader classLoader = HdsNotaryApplication.class.getClassLoader();
             notary = mapper.readValue(classLoader.getResource(STATE_PATH), Notary.class);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("An error occurred.", e);
             return;
         }

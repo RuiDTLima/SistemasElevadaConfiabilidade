@@ -24,13 +24,13 @@
       "id": 1,
       "owner-id": 1,
       "name": "house",
-      "state": "on-sale"
+      "state": "not-on-sale"
     },
     {
       "id": 2,
       "owner-id": 1,
       "name": "car",
-      "state": "not-on-sale"
+      "state": "on-sale"
     },
     {
       "id": 3,

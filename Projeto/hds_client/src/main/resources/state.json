@@ -31,7 +31,7 @@
       "id": 1,
       "owner-id": 1,
       "name": "house",
-      "state": "on-sale"
+      "state": "not-on-sale"
     },
     {
       "id": 2,
