@@ -55,9 +55,7 @@ public class Controller {
         Good good = notary.getGood(goodId);
         if (good.getOwnerId() != userId) {
             log.warn(String.format("The state of the good %d could not be changed by the user %d.", goodId, userId));
-            Body exceptionBody = new Body();
-            exceptionBody.setExceptionResponse(new ForbiddenException(new ErrorModel("The state of the good could not be changed.")));
-            return exceptionBody;
+            throw new ForbiddenException(new ErrorModel("You do not have that good."));
         }
 
         log.info(String.format("The good %d is owned by the user %d", goodId, userId));
@@ -90,14 +88,11 @@ public class Controller {
         Good g = Arrays.stream(notary.getGoods())
                 .filter(x -> x.getId() == buyerGoodId)
                 .findFirst()
-                .orElse(null);
-
-        if (g == null)
-            throw new NotFoundException(
-                    new ErrorModel(
-                            "Good not found!"
-                    )
-            );
+                .orElseThrow(() -> new NotFoundException(
+                        new ErrorModel(
+                                "Good not found!"
+                        )
+                ));
 
         // Check if owner id coincides
         if (g.getOwnerId() != sellerId)

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import pt.ist.sec.g27.hds_notary.exceptions.HttpExceptions;
 import pt.ist.sec.g27.hds_notary.exceptions.UnauthorizedException;
 import pt.ist.sec.g27.hds_notary.model.*;
 import pt.ist.sec.g27.hds_notary.utils.SecurityUtils;
@@ -33,13 +34,19 @@ public class VerifyAndSignAspect {
 
     @Around("@annotation(pt.ist.sec.g27.hds_notary.aop.VerifyAndSign)")
     public Object callHandler(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-        before(proceedingJoinPoint.getArgs());
+        try {
+            before(proceedingJoinPoint.getArgs());
+        } catch (HttpExceptions e) {
+            return after(new Body(e));
+        }
+
         Object returnedValue;
         try {
             returnedValue = proceedingJoinPoint.proceed();
-        } catch (Throwable e) {
-            returnedValue = new Body("Something went wrong.");
+        } catch (HttpExceptions e) {
+            returnedValue = new Body(e);
         }
+
         return after(returnedValue);
     }
 
@@ -57,10 +64,10 @@ public class VerifyAndSignAspect {
         return new Message((Body) returnedValue, sign);
     }
 
-    private void before(Object[] args) throws Exception {
+    private void before(Object[] args) {
         // TODO Check exceptions
         if (args == null || args.length == 0 || !(args[0] instanceof Message))
-            throw new Exception("The incoming message is not acceptable.");
+            throw new UnauthorizedException(new ErrorModel("The incoming message is not acceptable."));
 
         boolean verified = verifyAllMessages((Message) args[0]);
         if (!verified)
