@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pt.ist.sec.g27.hds_client.HdsClientApplication;
 import pt.ist.sec.g27.hds_client.RestClient;
+import pt.ist.sec.g27.hds_client.exceptions.ConnectionException;
+import pt.ist.sec.g27.hds_client.exceptions.ResponseException;
 import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
 import pt.ist.sec.g27.hds_client.model.*;
 
@@ -44,14 +46,13 @@ public class Controller {
             log.info(response);
             System.out.println(receivedBody.getMessage());
             return new Body(receivedBody.getResponse());    //  TODO check if the return can be of the receivedBody?
-        } catch (UnverifiedException e) {
+        } catch (UnverifiedException | ResponseException | ConnectionException e) {
             log.info(e.getMessage(), e);
-        } catch (IOException e) {
-            log.info(e.getMessage(), e);
-            System.out.println("Couldn't be proved that the response originated from the notary.");
+            System.out.println(e.getMessage());
         } catch (Exception e) {
-            log.warn("There was an error while trying to obtain the user private key");
-            System.out.println("Your private key could be successfully obtained.");
+            String errorMessage = "There was an error while trying to handle the buyGood request.";
+            log.warn(errorMessage, e);
+            System.out.println(errorMessage);
         }
 
         return new Body("No");

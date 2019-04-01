@@ -2,6 +2,7 @@ package pt.ist.sec.g27.hds_client.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.http.HttpStatus;
 
 import java.io.Serializable;
 
@@ -21,7 +22,7 @@ public class Body implements Serializable {
     private String response;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String exceptionResponse;
+    private HttpStatus status;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Message message;
@@ -64,8 +65,8 @@ public class Body implements Serializable {
         return response;
     }
 
-    public String getExceptionResponse() {
-        return exceptionResponse;
+    public HttpStatus getStatus() {
+        return status;
     }
 
     public Message getMessage() {

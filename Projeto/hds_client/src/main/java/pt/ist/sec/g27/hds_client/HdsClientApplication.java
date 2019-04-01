@@ -200,9 +200,9 @@ public class HdsClientApplication {
             return false;
         }
 
-        if (body.getExceptionResponse() != null) {
-            log.info(body.getExceptionResponse());
-            System.out.println(body.getExceptionResponse());
+        if (!body.getStatus().is2xxSuccessful()) {
+            log.info(body.getResponse());
+            System.out.println(body.getResponse());
             return false;
         }
 
