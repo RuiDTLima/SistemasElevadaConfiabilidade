@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import pt.ist.sec.g27.hds_client.exceptions.ConnectionException;
+import pt.ist.sec.g27.hds_client.exceptions.ResponseException;
 import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
 import pt.ist.sec.g27.hds_client.model.AppState;
 import pt.ist.sec.g27.hds_client.model.Body;
@@ -25,7 +27,6 @@ public class HdsClientApplication {
     public static User getMe() {
         return me;
     }
-
     public static Stream<Good> getMyGoods() {
         return appState.getUsersGood(me.getId());
     }
@@ -128,9 +129,13 @@ public class HdsClientApplication {
 
         try {
             receivedBody = restClient.post(notary, "/intentionToSell", body, me.getPrivateKey());
-        } catch (UnverifiedException e) {
-            log.info(e.getMessage(), e);
-            throw e;
+        } catch (UnverifiedException | ResponseException e) {
+            log.warn(e.getMessage(), e);
+            return;
+        } catch (ConnectionException e) {
+            System.out.println("It wasn't possible to connect to the server.");
+            log.warn(e.getMessage(), e);
+            return;
         }
 
         if (isValidResponse(receivedBody)) {
@@ -143,11 +148,16 @@ public class HdsClientApplication {
         Body body = new Body(me.getId(), Integer.parseInt(params[0]));
         User notary = appState.getNotary();
         Body receivedBody;
+
         try {
             receivedBody = restClient.post(notary, "/getStateOfGood", body, me.getPrivateKey());
-        } catch (UnverifiedException e) {
+        } catch (UnverifiedException | ResponseException e) {
             log.info(e.getMessage(), e);
-            throw e;
+            return;
+        } catch (ConnectionException e) {
+            System.out.println("It wasn't possible to connect to the server.");
+            log.warn(e.getMessage(), e);
+            return;
         }
 
         if (isValidResponse(receivedBody)) {
@@ -176,9 +186,20 @@ public class HdsClientApplication {
         User owner = appState.getUser(userId);
         Body body = new Body(userId, goodId);
 
-        Body receivedBody = restClient.post(owner, "/buyGood", body, me.getPrivateKey());
+        Body receivedBody;
 
-         if (isValidResponse(receivedBody)) {
+        try {
+            receivedBody = restClient.post(owner, "/buyGood", body, me.getPrivateKey());
+        } catch (UnverifiedException | ResponseException e) {
+            log.warn(e.getMessage(), e);
+            return;
+        } catch (ConnectionException e) {
+            System.out.println("It wasn't possible to connect to the server.");
+            log.warn(e.getMessage(), e);
+            return;
+        }
+
+        if (isValidResponse(receivedBody)) {
             log.info(String.format("The buy operation of the good with id %d from the user with id %d return the response %s", body.getGoodId(), body.getUserId(), receivedBody.getResponse()));
             System.out.println(receivedBody.getResponse());
         }
@@ -187,6 +208,7 @@ public class HdsClientApplication {
     private boolean validateParams(String[] params, int length, String logMessage, String outputMessage) {
         if (params.length == length)
             return true;
+        
         log.info(logMessage);
         System.out.println(outputMessage);
         return false;

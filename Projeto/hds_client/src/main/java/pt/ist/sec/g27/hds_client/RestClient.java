@@ -55,7 +55,7 @@ public class RestClient {
 
         Message receivedMessage = mapper.readValue(responseEntity.getBody(), Message.class);
         if (receivedMessage == null) {
-            log.info(String.format("The received message is null when make a request to %s.", url));
+            log.info(String.format("The received message was null when making a request to %s.", url));
             throw new ResponseException("Did not received a message.");
         }
 
