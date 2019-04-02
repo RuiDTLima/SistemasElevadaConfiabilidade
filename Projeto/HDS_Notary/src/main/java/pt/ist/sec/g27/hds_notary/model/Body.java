@@ -29,29 +29,28 @@ public class Body implements Serializable {
     private Message message;
 
     public Body() {
-        this.status = HttpStatus.OK;
     }
 
     public Body(int userId, int goodId) {
-        this();
+        this.status = HttpStatus.OK;
         this.userId = userId;
         this.goodId = goodId;
     }
 
     public Body(int userId, Message message) {
-        this();
+        this.status = HttpStatus.OK;
         this.userId = userId;
         this.message = message;
     }
 
     public Body(int userId, State state) {
-        this();
+        this.status = HttpStatus.OK;
         this.userId = userId;
         this.state = state.getState();
     }
 
     public Body(String response) {
-        this();
+        this.status = HttpStatus.OK;
         this.response = response;
     }
 
@@ -74,6 +73,10 @@ public class Body implements Serializable {
 
     public String getResponse() {
         return response;
+    }
+
+    public HttpStatus getStatus() {
+        return status;
     }
 
     public Message getMessage() {
