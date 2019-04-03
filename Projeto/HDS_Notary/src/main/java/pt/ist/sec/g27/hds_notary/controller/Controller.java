@@ -126,12 +126,13 @@ public class Controller {
     }
 
     // TODO verify if count of body is ok
+    // TODO what about when counter reaches max? How can we solve that?
 
     private boolean verifyCount(Body body){
         int bodyCount = body.getCount();
         int userId = body.getUserId();
 
-        User user = Arrays.stream(notary.getUsers())
+        User user = Arrays.stream(notary.getUsers()) // Or just pass the user, so it turns out faster!
                 .filter(x -> x.getId() == userId)
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException(new ErrorModel("The id that you specify does not exist.")));
@@ -140,6 +141,9 @@ public class Controller {
 
         // Case when the count on the body is lower than the one that the notary has
         if ( bodyCount < userCount ){ return false; } // Or throw some exception
+
+        user.setCount(bodyCount + 1); // Update counter on the notary
+        saveState();
 
         return true; // Or just continue running
 

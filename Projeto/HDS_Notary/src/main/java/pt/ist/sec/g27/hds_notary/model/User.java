@@ -45,4 +45,9 @@ public class User {
     public int getCount() {
         return count;
     }
+
+    public int setCount(int count) {
+        this.count = count;
+    }
+
 }
