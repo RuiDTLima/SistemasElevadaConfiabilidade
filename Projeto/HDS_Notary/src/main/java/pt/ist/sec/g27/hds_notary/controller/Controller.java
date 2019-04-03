@@ -140,7 +140,7 @@ public class Controller {
         int userCount = user.getCount();
 
         // Case when the count on the body is lower than the one that the notary has
-        if ( bodyCount < userCount ){ return false; } // Or throw some exception
+        if ( bodyCount <= userCount ){ return false; } // Or throw some exception
 
         user.setCount(bodyCount + 1); // Update counter on the notary
         saveState();
