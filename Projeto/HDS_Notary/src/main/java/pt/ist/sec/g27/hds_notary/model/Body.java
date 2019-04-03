@@ -16,6 +16,10 @@ public class Body implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private int goodId;
 
+    @JsonProperty("count")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private int count;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String state;
 
@@ -65,6 +69,10 @@ public class Body implements Serializable {
 
     public int getGoodId() {
         return goodId;
+    }
+
+    public int getCount() {
+        return count;
     }
 
     public String getState() {

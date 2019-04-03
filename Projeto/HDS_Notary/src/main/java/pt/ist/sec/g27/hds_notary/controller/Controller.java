@@ -124,4 +124,25 @@ public class Controller {
             log.error("There was an error while trying to save the state.", e);
         }
     }
+
+    // TODO verify if count of body is ok
+
+    private boolean verifyCount(Body body){
+        int bodyCount = body.getCount();
+        int userId = body.getUserId();
+
+        User user = Arrays.stream(notary.getUsers())
+                .filter(x -> x.getId() == userId)
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(new ErrorModel("The id that you specify does not exist.")));
+
+        int userCount = user.getCount();
+
+        // Case when the count on the body is lower than the one that the notary has
+        if ( bodyCount < userCount ){ return false; } // Or throw some exception
+
+        return true; // Or just continue running
+
+    }
+
 }

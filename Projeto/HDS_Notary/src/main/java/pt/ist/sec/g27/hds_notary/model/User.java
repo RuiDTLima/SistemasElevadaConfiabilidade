@@ -17,6 +17,7 @@ public class User {
     private String pubKeyPath;
     private PublicKey publicKey; // TODO temos de ignorar no parse do json com anotacao???
     private int port;
+    private int count;
 
     public User() {
     }
@@ -39,5 +40,9 @@ public class User {
 
     public int getPort() {
         return port;
+    }
+
+    public int getCount() {
+        return count;
     }
 }

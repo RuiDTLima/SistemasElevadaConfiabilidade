@@ -4,19 +4,22 @@
       "id": 1,
       "name": "alice",
       "pubKey": "alice.pub",
-      "port": 8081
+      "port": 8081,
+      "count" : 0
     },
     {
       "id": 2,
       "name": "bob",
       "pubKey": "bob.pub",
-      "port": 8082
+      "port": 8082,
+      "count" : 0
     },
     {
       "id": 3,
       "name": "eve",
       "pubKey": "eve.pub",
-      "port": 8083
+      "port": 8083,
+      "count" : 0
     }
   ],
   "goods": [
