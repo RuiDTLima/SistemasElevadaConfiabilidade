@@ -8,6 +8,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import pt.ist.sec.g27.hds_notary.model.Notary;
 
+import java.io.FileInputStream;
+
 @SpringBootApplication
 public class HdsNotaryApplication {
     private final static String STATE_PATH = "state.json";
@@ -17,9 +19,8 @@ public class HdsNotaryApplication {
 
     public static void main(String[] args) {
         ObjectMapper mapper = new ObjectMapper();
-        try {
-            ClassLoader classLoader = HdsNotaryApplication.class.getClassLoader();
-            notary = mapper.readValue(classLoader.getResource(STATE_PATH), Notary.class);
+        try (FileInputStream fileInputStream = new FileInputStream(STATE_PATH)) {
+            notary = mapper.readValue(fileInputStream, Notary.class);
         } catch (Exception e) {
             log.error("An error occurred.", e);
             return;

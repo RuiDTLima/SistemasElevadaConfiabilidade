@@ -3,9 +3,8 @@ package pt.ist.sec.g27.hds_client.utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -30,18 +29,9 @@ public class SecurityUtils {
     }
 
     private static byte[] read(String keyPath) throws IOException {
-        ClassLoader classLoader = SecurityUtils.class.getClassLoader();
-        URL resource = classLoader.getResource("keys/" + keyPath);
-
-        if (resource == null) {
-            String errorMessage = "Could not find the resource file.";
-            log.info(errorMessage);
-            throw new IOException(errorMessage);
-        }
-
-        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(resource.openStream())) {
-            byte[] encoded = new byte[bufferedInputStream.available()];
-            bufferedInputStream.read(encoded);
+        try (FileInputStream fileInputStream = new FileInputStream(keyPath)) {
+            byte[] encoded = new byte[fileInputStream.available()];
+            fileInputStream.read(encoded);
             return encoded;
         } catch (IOException e) {
             log.warn("An error occurred while reading a file.", e);

@@ -7,15 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import pt.ist.sec.g27.hds_notary.HdsNotaryApplication;
 import pt.ist.sec.g27.hds_notary.aop.VerifyAndSign;
 import pt.ist.sec.g27.hds_notary.exceptions.ForbiddenException;
 import pt.ist.sec.g27.hds_notary.exceptions.NotFoundException;
 import pt.ist.sec.g27.hds_notary.model.*;
 
-import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.time.ZonedDateTime;
 import java.util.Arrays;
 
 @RestController
@@ -49,11 +47,19 @@ public class Controller {
         Body body = message.getBody();
 
         int userId = body.getUserId();
+
         int goodId = body.getGoodId();
 
         log.info(String.format("The public key of the user %d was successfully obtained.", userId));
 
         Good good = notary.getGood(goodId);
+
+        if (good == null) {
+            String errorMessage = String.format("The good with id %d does not exist.", goodId);
+            log.info(errorMessage);
+            throw new NotFoundException(errorMessage);
+        }
+
         if (good.getOwnerId() != userId) {
             log.warn(String.format("The state of the good %d could not be changed by the user %d.", goodId, userId));
             throw new ForbiddenException("You do not have that good.");
@@ -84,7 +90,7 @@ public class Controller {
 
         Good g = notary.getGood(buyerGoodId);
 
-        if( g == null )
+        if (g == null)
             throw new NotFoundException("Good not found!");
 
         // Check if owner id coincides
@@ -106,11 +112,9 @@ public class Controller {
     }
 
     private void saveState() {
-        try {
-            // Writing to a file
-            ClassLoader classLoader = HdsNotaryApplication.class.getClassLoader();
-            File file = new File(classLoader.getResource(STATE_PATH).getFile());
-            mapper.writeValue(file, notary);
+        // Writing to a file
+        try (FileOutputStream fileOutputStream = new FileOutputStream(STATE_PATH)) {
+            mapper.writeValue(fileOutputStream, notary);
             log.info("The state has been updated.");
         } catch (IOException e) {
             log.error("There was an error while trying to save the state.", e);

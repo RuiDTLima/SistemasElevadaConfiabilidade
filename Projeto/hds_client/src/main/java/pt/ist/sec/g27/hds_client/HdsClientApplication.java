@@ -10,6 +10,7 @@ import pt.ist.sec.g27.hds_client.exceptions.ResponseException;
 import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
 import pt.ist.sec.g27.hds_client.model.*;
 
+import java.io.FileInputStream;
 import java.util.Scanner;
 import java.util.stream.Stream;
 
@@ -35,6 +36,10 @@ public class HdsClientApplication {
         return notary;
     }
 
+    public static User getUser(int userId) {
+        return appState.getUser(userId);
+    }
+
     public static void addTransferCertificate(TransferCertificate transferCertificate) {
         appState.addTransferCertificate(transferCertificate);
     }
@@ -54,9 +59,8 @@ public class HdsClientApplication {
 
         ObjectMapper mapper = new ObjectMapper();
 
-        try {
-            ClassLoader classLoader = HdsClientApplication.class.getClassLoader();
-            appState = mapper.readValue(classLoader.getResource(STATE_PATH), AppState.class);
+        try (FileInputStream fileInputStream = new FileInputStream(STATE_PATH)) {
+            appState = mapper.readValue(fileInputStream, AppState.class);
         } catch (Exception e) {
             log.error("An error occurred.", e);
             return;
@@ -196,7 +200,7 @@ public class HdsClientApplication {
         }
 
         User owner = appState.getUser(userId);
-        Body body = new Body(userId, goodId);
+        Body body = new Body(me.getId(), goodId);
 
         Message receivedMessage;
 

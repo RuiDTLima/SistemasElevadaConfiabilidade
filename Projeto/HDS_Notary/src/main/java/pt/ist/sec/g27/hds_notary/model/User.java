@@ -48,6 +48,7 @@ public class User {
         return timestamp;
     }
 
+    @JsonIgnore
     public ZonedDateTime getTimestampInUTC() {
         return ZonedDateTime.parse(timestamp).withZoneSameInstant(ZoneOffset.UTC);
     }

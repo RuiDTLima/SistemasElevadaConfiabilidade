@@ -54,6 +54,8 @@ public class AppState {
     }
 
     public void addTransferCertificate(TransferCertificate transferCertificate) {
+        if (transferCertificates == null)
+            transferCertificates = new ArrayList<>();
         transferCertificates.add(transferCertificate);
     }
 }

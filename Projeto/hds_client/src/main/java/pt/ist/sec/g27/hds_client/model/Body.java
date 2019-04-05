@@ -10,7 +10,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class Body implements Serializable {
-    @JsonProperty("user-id")
+    @JsonProperty(value = "user-id", defaultValue = "-1")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private int userId;
 
@@ -45,16 +45,16 @@ public class Body implements Serializable {
         this.goodId = goodId;
     }
 
-    public Body(int userId, Message message) {
+    public Body(int userId, int goodId, Message message) {
         this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
         this.userId = userId;
+        this.goodId = goodId;
         this.message = message;
     }
 
-    public Body(int userId, State state) {
-        this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
-        this.userId = userId;
-        this.state = state.getState();
+    public Body(RuntimeException runtimeException) {
+        this.response = runtimeException.getMessage();
+        this.status = HttpStatus.BAD_REQUEST;
     }
 
     public Body(String response) {

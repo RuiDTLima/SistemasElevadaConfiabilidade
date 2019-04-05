@@ -3,13 +3,13 @@ package pt.ist.sec.g27.hds_notary.utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pt.gov.cartaodecidadao.pteid;
+import pteidlib.PteidException;
 import sun.security.pkcs11.wrapper.*;
 
-import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -48,21 +48,11 @@ public class SecurityUtils {
     }
 
     private static byte[] read(String keyPath) throws IOException {
-        ClassLoader classLoader = SecurityUtils.class.getClassLoader();
-        String path = "keys/" + keyPath;
-        URL resource = classLoader.getResource(path);
-
-        if (resource == null) {
-            String errorMessage = "Could not find the resource file.";
-            log.info(errorMessage);
-            throw new IOException(errorMessage);
-        }
-
-        log.info("Trying to obtain key from: " + path);
-        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(resource.openStream())) {
-            byte[] encoded = new byte[bufferedInputStream.available()];
+        log.info("Trying to obtain key from: " + keyPath);
+        try (FileInputStream fileInputStream = new FileInputStream(keyPath)) {
+            byte[] encoded = new byte[fileInputStream.available()];
             log.info("Reading...");
-            bufferedInputStream.read(encoded);
+            fileInputStream.read(encoded);
             return encoded;
         } catch (IOException e) {
             log.warn("An error occurred while reading a file.", e);
@@ -74,9 +64,13 @@ public class SecurityUtils {
         log.info("Initialize library to sign.");
         PKCS11 pkcs11 = init();
         log.info("Initialize session to sign.");
-        long p11_session = signInit(pkcs11);
-        log.info("Signing...");
-        return pkcs11.C_Sign(p11_session, toSign);
+        try {
+            long p11_session = signInit(pkcs11);
+            log.info("Signing...");
+            return pkcs11.C_Sign(p11_session, toSign);
+        } finally {
+            pteidlib.pteid.Exit(pteidlib.pteid.PTEID_EXIT_LEAVE_CARD); //OBRIGATORIO Termina a eID Lib
+        }
     }
 
     public static boolean verify(PublicKey publicKey, byte[] notSigned, byte[] signed) throws Exception {
@@ -89,32 +83,38 @@ public class SecurityUtils {
         return signature.verify(signed);
     }
 
-    private static PKCS11 init() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, pt.gov.cartaodecidadao.PteidException {
+    private static PKCS11 init() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, pt.gov.cartaodecidadao.PteidException, PteidException {
         System.loadLibrary("pteidlibj");
         // Initializes the eID Lib
         pteid.Init("");
-        // Don't check the integrity of the ID, address and photo (!)
-        pteid.SetSODChecking(false);
 
-        PKCS11 pkcs11;
-        String osName = System.getProperty("os.name");
-        String javaVersion = System.getProperty("java.version");
+        try {
+            // Don't check the integrity of the ID, address and photo (!)
+            pteid.SetSODChecking(false);
 
-        String libName = "libbeidpkcs11.so";
+            PKCS11 pkcs11;
+            String osName = System.getProperty("os.name");
+            String javaVersion = System.getProperty("java.version");
 
-        if (osName.contains("Windows"))
-            libName = "pteidpkcs11.dll";
-        else if (osName.contains("Mac"))
-            libName = "pteidpkcs11.dylib";
-        Class<?> pkcs11Class = Class.forName("sun.security.pkcs11.wrapper.PKCS11");
-        if (javaVersion.startsWith("1.5.")) {
-            Method getInstanceMethode = pkcs11Class.getDeclaredMethod("getInstance", String.class, CK_C_INITIALIZE_ARGS.class, boolean.class);
-            pkcs11 = (PKCS11) getInstanceMethode.invoke(null, new Object[]{libName, null, false});
-        } else {
-            Method getInstanceMethode = pkcs11Class.getDeclaredMethod("getInstance", String.class, String.class, CK_C_INITIALIZE_ARGS.class, boolean.class);
-            pkcs11 = (PKCS11) getInstanceMethode.invoke(null, new Object[]{libName, "C_GetFunctionList", null, false});
+            String libName = "libbeidpkcs11.so";
+
+            if (osName.contains("Windows"))
+                libName = "pteidpkcs11.dll";
+            else if (osName.contains("Mac"))
+                libName = "pteidpkcs11.dylib";
+            Class<?> pkcs11Class = Class.forName("sun.security.pkcs11.wrapper.PKCS11");
+            if (javaVersion.startsWith("1.5.")) {
+                Method getInstanceMethode = pkcs11Class.getDeclaredMethod("getInstance", String.class, CK_C_INITIALIZE_ARGS.class, boolean.class);
+                pkcs11 = (PKCS11) getInstanceMethode.invoke(null, new Object[]{libName, null, false});
+            } else {
+                Method getInstanceMethode = pkcs11Class.getDeclaredMethod("getInstance", String.class, String.class, CK_C_INITIALIZE_ARGS.class, boolean.class);
+                pkcs11 = (PKCS11) getInstanceMethode.invoke(null, new Object[]{libName, "C_GetFunctionList", null, false});
+            }
+            return pkcs11;
+        } catch (Exception e) {
+            pteidlib.pteid.Exit(pteidlib.pteid.PTEID_EXIT_LEAVE_CARD); //OBRIGATORIO Termina a eID Lib
+            throw e;
         }
-        return pkcs11;
     }
 
     private static long signInit(PKCS11 pkcs11) throws PKCS11Exception {

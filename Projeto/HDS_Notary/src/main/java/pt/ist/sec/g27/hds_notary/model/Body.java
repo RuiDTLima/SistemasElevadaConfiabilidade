@@ -10,7 +10,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class Body implements Serializable {
-    @JsonProperty("user-id")
+    @JsonProperty(value = "user-id", defaultValue = "-1")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private int userId;
 

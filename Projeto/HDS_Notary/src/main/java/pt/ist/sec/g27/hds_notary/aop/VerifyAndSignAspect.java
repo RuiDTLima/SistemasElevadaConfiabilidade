@@ -20,7 +20,6 @@ import pt.ist.sec.g27.hds_notary.model.User;
 import pt.ist.sec.g27.hds_notary.utils.SecurityUtils;
 import pt.ist.sec.g27.hds_notary.utils.Utils;
 
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.time.ZonedDateTime;
 
@@ -57,17 +56,17 @@ public class VerifyAndSignAspect {
     }
 
     private Object after(Object returnedValue) throws Exception {
-        /*try {
+        try {
             byte[] sign = SecurityUtils.sign(Utils.jsonObjectToByteArray(returnedValue));
             return new Message((Body) returnedValue, sign);
         } catch (Exception e) {
             log.warn("Cannot sign the returned object.", e);
             throw e;
-        }*/
+        }
         // TODO remove the code below after testing and use the above code to sign with PT-CC
-        PrivateKey privateKey = SecurityUtils.readPrivate("notary.key");
+        /*PrivateKey privateKey = SecurityUtils.readPrivate("notary.key");
         byte[] sign = SecurityUtils.sign(privateKey, Utils.jsonObjectToByteArray(returnedValue));
-        return new Message((Body) returnedValue, sign);
+        return new Message((Body) returnedValue, sign);*/
     }
 
     private void before(Object[] args) {
@@ -79,8 +78,25 @@ public class VerifyAndSignAspect {
         if (message == null || message.getBody() == null)
             throw new NotFoundException("The incoming message does not follow the specification.");
 
+        verifyMessageStructure(message);
         verifyTimestamp(message);
         verifySignature(message);
+    }
+
+    private void verifyMessageStructure(Message message) {
+        if (message == null)    // It is known that in the first iteration the message is not null.
+            return;
+
+        Body body = message.getBody();
+        int userId = body.getUserId();
+
+        if (userId == -1 || body.getTimestamp() == null || notary.getUser(userId) == null) {
+            String errorMessage = "The message structure specification was not followed.";
+            log.info(errorMessage);
+            throw new UnauthorizedException(errorMessage);
+        }
+
+        verifyMessageStructure(body.getMessage());
     }
 
     private void verifyTimestamp(Message message) {
@@ -102,7 +118,6 @@ public class VerifyAndSignAspect {
     }
 
     private void verifySignature(Message message) {
-        // TODO Check exceptions
         boolean verified = verifyAllMessages(message);
         if (!verified)
             throw new UnauthorizedException("This message is not authentic.");
@@ -136,7 +151,7 @@ public class VerifyAndSignAspect {
         try {
             jsonBody = objectMapper.writeValueAsBytes(body);
         } catch (JsonProcessingException e) {
-            log.warn("An error occurred while trying to convert object to string", e);  //  TODO check exception message and when it occurs
+            log.warn("An error occurred while trying to convert object to byte[].", e);
             throw new UnauthorizedException("Something went wrong while verifying the signature.");
         }
 

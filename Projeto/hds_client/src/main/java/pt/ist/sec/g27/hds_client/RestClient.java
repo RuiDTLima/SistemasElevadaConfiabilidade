@@ -54,10 +54,12 @@ public class RestClient {
         }
 
         Message receivedMessage = mapper.readValue(responseEntity.getBody(), Message.class);
-        if (receivedMessage == null) {
+        if (receivedMessage == null || receivedMessage.getBody() == null) {
             log.info(String.format("The received message was null when making a request to %s.", url));
             throw new ResponseException("Did not received a message.");
         }
+
+        verifyTimestamp(receivedMessage, receivedMessage.getBody().getMessage());
 
         if (!verifyAllMessages(user.getPublicKey(), receivedMessage))
             throw new UnverifiedException("The response received did not originate from the notary.");
@@ -67,6 +69,29 @@ public class RestClient {
             throw new ResponseException(receivedBody.getResponse());
 
         return receivedMessage;
+    }
+
+    private void verifyTimestamp(Message message, Message innerMessage) {
+        if (innerMessage == null) {
+            Body body = message.getBody();
+            if (body.getTimestamp() == null) {
+                String errorMessage = "The message structure specification was not followed.";
+                log.info(errorMessage);
+                throw new ResponseException(errorMessage);
+            }
+            if (body.getTimestampInUTC().compareTo(HdsClientApplication.getNotary().getTimestampInUTC()) <= 0) {
+                String errorMessage = "The response received was duplicated.";
+                log.info(errorMessage);
+                throw new ResponseException(errorMessage);
+            }
+            return;
+        }
+        if (innerMessage.getBody() == null) {
+            String errorMessage = "The message structure specification was not followed.";
+            log.info(errorMessage);
+            throw new ResponseException(errorMessage);
+        }
+        verifyTimestamp(innerMessage, innerMessage.getBody().getMessage());
     }
 
     private boolean verifyAllMessages(PublicKey publicKey, Message message) throws Exception {

@@ -3,27 +3,27 @@
     {
       "id": 0,
       "name": "notary",
-      "pubKey": "notary.pub",
+      "pubKey": "keys/notary.pub",
       "port": 8080,
       "timestamp": "1970-01-01T00:00:00.000Z"
     },
     {
       "id": 1,
       "name": "alice",
-      "pubKey": "alice.pub",
-      "privKey": "alice.key",
+      "pubKey": "keys/alice.pub",
+      "privKey": "keys/alice.key",
       "port": 8081
     },
     {
       "id": 2,
       "name": "bob",
-      "pubKey": "bob.pub",
+      "pubKey": "keys/bob.pub",
       "port": 8082
     },
     {
       "id": 3,
       "name": "eve",
-      "pubKey": "eve.pub",
+      "pubKey": "keys/eve.pub",
       "port": 8083
     }
   ],
