@@ -82,10 +82,10 @@ public class Controller {
         if (buyerGoodId != sellerGoodId)
             throw new ForbiddenException("Seller good ID does not match buyers good ID!");
 
-        Good g = Arrays.stream(notary.getGoods())
-                .filter(x -> x.getId() == buyerGoodId)
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("Good not found!"));
+        Good g = notary.getGood(buyerGoodId);
+
+        if( g == null )
+            throw new NotFoundException("Good not found!");
 
         // Check if owner id coincides
         if (g.getOwnerId() != sellerId)
