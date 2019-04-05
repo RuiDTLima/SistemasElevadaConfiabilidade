@@ -36,7 +36,7 @@ public class RestClient {
         headers.add("Accept", "*/*");
     }
 
-    public Body post(User user, String uri, Body body, PrivateKey privateKey) throws Exception {
+    public Message post(User user, String uri, Body body, PrivateKey privateKey) throws Exception {
         String url = server + user.getPort() + uri;
         byte[] jsonBody = mapper.writeValueAsBytes(body);
         Message message = new Message(body, SecurityUtils.sign(privateKey, jsonBody));
@@ -66,7 +66,7 @@ public class RestClient {
         if (!receivedBody.getStatus().is2xxSuccessful())
             throw new ResponseException(receivedBody.getResponse());
 
-        return receivedBody;
+        return receivedMessage;
     }
 
     private boolean verifyAllMessages(PublicKey publicKey, Message message) throws Exception {

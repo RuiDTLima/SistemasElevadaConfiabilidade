@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 public class User {
     private int id;
@@ -17,6 +19,7 @@ public class User {
     private String pubKeyPath;
     private PublicKey publicKey; // TODO temos de ignorar no parse do json com anotacao???
     private int port;
+    private String timestamp;
 
     public User() {
     }
@@ -39,5 +42,9 @@ public class User {
 
     public int getPort() {
         return port;
+    }
+
+    public ZonedDateTime getTimestampInUTC() {
+        return ZonedDateTime.parse(timestamp).withZoneSameInstant(ZoneOffset.UTC);
     }
 }

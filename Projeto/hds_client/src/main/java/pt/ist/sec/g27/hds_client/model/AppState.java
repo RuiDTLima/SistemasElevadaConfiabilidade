@@ -1,5 +1,8 @@
 package pt.ist.sec.g27.hds_client.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -9,12 +12,19 @@ public class AppState {
     private User[] users;
     private Good[] goods;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private ArrayList<TransferCertificate> transferCertificates;
+
     public User[] getUsers() {
         return users;
     }
 
     public Good[] getGoods() {
         return goods;
+    }
+
+    public ArrayList<TransferCertificate> getTransferCertificates() {
+        return transferCertificates;
     }
 
     public User getUser(int userId) {
@@ -41,5 +51,9 @@ public class AppState {
     public Stream<Good> getUsersGood(int userId) {
         return Arrays.stream(goods)
                 .filter(good -> good.getOwnerId() == userId);
+    }
+
+    public void addTransferCertificate(TransferCertificate transferCertificate) {
+        transferCertificates.add(transferCertificate);
     }
 }

@@ -8,10 +8,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import pt.ist.sec.g27.hds_client.exceptions.ConnectionException;
 import pt.ist.sec.g27.hds_client.exceptions.ResponseException;
 import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
-import pt.ist.sec.g27.hds_client.model.AppState;
-import pt.ist.sec.g27.hds_client.model.Body;
-import pt.ist.sec.g27.hds_client.model.Good;
-import pt.ist.sec.g27.hds_client.model.User;
+import pt.ist.sec.g27.hds_client.model.*;
+
 import java.util.Scanner;
 import java.util.stream.Stream;
 
@@ -23,12 +21,22 @@ public class HdsClientApplication {
 
     private static AppState appState;
     private static User me;
+    private static User notary;
 
     public static User getMe() {
         return me;
     }
+
     public static Stream<Good> getMyGoods() {
         return appState.getUsersGood(me.getId());
+    }
+
+    public static User getNotary() {
+        return notary;
+    }
+
+    public static void addTransferCertificate(TransferCertificate transferCertificate) {
+        appState.addTransferCertificate(transferCertificate);
     }
 
     public static void main(String[] args) {
@@ -60,6 +68,8 @@ public class HdsClientApplication {
             System.out.println("The private key to the given user was not provided in the state.");
             return;
         }
+
+        notary = appState.getNotary();
 
         SpringApplication.run(HdsClientApplication.class, args);
 
@@ -124,11 +134,10 @@ public class HdsClientApplication {
 
     private void intentionToSell(String[] params) throws Exception {
         Body body = new Body(me.getId(), Integer.parseInt(params[0]));
-        User notary = appState.getNotary();
-        Body receivedBody;
+        Message receivedMessage;
 
         try {
-            receivedBody = restClient.post(notary, "/intentionToSell", body, me.getPrivateKey());
+            receivedMessage = restClient.post(notary, "/intentionToSell", body, me.getPrivateKey());
         } catch (UnverifiedException | ResponseException e) {
             log.warn(e.getMessage(), e);
             return;
@@ -137,6 +146,8 @@ public class HdsClientApplication {
             log.warn(e.getMessage(), e);
             return;
         }
+
+        Body receivedBody = receivedMessage.getBody();
 
         if (isValidResponse(receivedBody)) {
             log.info(String.format("The good with id %d is on sale.", body.getGoodId()));
@@ -146,11 +157,10 @@ public class HdsClientApplication {
 
     private void getStateOfGood(String[] params) throws Exception {
         Body body = new Body(me.getId(), Integer.parseInt(params[0]));
-        User notary = appState.getNotary();
-        Body receivedBody;
+        Message receivedMessage;
 
         try {
-            receivedBody = restClient.post(notary, "/getStateOfGood", body, me.getPrivateKey());
+            receivedMessage = restClient.post(notary, "/getStateOfGood", body, me.getPrivateKey());
         } catch (UnverifiedException | ResponseException e) {
             log.info(e.getMessage(), e);
             return;
@@ -159,6 +169,8 @@ public class HdsClientApplication {
             log.warn(e.getMessage(), e);
             return;
         }
+
+        Body receivedBody = receivedMessage.getBody();
 
         if (isValidResponse(receivedBody)) {
             String message = String.format("The good with id %d is owned by user with id %d and his state is %s.",
@@ -186,10 +198,10 @@ public class HdsClientApplication {
         User owner = appState.getUser(userId);
         Body body = new Body(userId, goodId);
 
-        Body receivedBody;
+        Message receivedMessage;
 
         try {
-            receivedBody = restClient.post(owner, "/buyGood", body, me.getPrivateKey());
+            receivedMessage = restClient.post(owner, "/buyGood", body, me.getPrivateKey());
         } catch (UnverifiedException | ResponseException e) {
             log.warn(e.getMessage(), e);
             return;
@@ -198,6 +210,8 @@ public class HdsClientApplication {
             log.warn(e.getMessage(), e);
             return;
         }
+
+        Body receivedBody = receivedMessage.getBody();
 
         if (isValidResponse(receivedBody)) {
             log.info(String.format("The buy operation of the good with id %d from the user with id %d return the response %s", body.getGoodId(), body.getUserId(), receivedBody.getResponse()));
@@ -225,6 +239,13 @@ public class HdsClientApplication {
         if (!body.getStatus().is2xxSuccessful()) {
             log.info(body.getResponse());
             System.out.println(body.getResponse());
+            return false;
+        }
+
+        if (body.getTimestampInUTC().compareTo(notary.getTimestampInUTC()) <= 0) {
+            String errorMessage = "The message received is a repeat of a previous one.";
+            log.info(errorMessage);
+            System.out.println(errorMessage);
             return false;
         }
 

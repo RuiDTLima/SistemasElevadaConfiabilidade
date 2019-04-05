@@ -4,16 +4,16 @@ import org.springframework.http.HttpStatus;
 import pt.ist.sec.g27.hds_notary.model.ErrorModel;
 
 public class HttpExceptions extends RuntimeException {
-    private ErrorModel error;
+    private String errorMessage;
     private HttpStatus httpStatus;
 
-    HttpExceptions(ErrorModel errorModel, HttpStatus httpStatus) {
-        this.error = errorModel;
+    HttpExceptions(String errorMessage, HttpStatus httpStatus) {
+        this.errorMessage = errorMessage;
         this.httpStatus = httpStatus;
     }
 
-    public ErrorModel getError() {
-        return error;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
     public HttpStatus getHttpStatus() {

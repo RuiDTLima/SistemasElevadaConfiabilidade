@@ -15,6 +15,7 @@ import pt.ist.sec.g27.hds_notary.model.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 
 @RestController
@@ -39,7 +40,7 @@ public class Controller {
                 .filter(good -> good.getId() == goodId)
                 .map(good -> new Body(good.getOwnerId(), good.getState()))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException(new ErrorModel("The id that you specify does not exist.")));
+                .orElseThrow(() -> new NotFoundException("The id that you specify does not exist."));
     }
 
     @VerifyAndSign
@@ -55,7 +56,7 @@ public class Controller {
         Good good = notary.getGood(goodId);
         if (good.getOwnerId() != userId) {
             log.warn(String.format("The state of the good %d could not be changed by the user %d.", goodId, userId));
-            throw new ForbiddenException(new ErrorModel("You do not have that good."));
+            throw new ForbiddenException("You do not have that good.");
         }
 
         log.info(String.format("The good %d is owned by the user %d", goodId, userId));
@@ -79,28 +80,16 @@ public class Controller {
         int sellerId = sellerBody.getUserId();
 
         if (buyerGoodId != sellerGoodId)
-            throw new ForbiddenException(
-                    new ErrorModel(
-                            "Seller good ID does not match buyers good ID!"
-                    )
-            );
+            throw new ForbiddenException("Seller good ID does not match buyers good ID!");
 
         Good g = Arrays.stream(notary.getGoods())
                 .filter(x -> x.getId() == buyerGoodId)
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException(
-                        new ErrorModel(
-                                "Good not found!"
-                        )
-                ));
+                .orElseThrow(() -> new NotFoundException("Good not found!"));
 
         // Check if owner id coincides
         if (g.getOwnerId() != sellerId)
-            throw new ForbiddenException(
-                    new ErrorModel(
-                            "Good does not belong to seller!"
-                    )
-            );
+            throw new ForbiddenException("Good does not belong to seller!");
 
         if (g.getState() != State.ON_SALE)
             return new Body("No");
@@ -108,9 +97,12 @@ public class Controller {
         g.setState(State.NOT_ON_SALE);
         g.setOwnerId(buyerId);
 
+        TransferCertificate transferCertificate = new TransferCertificate(buyerId, sellerId, buyerGoodId);
+        notary.addTransferCertificate(transferCertificate);
+
         saveState();
 
-        return new Body("Yes");
+        return new Body("Yes", transferCertificate);
     }
 
     private void saveState() {
