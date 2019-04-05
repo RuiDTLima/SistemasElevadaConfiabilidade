@@ -60,6 +60,10 @@ public class User {
         return port;
     }
 
+    public String getTimestamp() {
+        return timestamp;
+    }
+
     public ZonedDateTime getTimestampInUTC() {
         return ZonedDateTime.parse(timestamp).withZoneSameInstant(ZoneOffset.UTC);
     }

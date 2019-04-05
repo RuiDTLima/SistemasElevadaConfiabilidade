@@ -68,7 +68,8 @@ public class VerifyAndSignAspect {
     }
 
     private void before(Object[] args) {
-        if (args == null || args.length == 0 || !(args[0] instanceof Message))
+        throw new UnauthorizedException("The incoming message is not acceptable.");
+        /*if (args == null || args.length == 0 || !(args[0] instanceof Message))
             throw new UnauthorizedException("The incoming message is not acceptable.");
 
         Message message = (Message) args[0];
@@ -77,7 +78,7 @@ public class VerifyAndSignAspect {
             throw new NotFoundException("The incoming message does not follow the specification.");
 
         verifyTimestamp(message);
-        verifySignature(message);
+        verifySignature(message);*/
     }
 
     private void verifyTimestamp(Message message) {

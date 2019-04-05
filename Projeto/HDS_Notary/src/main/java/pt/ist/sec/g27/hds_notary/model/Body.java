@@ -1,5 +1,6 @@
 package pt.ist.sec.g27.hds_notary.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.http.HttpStatus;
@@ -103,6 +104,11 @@ public class Body implements Serializable {
         return transferCertificate;
     }
 
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    @JsonIgnore
     public ZonedDateTime getTimestampInUTC() {
         return ZonedDateTime.parse(timestamp).withZoneSameInstant(ZoneOffset.UTC);
     }

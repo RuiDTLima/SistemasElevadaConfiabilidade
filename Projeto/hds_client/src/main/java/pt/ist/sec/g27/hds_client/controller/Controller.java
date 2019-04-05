@@ -33,7 +33,7 @@ public class Controller {
         Message receivedMessage;
 
         try {
-            receivedMessage = restClient.post(me, "/transferGood", body, me.getPrivateKey());
+            receivedMessage = restClient.post(HdsClientApplication.getNotary(), "/transferGood", body, me.getPrivateKey());
 
             Body receivedBody = receivedMessage.getBody();
 

@@ -9,7 +9,7 @@ public class Notary {
     private User[] users;
     private Good[] goods;
 
-    @JsonProperty("transfer-certificate")
+    @JsonProperty("transfer-certificates")
     private ArrayList<TransferCertificate> transferCertificates;
 
     public User[] getUsers() {
