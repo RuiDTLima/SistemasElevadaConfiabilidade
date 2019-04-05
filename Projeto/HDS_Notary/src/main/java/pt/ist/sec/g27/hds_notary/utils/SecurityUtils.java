@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import pt.gov.cartaodecidadao.pteid;
 import sun.security.pkcs11.wrapper.*;
 
-import java.io.FileInputStream;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -51,12 +51,22 @@ public class SecurityUtils {
         ClassLoader classLoader = SecurityUtils.class.getClassLoader();
         String path = "keys/" + keyPath;
         URL resource = classLoader.getResource(path);
+
+        if (resource == null) {
+            String errorMessage = "Could not find the resource file.";
+            log.info(errorMessage);
+            throw new IOException(errorMessage);
+        }
+
         log.info("Trying to obtain key from: " + path);
-        try (FileInputStream inputStream = new FileInputStream(resource.getFile())) {
-            byte[] encoded = new byte[inputStream.available()];
+        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(resource.openStream())) {
+            byte[] encoded = new byte[bufferedInputStream.available()];
             log.info("Reading...");
-            inputStream.read(encoded);
+            bufferedInputStream.read(encoded);
             return encoded;
+        } catch (IOException e) {
+            log.warn("An error occurred while reading a file.", e);
+            throw e;
         }
     }
 

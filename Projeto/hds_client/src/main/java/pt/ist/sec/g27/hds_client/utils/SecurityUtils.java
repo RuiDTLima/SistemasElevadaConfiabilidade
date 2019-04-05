@@ -3,8 +3,8 @@ package pt.ist.sec.g27.hds_client.utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
@@ -39,9 +39,9 @@ public class SecurityUtils {
             throw new IOException(errorMessage);
         }
 
-        try (InputStream inputStream = resource.openStream()) {
-            byte[] encoded = new byte[inputStream.available()];
-            inputStream.read(encoded);
+        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(resource.openStream())) {
+            byte[] encoded = new byte[bufferedInputStream.available()];
+            bufferedInputStream.read(encoded);
             return encoded;
         } catch (IOException e) {
             log.warn("An error occurred while reading a file.", e);
