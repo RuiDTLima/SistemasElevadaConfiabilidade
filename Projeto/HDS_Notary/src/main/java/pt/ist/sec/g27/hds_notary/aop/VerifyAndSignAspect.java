@@ -13,7 +13,10 @@ import pt.ist.sec.g27.hds_notary.exceptions.ForbiddenException;
 import pt.ist.sec.g27.hds_notary.exceptions.HttpExceptions;
 import pt.ist.sec.g27.hds_notary.exceptions.NotFoundException;
 import pt.ist.sec.g27.hds_notary.exceptions.UnauthorizedException;
-import pt.ist.sec.g27.hds_notary.model.*;
+import pt.ist.sec.g27.hds_notary.model.Body;
+import pt.ist.sec.g27.hds_notary.model.Message;
+import pt.ist.sec.g27.hds_notary.model.Notary;
+import pt.ist.sec.g27.hds_notary.model.User;
 import pt.ist.sec.g27.hds_notary.utils.SecurityUtils;
 import pt.ist.sec.g27.hds_notary.utils.Utils;
 
@@ -68,8 +71,7 @@ public class VerifyAndSignAspect {
     }
 
     private void before(Object[] args) {
-        throw new UnauthorizedException("The incoming message is not acceptable.");
-        /*if (args == null || args.length == 0 || !(args[0] instanceof Message))
+        if (args == null || args.length == 0 || !(args[0] instanceof Message))
             throw new UnauthorizedException("The incoming message is not acceptable.");
 
         Message message = (Message) args[0];
@@ -78,7 +80,7 @@ public class VerifyAndSignAspect {
             throw new NotFoundException("The incoming message does not follow the specification.");
 
         verifyTimestamp(message);
-        verifySignature(message);*/
+        verifySignature(message);
     }
 
     private void verifyTimestamp(Message message) {

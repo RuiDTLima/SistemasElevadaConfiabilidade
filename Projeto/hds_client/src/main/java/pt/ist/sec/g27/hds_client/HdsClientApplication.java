@@ -120,7 +120,7 @@ public class HdsClientApplication {
                         2,
                         String.format("To invoke buyGood there needs to be passed two ids. It was passed %d ids.", params.length),
                         "To invoke buyGood there needs to be passed two ids, the id of the good and the owner, respectively."))
-                buyGood(params);
+                    buyGood(params);
                 break;
             case "exit":
                 System.exit(0);
@@ -222,7 +222,7 @@ public class HdsClientApplication {
     private boolean validateParams(String[] params, int length, String logMessage, String outputMessage) {
         if (params.length == length)
             return true;
-        
+
         log.info(logMessage);
         System.out.println(outputMessage);
         return false;
