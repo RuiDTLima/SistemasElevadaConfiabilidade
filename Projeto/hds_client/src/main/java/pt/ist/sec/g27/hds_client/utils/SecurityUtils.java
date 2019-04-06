@@ -1,13 +1,8 @@
 package pt.ist.sec.g27.hds_client.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pt.ist.sec.g27.hds_client.HdsClientApplication;
 import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
-import pt.ist.sec.g27.hds_client.model.Body;
-import pt.ist.sec.g27.hds_client.model.Message;
-import pt.ist.sec.g27.hds_client.model.User;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -45,27 +40,29 @@ public class SecurityUtils {
         }
     }
 
-    public static byte[] sign(PrivateKey privateKey, byte[] toSign) throws Exception {
+    public static byte[] sign(PrivateKey privateKey, byte[] toSign) {
         try {
             Signature signature = Signature.getInstance(ALGORITHM_FOR_VERIFY);
             signature.initSign(privateKey);
             signature.update(toSign);
             return signature.sign();
         } catch (Exception e) {
-            log.warn("Something related to sign not worked properly.", e);
-            throw e;// TODO change this to the correct exception
+            String errorMessage = "Something related to the signing of the message did not work properly.";
+            log.warn(errorMessage);
+            throw new UnverifiedException(errorMessage);
         }
     }
 
-    public static boolean verify(PublicKey publicKey, byte[] notSigned, byte[] signed) throws Exception {
+    public static boolean verify(PublicKey publicKey, byte[] notSigned, byte[] signed) {
         try {
             Signature signature = Signature.getInstance(ALGORITHM_FOR_VERIFY);
             signature.initVerify(publicKey);
             signature.update(notSigned);
             return signature.verify(signed);
         } catch (Exception e) {
-            log.warn("Something related to verify not worked properly.", e);
-            throw e;// TODO change this to the correct exception
+            String errorMessage = "Something related to the verification of the signature did not work properly.";
+            log.warn(errorMessage);
+            throw new UnverifiedException(errorMessage);
         }
     }
 }

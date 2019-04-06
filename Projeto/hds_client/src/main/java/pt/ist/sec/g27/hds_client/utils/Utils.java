@@ -32,12 +32,7 @@ public class Utils {
             throw new UnverifiedException("Something went wrong while verifying the signature.");
         }
 
-        try {
-            return SecurityUtils.verify(notaryKey, jsonBody, receivedMessage.getSignature());
-        } catch (Exception e) {
-            log.warn("Cannot verify the incoming message.", e);
-            throw new UnverifiedException("Something went wrong while verifying the signature.");
-        }
+        return SecurityUtils.verify(notaryKey, jsonBody, receivedMessage.getSignature());
     }
 
     public static void verifyAllMessages(Message receivedMessage, String url) {
@@ -122,14 +117,6 @@ public class Utils {
             throw new UnverifiedException("Something went wrong while verifying the signature.");
         }
 
-        boolean verified;
-        try {
-            verified = SecurityUtils.verify(publicKey, jsonBody, message.getSignature());
-        } catch (Exception e) {
-            log.warn("Cannot verify the incoming message.", e);
-            throw new UnverifiedException("Something went wrong while verifying the signature.");
-        }
-
-        return verified && verifyAllSignatures(body.getMessage());
+        return SecurityUtils.verify(publicKey, jsonBody, message.getSignature()) && verifyAllSignatures(body.getMessage());
     }
 }

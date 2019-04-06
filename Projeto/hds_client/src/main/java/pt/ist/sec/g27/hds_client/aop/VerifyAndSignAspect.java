@@ -54,7 +54,7 @@ public class VerifyAndSignAspect {
 
         Message message = (Message) args[0];
 
-        if (message == null || message.getBody() == null)
+        if (message.getBody() == null)
             throw new ResponseException("The incoming message does not follow the specification.");
 
         verifyMessageStructure(message.getBody());
@@ -75,7 +75,6 @@ public class VerifyAndSignAspect {
     private void verifyMessageStructure(Body body) {
         int userId = body.getUserId();
 
-        // TODO nunca é -1
         if (userId == -1 || body.getTimestamp() == null || HdsClientApplication.getUser(userId) == null) {
             String errorMessage = "The message structure specification was not followed.";
             log.info(errorMessage);

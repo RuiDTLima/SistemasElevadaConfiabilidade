@@ -56,6 +56,8 @@ public class Controller {
         TransferCertificate transferCertificate = receivedBody.getTransferCertificate();
         HdsClientApplication.addTransferCertificate(transferCertificate);
 
+        notary.setTimestamp(receivedBody.getTimestamp());
+
         return new Body(me.getId(), receivedMessage);
     }
 

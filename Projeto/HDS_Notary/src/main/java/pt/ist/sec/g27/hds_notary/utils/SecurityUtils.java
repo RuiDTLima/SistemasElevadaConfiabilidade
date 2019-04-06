@@ -43,7 +43,7 @@ public class SecurityUtils {
             return signature.sign();
         } catch (Exception e) {
             log.warn("Something related to sign not worked properly.", e);
-            throw e;// TODO change this to the correct exception
+            throw e;
         }
     }
 

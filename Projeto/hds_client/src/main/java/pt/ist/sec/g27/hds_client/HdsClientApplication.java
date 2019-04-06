@@ -149,6 +149,7 @@ public class HdsClientApplication {
         Body receivedBody = receivedMessage.getBody();
 
         if (isValidResponse(receivedBody) && Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage)) {
+            notary.setTimestamp(receivedBody.getTimestamp());
             log.info(String.format("The good with id %d is on sale.", body.getGoodId()));
             System.out.println(receivedBody.getResponse());
             return;
@@ -172,6 +173,7 @@ public class HdsClientApplication {
         Body receivedBody = receivedMessage.getBody();
 
         if (isValidResponse(receivedBody) && Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage)) {
+            notary.setTimestamp(receivedBody.getTimestamp());
             String message = String.format("The good with id %d is owned by user with id %d and his state is %s.",
                     body.getGoodId(),
                     receivedBody.getUserId(),
@@ -216,7 +218,11 @@ public class HdsClientApplication {
 
         Utils.verifyAllMessages(receivedMessage, uri);
 
-        String response = receivedMessage.getBody().getMessage().getBody().getResponse();
+        Body notaryBody = receivedMessage.getBody().getMessage().getBody();
+
+        notary.setTimestamp(notaryBody.getTimestamp());
+
+        String response = notaryBody.getResponse();
         log.info(response);
         System.out.println(response);
     }

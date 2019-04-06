@@ -19,7 +19,7 @@ public class User {
     @JsonProperty("pubKey")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String pubKeyPath;
-    private PublicKey publicKey; // TODO temos de ignorar no parse do json com anotacao???
+    private PublicKey publicKey;
     private int port;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

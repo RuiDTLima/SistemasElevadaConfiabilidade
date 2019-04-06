@@ -18,7 +18,7 @@ public class User {
 
     @JsonProperty("pubKey")
     private String pubKeyPath;
-    private PublicKey publicKey; // TODO temos de ignorar no parse do json com anotacao???
+    private PublicKey publicKey;
 
     @JsonProperty("privKey")
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -62,6 +62,10 @@ public class User {
 
     public String getTimestamp() {
         return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
     public ZonedDateTime getTimestampInUTC() {
