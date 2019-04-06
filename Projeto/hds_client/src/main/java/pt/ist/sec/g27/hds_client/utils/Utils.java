@@ -41,19 +41,19 @@ public class Utils {
     }
 
     public static void verifyAllMessages(Message receivedMessage, String url) {
-        if (receivedMessage.getBody() == null) {
+        Body receivedBody = receivedMessage.getBody();
+        if (receivedBody == null) {
             log.info(String.format("The received message was null when making a request to %s.", url));
             throw new ResponseException("Did not received a message.");
         }
+
+        if (!receivedBody.getStatus().is2xxSuccessful())
+            throw new ResponseException(receivedBody.getResponse());
 
         verifyInnerTimestamp(receivedMessage, receivedMessage.getBody().getMessage());
 
         if (!verifyAllSignatures(receivedMessage))
             throw new UnverifiedException("The response received did not originate from the notary.");
-
-        Body receivedBody = receivedMessage.getBody();
-        if (!receivedBody.getStatus().is2xxSuccessful())
-            throw new ResponseException(receivedBody.getResponse());
     }
 
     private static void verifyTimestamp(Message message) {

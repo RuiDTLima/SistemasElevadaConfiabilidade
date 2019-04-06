@@ -20,7 +20,6 @@ import pt.ist.sec.g27.hds_notary.model.User;
 import pt.ist.sec.g27.hds_notary.utils.SecurityUtils;
 import pt.ist.sec.g27.hds_notary.utils.Utils;
 
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.time.ZonedDateTime;
 
@@ -57,17 +56,17 @@ public class VerifyAndSignAspect {
     }
 
     private Object after(Object returnedValue) throws Exception {
-        /*try {
+        try {
             byte[] sign = SecurityUtils.sign(Utils.jsonObjectToByteArray(returnedValue));
             return new Message((Body) returnedValue, sign);
         } catch (Exception e) {
             log.warn("Cannot sign the returned object.", e);
             throw e;
-        }*/
+        }
         // TODO remove the code below after testing and use the above code to sign with PT-CC
-        PrivateKey privateKey = SecurityUtils.readPrivate("keys/notary.key");
+        /*PrivateKey privateKey = SecurityUtils.readPrivate("keys/notary.key");
         byte[] sign = SecurityUtils.sign(privateKey, Utils.jsonObjectToByteArray(returnedValue));
-        return new Message((Body) returnedValue, sign);
+        return new Message((Body) returnedValue, sign);*/
     }
 
     private void before(Object[] args) {

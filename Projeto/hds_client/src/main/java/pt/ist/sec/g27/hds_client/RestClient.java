@@ -11,12 +11,10 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import pt.ist.sec.g27.hds_client.exceptions.ConnectionException;
 import pt.ist.sec.g27.hds_client.exceptions.ResponseException;
-import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
 import pt.ist.sec.g27.hds_client.model.Body;
 import pt.ist.sec.g27.hds_client.model.Message;
 import pt.ist.sec.g27.hds_client.model.User;
 import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
-import pt.ist.sec.g27.hds_client.utils.Utils;
 
 import java.security.PrivateKey;
 

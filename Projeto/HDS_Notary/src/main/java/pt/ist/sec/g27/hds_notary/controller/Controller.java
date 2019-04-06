@@ -34,6 +34,8 @@ public class Controller {
     @PostMapping("/getStateOfGood")
     public Object getStateOfGood(@RequestBody Message message) {
         final int goodId = message.getBody().getGoodId();
+        log.info(String.format("Obtaining the state of good with id %d", goodId));
+
         return Arrays.stream(notary.getGoods())
                 .filter(good -> good.getId() == goodId)
                 .map(good -> new Body(good.getOwnerId(), good.getState()))
@@ -61,13 +63,19 @@ public class Controller {
         }
 
         if (good.getOwnerId() != userId) {
-            log.warn(String.format("The state of the good %d could not be changed by the user %d.", goodId, userId));
+            log.info(String.format("The state of the good %d could not be changed by the user %d.", goodId, userId));
             throw new ForbiddenException("You do not have that good.");
         }
 
-        log.info(String.format("The good %d is owned by the user %d", goodId, userId));
+        if (good.getState().equals(State.ON_SALE)) {
+            String errorMessage = "The good is already on sale.";
+            log.info(errorMessage);
+            return new Body("NO");
+        }
 
         good.setState(State.ON_SALE);
+
+        log.info(String.format("The good with id %d owned by the user with id %d is now on sale.", goodId, userId));
 
         saveState();
 
@@ -85,20 +93,40 @@ public class Controller {
         int buyerId = buyerBody.getUserId();
         int sellerId = sellerBody.getUserId();
 
-        if (buyerGoodId != sellerGoodId)
-            throw new ForbiddenException("Seller good ID does not match buyers good ID!");
+        if (buyerId == sellerId) {
+            String errorMessage = "The user cannot buy from itself.";
+            log.info(errorMessage);
+            throw new ForbiddenException(errorMessage);
+        }
+
+        if (buyerGoodId != sellerGoodId) {
+            String errorMessage = "The good id sent from the seller does not match the good id sent from the buyer.";
+            log.info(errorMessage);
+            throw new ForbiddenException(errorMessage);
+        }
 
         Good g = notary.getGood(buyerGoodId);
 
-        if (g == null)
-            throw new NotFoundException("Good not found!");
+        if (g == null) {
+            String errorMessage = "Good not found.";
+            log.info(errorMessage);
+            throw new NotFoundException(errorMessage);
+        }
 
         // Check if owner id coincides
-        if (g.getOwnerId() != sellerId)
-            throw new ForbiddenException("Good does not belong to seller!");
+        if (g.getOwnerId() != sellerId) {
+            String errorMessage = String.format("Good with id %d does not belong to the seller.", buyerGoodId);
+            log.info(errorMessage);
+            throw new ForbiddenException(errorMessage);
+        }
 
-        if (g.getState() != State.ON_SALE)
-            return new Body("No");
+        int notaryId = notary.getNotary().getId();
+
+        if (g.getState() != State.ON_SALE) {
+            String errorMessage = String.format("The good with id %d is not on sale.", buyerGoodId);
+            log.info(errorMessage);
+            return new Body(notaryId, "No");
+        }
 
         g.setState(State.NOT_ON_SALE);
         g.setOwnerId(buyerId);
@@ -106,9 +134,11 @@ public class Controller {
         TransferCertificate transferCertificate = new TransferCertificate(buyerId, sellerId, buyerGoodId);
         notary.addTransferCertificate(transferCertificate);
 
+        log.info(String.format("The good with id %d was transferred from the user with id %d to the user with id %d.", buyerGoodId, sellerId, buyerId));
+
         saveState();
 
-        return new Body(notary.getNotary().getId(), "Yes", transferCertificate);
+        return new Body(notaryId, "Yes", transferCertificate);
     }
 
     private void saveState() {

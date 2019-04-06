@@ -5,14 +5,15 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.http.HttpStatus;
 import pt.ist.sec.g27.hds_notary.exceptions.HttpExceptions;
+
 import java.io.Serializable;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class Body implements Serializable {
-    @JsonProperty(value = "user-id", defaultValue = "-1")
+    @JsonProperty(value = "user-id")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private int userId;
+    private int userId = -1;
 
     @JsonProperty("good-id")
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -62,6 +63,13 @@ public class Body implements Serializable {
     }
 
     public Body(String response) {
+        this.status = HttpStatus.OK;
+        this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
+        this.response = response;
+    }
+
+    public Body(int notaryId, String response) {
+        this.userId = notaryId;
         this.status = HttpStatus.OK;
         this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
         this.response = response;

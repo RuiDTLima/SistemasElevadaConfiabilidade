@@ -43,7 +43,7 @@
     {
       "id": 3,
       "name": "motorcycle",
-      "state": "on-sale",
+      "state": "not-on-sale",
       "owner-id": 2
     },
     {
@@ -142,6 +142,30 @@
       "timestamp": "2019-04-06T09:36:44.131Z",
       "buyer-id": 1,
       "seller-id": 2,
+      "good-id": 3
+    },
+    {
+      "timestamp": "2019-04-06T11:44:10.587Z",
+      "buyer-id": 1,
+      "seller-id": 2,
+      "good-id": 3
+    },
+    {
+      "timestamp": "2019-04-06T13:41:13.084Z",
+      "buyer-id": 1,
+      "seller-id": 2,
+      "good-id": 3
+    },
+    {
+      "timestamp": "2019-04-06T15:57:05.831Z",
+      "buyer-id": 2,
+      "seller-id": 1,
+      "good-id": 3
+    },
+    {
+      "timestamp": "2019-04-06T15:59:46.976Z",
+      "buyer-id": 2,
+      "seller-id": 1,
       "good-id": 3
     }
   ]

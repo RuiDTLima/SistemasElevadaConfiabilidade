@@ -13,7 +13,6 @@ import pt.ist.sec.g27.hds_client.utils.Utils;
 
 import java.io.FileInputStream;
 import java.util.Scanner;
-import java.util.stream.Stream;
 
 @SpringBootApplication
 public class HdsClientApplication {
@@ -27,10 +26,6 @@ public class HdsClientApplication {
 
     public static User getMe() {
         return me;
-    }
-
-    public static Stream<Good> getMyGoods() {
-        return appState.getUsersGood(me.getId());
     }
 
     public static User getNotary() {
@@ -97,6 +92,7 @@ public class HdsClientApplication {
                     commands(command, params);
                 } catch (Throwable e) {
                     log.warn("Something went wrong.", e);
+                    System.out.println(e.getMessage());
                     if (!input.equals(""))
                         log.warn(input);
                 }
@@ -138,25 +134,21 @@ public class HdsClientApplication {
     }
 
     private void intentionToSell(String[] params) throws Exception {
-        String url = "/intentionToSell";
-        Body body = new Body(me.getId(), Integer.parseInt(params[0]));
-        Message receivedMessage;
+        String uri = "/intentionToSell";
+        int goodId = Integer.parseInt(params[0]);
 
-        try {
-            receivedMessage = restClient.post(notary, url, body, me.getPrivateKey());
-        } catch (UnverifiedException | ResponseException e) {
-            log.warn(e.getMessage(), e);
+        if (!goodExist(goodId))
             return;
-        } catch (ConnectionException e) {
-            System.out.println("It wasn't possible to connect to the server.");
-            log.warn(e.getMessage(), e);
+
+        Body body = new Body(me.getId(), goodId);
+
+        Message receivedMessage = makeRequest(notary, uri, body);
+        if (receivedMessage == null)
             return;
-        }
 
         Body receivedBody = receivedMessage.getBody();
 
-        if (isValidResponse(receivedBody)) {
-            Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage);
+        if (isValidResponse(receivedBody) && Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage)) {
             log.info(String.format("The good with id %d is on sale.", body.getGoodId()));
             System.out.println(receivedBody.getResponse());
             return;
@@ -166,20 +158,16 @@ public class HdsClientApplication {
     }
 
     private void getStateOfGood(String[] params) throws Exception {
-        String url = "/getStateOfGood";
-        Body body = new Body(me.getId(), Integer.parseInt(params[0]));
-        Message receivedMessage;
+        String uri = "/getStateOfGood";
+        int goodId = Integer.parseInt(params[0]);
 
-        try {
-            receivedMessage = restClient.post(notary, url, body, me.getPrivateKey());
-        } catch (UnverifiedException | ResponseException e) {
-            log.info(e.getMessage(), e);
+        if (!goodExist(goodId))
             return;
-        } catch (ConnectionException e) {
-            System.out.println("It wasn't possible to connect to the server.");
-            log.warn(e.getMessage(), e);
+
+        Body body = new Body(me.getId(), goodId);
+        Message receivedMessage = makeRequest(notary, uri, body);
+        if (receivedMessage == null)
             return;
-        }
 
         Body receivedBody = receivedMessage.getBody();
 
@@ -198,7 +186,7 @@ public class HdsClientApplication {
     }
 
     private void buyGood(String[] params) throws Exception {
-        String url = "/buyGood";
+        String uri = "/buyGood";
         int goodId, userId;
 
         try {
@@ -211,22 +199,26 @@ public class HdsClientApplication {
         }
 
         User owner = appState.getUser(userId);
-        Body body = new Body(me.getId(), goodId);
-
-        Message receivedMessage;
-
-        try {
-            receivedMessage = restClient.post(owner, url, body, me.getPrivateKey());
-        } catch (UnverifiedException | ResponseException e) {
-            log.warn(e.getMessage(), e);
-            return;
-        } catch (ConnectionException e) {
-            System.out.println("It wasn't possible to connect to the server.");
-            log.warn(e.getMessage(), e);
+        if (owner == null) {
+            String errorMessage = String.format("The user with id %d does not exist.", userId);
+            log.info(errorMessage);
+            System.out.println(errorMessage);
             return;
         }
 
-        Utils.verifyAllMessages(receivedMessage, url);
+        if (!goodExist(goodId))
+            return;
+
+        Body body = new Body(me.getId(), goodId);
+        Message receivedMessage = makeRequest(owner, uri, body);
+        if (receivedMessage == null)
+            return;
+
+        Utils.verifyAllMessages(receivedMessage, uri);
+
+        String response = receivedMessage.getBody().getMessage().getBody().getResponse();
+        log.info(response);
+        System.out.println(response);
     }
 
     private boolean validateParams(String[] params, int length, String logMessage, String outputMessage) {
@@ -236,6 +228,30 @@ public class HdsClientApplication {
         log.info(logMessage);
         System.out.println(outputMessage);
         return false;
+    }
+
+    private boolean goodExist(int goodId) {
+        Good good = appState.getGood(goodId);
+        if (good == null) {
+            String errorMessage = String.format("The good with id %d does not exist.", goodId);
+            log.info(errorMessage);
+            System.out.println(errorMessage);
+            return false;
+        }
+        return true;
+    }
+
+    private Message makeRequest(User user, String uri, Body body) throws Exception {
+        try {
+            return restClient.post(user, uri, body, me.getPrivateKey());
+        } catch (UnverifiedException | ResponseException e) {
+            log.warn(e.getMessage(), e);
+            return null;
+        } catch (ConnectionException e) {
+            System.out.println("It wasn't possible to connect to the server.");
+            log.warn(e.getMessage(), e);
+            return null;
+        }
     }
 
     private boolean isValidResponse(Body body) {

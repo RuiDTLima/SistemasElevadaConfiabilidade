@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import pt.ist.sec.g27.hds_client.HdsClientApplication;
 import pt.ist.sec.g27.hds_client.RestClient;
 import pt.ist.sec.g27.hds_client.aop.VerifyAndSign;
+import pt.ist.sec.g27.hds_client.exceptions.ResponseException;
 import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
 import pt.ist.sec.g27.hds_client.model.Body;
 import pt.ist.sec.g27.hds_client.model.Message;
@@ -32,7 +33,9 @@ public class Controller {
 
         receivedMessage = restClient.post(HdsClientApplication.getNotary(), "/transferGood", body, me.getPrivateKey());
 
-        if (isValidResponse(notary, receivedMessage.getBody()) && !Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage)) {
+        isValidResponse(notary, receivedMessage.getBody());
+
+        if (!Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage)) {
             String errorMessage = "Could not verify the message.";
             log.info(errorMessage);
             throw new UnverifiedException(errorMessage);
@@ -53,30 +56,28 @@ public class Controller {
         TransferCertificate transferCertificate = receivedBody.getTransferCertificate();
         HdsClientApplication.addTransferCertificate(transferCertificate);
 
-        return new Body(me.getId(), receivedMessage);// TODO check, tem de mandar tmb o status?
+        return new Body(me.getId(), receivedMessage);
     }
 
-    private boolean isValidResponse(User notary, Body body) {
+    private void isValidResponse(User notary, Body body) {
         if (body == null) {
             String errorMessage = "The server could not respond.";
             log.info(errorMessage);
             System.out.println(errorMessage);
-            return false;
+            throw new ResponseException(errorMessage);
         }
 
         if (!body.getStatus().is2xxSuccessful()) {
             log.info(body.getResponse());
             System.out.println(body.getResponse());
-            return false;
+            throw new ResponseException(body.getResponse());
         }
 
         if (body.getTimestampInUTC().compareTo(notary.getTimestampInUTC()) <= 0) {
             String errorMessage = "The message received is a repeat of a previous one.";
             log.info(errorMessage);
             System.out.println(errorMessage);
-            return false;
+            throw new ResponseException(errorMessage);
         }
-
-        return true;
     }
 }
