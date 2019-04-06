@@ -67,7 +67,8 @@ public class Body implements Serializable {
         this.response = response;
     }
 
-    public Body(String response, TransferCertificate transferCertificate) {
+    public Body(int notaryId, String response, TransferCertificate transferCertificate) {
+        this.userId = notaryId;
         this.status = HttpStatus.OK;
         this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
         this.response = response;

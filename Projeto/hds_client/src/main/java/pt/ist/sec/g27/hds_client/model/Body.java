@@ -10,9 +10,9 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class Body implements Serializable {
-    @JsonProperty(value = "user-id", defaultValue = "-1")
+    @JsonProperty(value = "user-id")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private int userId;
+    private int userId = -1;
 
     @JsonProperty("good-id")
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -43,6 +43,12 @@ public class Body implements Serializable {
         this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
         this.userId = userId;
         this.goodId = goodId;
+    }
+
+    public Body(int userId, Message message) {
+        this.userId = userId;
+        this.status = message.getBody().getStatus();
+        this.message = message;
     }
 
     public Body(int userId, int goodId, Message message) {

@@ -16,6 +16,10 @@ import pt.ist.sec.g27.hds_client.model.User;
 import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
 import pt.ist.sec.g27.hds_client.utils.Utils;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
 @Aspect
 @Component
 public class VerifyAndSignAspect {
@@ -84,7 +88,15 @@ public class VerifyAndSignAspect {
     }
 
     private void verifySignature(Message message) {
-        boolean verified = SecurityUtils.verifyAllMessages(message);
+        boolean verified;
+        try {
+            verified = Utils.verifySingleMessage(HdsClientApplication.getUser(message.getBody().getUserId()).getPublicKey(), message);
+        } catch (Exception e) {
+            String errorMessage = "Could not verify the signature of the message";
+            log.warn(errorMessage);
+            throw new UnverifiedException(errorMessage);
+        }
+
         if (!verified)
             throw new UnverifiedException("This message is not authentic.");
     }

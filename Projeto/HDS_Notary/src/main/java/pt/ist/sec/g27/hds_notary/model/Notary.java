@@ -1,5 +1,6 @@
 package pt.ist.sec.g27.hds_notary.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
@@ -22,6 +23,11 @@ public class Notary {
 
     public ArrayList<TransferCertificate> getTransferCertificates() {
         return transferCertificates;
+    }
+
+    @JsonIgnore
+    public User getNotary() {
+        return Arrays.stream(users).filter(user -> user.getTimestamp() == null).findFirst().orElse(null);
     }
 
     public User getUser(int userId) {

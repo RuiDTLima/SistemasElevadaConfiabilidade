@@ -8,10 +8,12 @@ import org.springframework.web.bind.annotation.RestController;
 import pt.ist.sec.g27.hds_client.HdsClientApplication;
 import pt.ist.sec.g27.hds_client.RestClient;
 import pt.ist.sec.g27.hds_client.aop.VerifyAndSign;
+import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
 import pt.ist.sec.g27.hds_client.model.Body;
 import pt.ist.sec.g27.hds_client.model.Message;
 import pt.ist.sec.g27.hds_client.model.TransferCertificate;
 import pt.ist.sec.g27.hds_client.model.User;
+import pt.ist.sec.g27.hds_client.utils.Utils;
 
 @RestController
 public class Controller {
@@ -21,6 +23,7 @@ public class Controller {
     @VerifyAndSign
     @PostMapping("/buyGood")
     public Object buyGood(@RequestBody Message message) throws Exception {
+        User notary = HdsClientApplication.getNotary();
         User me = HdsClientApplication.getMe();
         int goodId = message.getBody().getGoodId();
 
@@ -29,28 +32,13 @@ public class Controller {
 
         receivedMessage = restClient.post(HdsClientApplication.getNotary(), "/transferGood", body, me.getPrivateKey());
 
-        Body receivedBody = receivedMessage.getBody();
-
-        if (receivedBody == null) {
-            String unsignedMessage = "The server could not respond.";
-            log.info(unsignedMessage);
-            System.out.println(unsignedMessage);
-            return new Body("NO");
-        }
-
-
-        if (!receivedBody.getStatus().is2xxSuccessful()) {
-            log.info(receivedBody.getResponse());
-            System.out.println(receivedBody.getResponse());
-            return new Body(receivedMessage);
-        }
-
-        if (receivedBody.getTimestampInUTC().compareTo(HdsClientApplication.getNotary().getTimestampInUTC()) <= 0) {
-            String errorMessage = "The message received is a repeat of a previous one.";
+        if (isValidResponse(notary, receivedMessage.getBody()) && !Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage)) {
+            String errorMessage = "Could not verify the message.";
             log.info(errorMessage);
-            System.out.println(errorMessage);
-            return new Body("NO");
+            throw new UnverifiedException(errorMessage);
         }
+
+        Body receivedBody = receivedMessage.getBody();
 
         String response = String.format("When trying to transfer the good with id %d from the user with id %d to " +
                         "user with the id %d, the response from the notary was %s",
@@ -65,6 +53,30 @@ public class Controller {
         TransferCertificate transferCertificate = receivedBody.getTransferCertificate();
         HdsClientApplication.addTransferCertificate(transferCertificate);
 
-        return new Body(me.getId(), goodId, receivedMessage);// TODO check, tem de mandar tmb o status?
+        return new Body(me.getId(), receivedMessage);// TODO check, tem de mandar tmb o status?
+    }
+
+    private boolean isValidResponse(User notary, Body body) {
+        if (body == null) {
+            String errorMessage = "The server could not respond.";
+            log.info(errorMessage);
+            System.out.println(errorMessage);
+            return false;
+        }
+
+        if (!body.getStatus().is2xxSuccessful()) {
+            log.info(body.getResponse());
+            System.out.println(body.getResponse());
+            return false;
+        }
+
+        if (body.getTimestampInUTC().compareTo(notary.getTimestampInUTC()) <= 0) {
+            String errorMessage = "The message received is a repeat of a previous one.";
+            log.info(errorMessage);
+            System.out.println(errorMessage);
+            return false;
+        }
+
+        return true;
     }
 }

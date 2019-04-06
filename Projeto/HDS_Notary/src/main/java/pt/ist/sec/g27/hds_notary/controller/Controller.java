@@ -108,7 +108,7 @@ public class Controller {
 
         saveState();
 
-        return new Body("Yes", transferCertificate);
+        return new Body(notary.getNotary().getId(), "Yes", transferCertificate);
     }
 
     private void saveState() {

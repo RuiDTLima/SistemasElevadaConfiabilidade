@@ -9,6 +9,7 @@ import pt.ist.sec.g27.hds_client.exceptions.ConnectionException;
 import pt.ist.sec.g27.hds_client.exceptions.ResponseException;
 import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
 import pt.ist.sec.g27.hds_client.model.*;
+import pt.ist.sec.g27.hds_client.utils.Utils;
 
 import java.io.FileInputStream;
 import java.util.Scanner;
@@ -137,11 +138,12 @@ public class HdsClientApplication {
     }
 
     private void intentionToSell(String[] params) throws Exception {
+        String url = "/intentionToSell";
         Body body = new Body(me.getId(), Integer.parseInt(params[0]));
         Message receivedMessage;
 
         try {
-            receivedMessage = restClient.post(notary, "/intentionToSell", body, me.getPrivateKey());
+            receivedMessage = restClient.post(notary, url, body, me.getPrivateKey());
         } catch (UnverifiedException | ResponseException e) {
             log.warn(e.getMessage(), e);
             return;
@@ -154,17 +156,22 @@ public class HdsClientApplication {
         Body receivedBody = receivedMessage.getBody();
 
         if (isValidResponse(receivedBody)) {
+            Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage);
             log.info(String.format("The good with id %d is on sale.", body.getGoodId()));
             System.out.println(receivedBody.getResponse());
+            return;
         }
+
+        log.info("Could not verify the message");
     }
 
     private void getStateOfGood(String[] params) throws Exception {
+        String url = "/getStateOfGood";
         Body body = new Body(me.getId(), Integer.parseInt(params[0]));
         Message receivedMessage;
 
         try {
-            receivedMessage = restClient.post(notary, "/getStateOfGood", body, me.getPrivateKey());
+            receivedMessage = restClient.post(notary, url, body, me.getPrivateKey());
         } catch (UnverifiedException | ResponseException e) {
             log.info(e.getMessage(), e);
             return;
@@ -176,7 +183,7 @@ public class HdsClientApplication {
 
         Body receivedBody = receivedMessage.getBody();
 
-        if (isValidResponse(receivedBody)) {
+        if (isValidResponse(receivedBody) && Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage)) {
             String message = String.format("The good with id %d is owned by user with id %d and his state is %s.",
                     body.getGoodId(),
                     receivedBody.getUserId(),
@@ -184,10 +191,14 @@ public class HdsClientApplication {
 
             log.info(message);
             System.out.println(message);
+            return;
         }
+
+        log.info("Could not verify the message");
     }
 
     private void buyGood(String[] params) throws Exception {
+        String url = "/buyGood";
         int goodId, userId;
 
         try {
@@ -205,7 +216,7 @@ public class HdsClientApplication {
         Message receivedMessage;
 
         try {
-            receivedMessage = restClient.post(owner, "/buyGood", body, me.getPrivateKey());
+            receivedMessage = restClient.post(owner, url, body, me.getPrivateKey());
         } catch (UnverifiedException | ResponseException e) {
             log.warn(e.getMessage(), e);
             return;
@@ -215,12 +226,7 @@ public class HdsClientApplication {
             return;
         }
 
-        Body receivedBody = receivedMessage.getBody();
-
-        if (isValidResponse(receivedBody)) {
-            log.info(String.format("The buy operation of the good with id %d from the user with id %d return the response %s", body.getGoodId(), body.getUserId(), receivedBody.getResponse()));
-            System.out.println(receivedBody.getResponse());
-        }
+        Utils.verifyAllMessages(receivedMessage, url);
     }
 
     private boolean validateParams(String[] params, int length, String logMessage, String outputMessage) {
@@ -234,9 +240,9 @@ public class HdsClientApplication {
 
     private boolean isValidResponse(Body body) {
         if (body == null) {
-            String unsignedMessage = "The server could not respond.";
-            log.info(unsignedMessage);
-            System.out.println(unsignedMessage);
+            String errorMessage = "The server could not respond.";
+            log.info(errorMessage);
+            System.out.println(errorMessage);
             return false;
         }
 
