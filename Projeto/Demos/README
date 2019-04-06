@@ -1,0 +1,64 @@
+Para executar os vários testes é necessário primeiro executar o ficheiro script.bat e de seguida, de acordo com o teste que se deseja
+executar devem ser introduzidos os seguintes inputs. Para a realização dos testes é necessário guardar a chave pública correspondente
+ao cartão de cidadão a usar durante os testes, no ficheiro notary.pub. Esse ficheiro deve ser colocado nos seguintes diretórios
+Demo\alice\keys, Demo\bob\keys, FakeKeyNotary\alice\keys, FakeKeyAlice\alice\keys, FakeKeyBob\alice\keys, FakeKeyBob\bob\keys,
+FakeKeyNotary2\alice\keys e FakeKeyNotary2\bob\keys. Durante a realização dos testes é necessário ter os portos 8080, 8081 e 8082 vagos.
+
+Demo 1:
+  - Testa a compra de um bem inexistente.
+  - Na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 55 2".
+  - No fim espera-se receber como aviso na Alice "The good with id 55 does not exist.".
+
+Demo 2:
+  - Testa a compra de um bem que não está à venda.
+  - Na janela pertencente ao Bob, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 1 1".
+  - No fim espera-se receber como mensagem no Bob "NO".
+
+Demo 3:
+  - Testa a compra a um utilizador de um bem que não possui.
+  - Na janela pertencente ao Bob, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 3 1".
+  - No fim espera-se receber como mensagem no Bob "Good with id 3 does not belong to the seller.".
+
+Demo 4:
+  - Testa a compra a um utilizador inexistente.
+  - Na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 3 4".
+  - No fim espera-se receber como mensagem na Alice "The user with id 4 does not exist."
+
+Demo 5:
+  - Testa a compra do seu próprio bem.
+  - Na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 1 1".
+  - No fim espera-se receber como mensagem na Alice "The user cannot buy from itself."
+
+Demo 6:
+  - Testa assinar pedidos no lado do cliente com chaves falsas, a Alice possui uma chave falsa e o notário deve detetar isso.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice e Bob e ao Notary.
+  - De seguida, deve ser executado o ficheiro script.bat na pasta FakeKeyAlice.
+  - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "getStateOfGood 1".
+  - No fim espera-se receber como mensagem na Alice "This message is not authentic."
+  - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes à cliente Alice e ao Notary devem ser encerradas.
+
+Demo 7:
+  - Testa assinar resposta a pedidos com chaves falsas, a chave privada do Notary é falsa, usa um cartão diferente do original.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice e Bob e ao Notary.
+  - Durante este teste, deve ser usado um cartão de cidadão diferente do usado para gerar a chave pública.
+  - De seguida, deve ser executado o ficheiro script.bat na pasta FakeKeyNotary.
+  - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "getStateOfGood 1".
+  - No fim espera-se receber como mensagem na Alice "This message is not authentic."???????
+  - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes à cliente Alice e ao Notary devem ser encerradas.
+
+Demo 8:
+  - Testa assinar pedidos no lado do cliente com chaves falsas, a chave privada do Bob é falsa e o Notary e a Alice devem detetar isso.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice e Bob e ao Notary.
+  - De seguida, deve ser executado o ficheiro script.bat na pasta FakeKeyBob.
+  - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 3 2".
+  - No fim espera-se receber como mensagem na Alice e no Bob "This message is not authentic."
+  - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes aos clientes Alice e Bob e ao Notary devem ser encerradas.
+
+Demo 9:
+  - Testa assinar resposta a pedidos com chaves falsas.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice e Bob e ao Notary.
+  - Durante este teste, deve ser usado um cartão de cidadão diferente do usado para gerar a chave pública.
+  - De seguida, deve ser executado o ficheiro script.bat na pasta FakeKeyNotary2.
+  - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 3 2".
+  - No fim espera-se receber como mensagem na Alice "This message is not authentic."???????????????????????????
+  - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes aos clientes Alice e Bob e ao Notary devem ser encerradas.

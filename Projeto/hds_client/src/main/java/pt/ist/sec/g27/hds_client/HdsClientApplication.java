@@ -155,7 +155,9 @@ public class HdsClientApplication {
             return;
         }
 
-        log.info("Could not verify the message");
+        String errorMessage = "Could not verify the message";
+        log.info(errorMessage);
+        System.out.println(errorMessage);
     }
 
     private void getStateOfGood(String[] params) throws Exception {
@@ -184,7 +186,9 @@ public class HdsClientApplication {
             return;
         }
 
-        log.info("Could not verify the message");
+        String errorMessage = "Could not verify the message";
+        log.info(errorMessage);
+        System.out.println(errorMessage);
     }
 
     private void buyGood(String[] params) throws Exception {
@@ -197,6 +201,13 @@ public class HdsClientApplication {
         } catch (NumberFormatException e) {
             log.warn("The provided id was not an integer.");
             System.out.println("The id you provide must be an integer.");
+            return;
+        }
+
+        if (userId == me.getId()) {
+            String errorMessage = "The user cannot buy from itself.";
+            log.info(errorMessage);
+            System.out.println(errorMessage);
             return;
         }
 

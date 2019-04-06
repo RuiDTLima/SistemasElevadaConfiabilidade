@@ -48,7 +48,7 @@ public class Utils {
         verifyInnerTimestamp(receivedMessage, receivedMessage.getBody().getMessage());
 
         if (!verifyAllSignatures(receivedMessage))
-            throw new UnverifiedException("The response received did not originate from the notary.");
+            throw new UnverifiedException("The response received did not originate from the expected source.");
     }
 
     private static void verifyTimestamp(Message message) {

@@ -1,0 +1,68 @@
+{
+  "users": [
+    {
+      "id": 0,
+      "name": "notary",
+      "pubKey": "keys/notary.pub",
+      "port": 8080,
+      "timestamp": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 1,
+      "name": "alice",
+      "pubKey": "keys/alice.pub",
+      "privKey": "keys/alice.key",
+      "port": 8081
+    },
+    {
+      "id": 2,
+      "name": "bob",
+      "pubKey": "keys/bob.pub",
+      "port": 8082
+    },
+    {
+      "id": 3,
+      "name": "eve",
+      "pubKey": "keys/eve.pub",
+      "port": 8083
+    }
+  ],
+  "goods": [
+    {
+      "id": 1,
+      "owner-id": 1,
+      "name": "house",
+      "state": "not-on-sale"
+    },
+    {
+      "id": 2,
+      "owner-id": 1,
+      "name": "car",
+      "state": "not-on-sale"
+    },
+    {
+      "id": 3,
+      "owner-id": 2,
+      "name": "motorcycle",
+      "state": "not-on-sale"
+    },
+    {
+      "id": 4,
+      "owner-id": 2,
+      "name": "pool table",
+      "state": "not-on-sale"
+    },
+    {
+      "id": 5,
+      "owner-id": 1,
+      "name": "makeup set",
+      "state": "not-on-sale"
+    },
+    {
+      "id": 6,
+      "owner-id": 2,
+      "name": "phone",
+      "state": "not-on-sale"
+    }
+  ]
+}
