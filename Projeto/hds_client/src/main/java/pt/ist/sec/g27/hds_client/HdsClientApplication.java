@@ -221,6 +221,7 @@ public class HdsClientApplication {
         Body notaryBody = receivedMessage.getBody().getMessage().getBody();
 
         notary.setTimestamp(notaryBody.getTimestamp());
+        addTransferCertificate(notaryBody.getTransferCertificate());
 
         String response = notaryBody.getResponse();
         log.info(response);
