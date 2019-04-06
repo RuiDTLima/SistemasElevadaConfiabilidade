@@ -8,9 +8,10 @@ import org.springframework.web.bind.annotation.RestController;
 import pt.ist.sec.g27.hds_client.HdsClientApplication;
 import pt.ist.sec.g27.hds_client.RestClient;
 import pt.ist.sec.g27.hds_client.aop.VerifyAndSign;
-import pt.ist.sec.g27.hds_client.model.*;
-
-import java.util.stream.Stream;
+import pt.ist.sec.g27.hds_client.model.Body;
+import pt.ist.sec.g27.hds_client.model.Message;
+import pt.ist.sec.g27.hds_client.model.TransferCertificate;
+import pt.ist.sec.g27.hds_client.model.User;
 
 @RestController
 public class Controller {
@@ -64,6 +65,6 @@ public class Controller {
         TransferCertificate transferCertificate = receivedBody.getTransferCertificate();
         HdsClientApplication.addTransferCertificate(transferCertificate);
 
-        return new Body(receivedMessage);
+        return new Body(me.getId(), goodId, receivedMessage);// TODO check, tem de mandar tmb o status?
     }
 }

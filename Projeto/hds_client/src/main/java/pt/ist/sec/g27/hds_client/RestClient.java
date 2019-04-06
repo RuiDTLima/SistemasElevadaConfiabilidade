@@ -16,10 +16,8 @@ import pt.ist.sec.g27.hds_client.model.Body;
 import pt.ist.sec.g27.hds_client.model.Message;
 import pt.ist.sec.g27.hds_client.model.User;
 import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
-import pt.ist.sec.g27.hds_client.utils.Utils;
 
 import java.security.PrivateKey;
-import java.security.PublicKey;
 
 public class RestClient {
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -61,7 +59,7 @@ public class RestClient {
 
         verifyTimestamp(receivedMessage, receivedMessage.getBody().getMessage());
 
-        if (!verifyAllMessages(user.getPublicKey(), receivedMessage))
+        if (!SecurityUtils.verifyAllMessages(receivedMessage))
             throw new UnverifiedException("The response received did not originate from the notary.");
 
         Body receivedBody = receivedMessage.getBody();
@@ -74,7 +72,7 @@ public class RestClient {
     private void verifyTimestamp(Message message, Message innerMessage) {
         if (innerMessage == null) {
             Body body = message.getBody();
-            if (body.getTimestamp() == null) {
+            if (body.getTimestamp() == null) { // TODO está mal pq o cliente não manda timestamp para outro cliente no caso de haver excecao
                 String errorMessage = "The message structure specification was not followed.";
                 log.info(errorMessage);
                 throw new ResponseException(errorMessage);
@@ -92,13 +90,5 @@ public class RestClient {
             throw new ResponseException(errorMessage);
         }
         verifyTimestamp(innerMessage, innerMessage.getBody().getMessage());
-    }
-
-    private boolean verifyAllMessages(PublicKey publicKey, Message message) throws Exception {
-        if (message == null) return true;
-        Body body = message.getBody();
-        if (body == null) return false;
-        boolean verify = SecurityUtils.verify(publicKey, Utils.jsonObjectToByteArray(body), message.getSignature());
-        return verify && verifyAllMessages(publicKey, body.getMessage());
     }
 }
