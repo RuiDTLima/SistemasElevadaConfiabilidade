@@ -1,3 +1,8 @@
+Os clientes podem efetuar as seguintes operações:
+    getStateOfGood <good-id>        em que o <good-id> é o identificador único do good.
+    intentionToSell <good-id>       em que o <good-id> é o identificador único do good.
+    buyGood <good-id> <owner-id>    em que o <good-id> é o identificador único do good e o <owner-id> é o identificador único do dono do good representado por <good-id>.
+
 Para executar os vários testes é necessário primeiro executar o ficheiro script.bat e de seguida, de acordo com o teste que se deseja
 executar devem ser introduzidos os seguintes inputs. Para a realização dos testes é necessário guardar a chave pública correspondente
 ao cartão de cidadão a usar durante os testes, no ficheiro notary.pub. Esse ficheiro deve ser colocado nos seguintes diretórios
