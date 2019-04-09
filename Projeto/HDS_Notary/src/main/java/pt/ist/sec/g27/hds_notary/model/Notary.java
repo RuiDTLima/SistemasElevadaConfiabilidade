@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Notary {
+    private static final int notaryId = 0;
+
     private User[] users;
     private Good[] goods;
 
@@ -27,7 +29,7 @@ public class Notary {
 
     @JsonIgnore
     public User getNotary() {
-        return Arrays.stream(users).filter(user -> user.getTimestamp() == null).findFirst().orElse(null);
+        return Arrays.stream(users).filter(user -> user.getId() == notaryId).findFirst().orElse(null);
     }
 
     public User getUser(int userId) {

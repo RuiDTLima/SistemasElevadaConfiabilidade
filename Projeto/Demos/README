@@ -43,7 +43,7 @@ Demo 7:
   - Durante este teste, deve ser usado um cartão de cidadão diferente do usado para gerar a chave pública.
   - De seguida, deve ser executado o ficheiro script.bat na pasta FakeKeyNotary.
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "getStateOfGood 1".
-  - No fim espera-se receber como mensagem na Alice "This message is not authentic."???????
+  - No fim espera-se receber como mensagem na Alice "Could not verify the message"
   - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes à cliente Alice e ao Notary devem ser encerradas.
 
 Demo 8:
@@ -60,5 +60,6 @@ Demo 9:
   - Durante este teste, deve ser usado um cartão de cidadão diferente do usado para gerar a chave pública.
   - De seguida, deve ser executado o ficheiro script.bat na pasta FakeKeyNotary2.
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 3 2".
-  - No fim espera-se receber como mensagem na Alice "This message is not authentic."???????????????????????????
+  - No fim espera-se receber como mensagem na Alice "Could not verify the message."
   - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes aos clientes Alice e Bob e ao Notary devem ser encerradas.
+  - Para testar este teste uma segunda vez é necessário copiar o conteúdo do ficheiro state_copy.json para o ficheiro state.json.
