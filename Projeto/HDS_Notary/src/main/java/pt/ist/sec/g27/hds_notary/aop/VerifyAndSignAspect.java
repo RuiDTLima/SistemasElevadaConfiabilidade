@@ -57,17 +57,17 @@ public class VerifyAndSignAspect {
     }
 
     private Object after(Object returnedValue) throws Exception {
-        /*try {
+        try {
             byte[] sign = SecurityUtils.sign(Utils.jsonObjectToByteArray(returnedValue));
             return new Message((Body) returnedValue, sign);
         } catch (Exception e) {
             log.warn("Cannot sign the returned object.", e);
             throw e;
-        }*/
+        }
         // TODO remove the code below after testing and use the above code to sign with PT-CC
-        PrivateKey privateKey = SecurityUtils.readPrivate("keys/notary.key");
+        /*PrivateKey privateKey = SecurityUtils.readPrivate("keys/notary.key");
         byte[] sign = SecurityUtils.sign(privateKey, Utils.jsonObjectToByteArray(returnedValue));
-        return new Message((Body) returnedValue, sign);
+        return new Message((Body) returnedValue, sign);*/
     }
 
     private void before(Object[] args) {
