@@ -8,6 +8,8 @@ executar devem ser introduzidos os seguintes inputs. Para a realização dos tes
 ao cartão de cidadão a usar durante os testes, no ficheiro notary.pub. Esse ficheiro deve ser colocado nos seguintes diretórios
 Demo\alice\keys, Demo\bob\keys, FakeKeyNotary\alice\keys, FakeKeyAlice\alice\keys, FakeKeyBob\alice\keys, FakeKeyBob\bob\keys,
 FakeKeyNotary2\alice\keys e FakeKeyNotary2\bob\keys. Durante a realização dos testes é necessário ter os portos 8080, 8081 e 8082 vagos.
+Executando os 3 jar do ReplayAttack, a eve tem a opção de enviar uma mensagem antiga usando o comando sendLastMessage. Verifica-se
+que o notário rejeita esta, tal como todas as outras mensagens com timestamps inferiores.
 
 Demo 1:
   - Testa a compra de um bem inexistente.
