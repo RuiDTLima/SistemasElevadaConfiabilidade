@@ -56,4 +56,8 @@ public class User {
     public ZonedDateTime getTimestampInUTC() {
         return ZonedDateTime.parse(timestamp).withZoneSameInstant(ZoneOffset.UTC);
     }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
 }

@@ -36,6 +36,9 @@ public class Controller {
         final int goodId = message.getBody().getGoodId();
         log.info(String.format("Obtaining the state of good with id %d", goodId));
 
+        User user = notary.getUser(message.getBody().getUserId());
+        user.setTimestamp(message.getBody().getTimestamp());
+
         return Arrays.stream(notary.getGoods())
                 .filter(good -> good.getId() == goodId)
                 .map(good -> new Body(good.getOwnerId(), good.getState()))
@@ -55,6 +58,9 @@ public class Controller {
         log.info(String.format("The public key of the user %d was successfully obtained.", userId));
 
         Good good = notary.getGood(goodId);
+
+        User user = notary.getUser(userId);
+        user.setTimestamp(message.getBody().getTimestamp());
 
         if (good == null) {
             String errorMessage = String.format("The good with id %d does not exist.", goodId);
@@ -92,6 +98,12 @@ public class Controller {
         int sellerGoodId = sellerBody.getGoodId();
         int buyerId = buyerBody.getUserId();
         int sellerId = sellerBody.getUserId();
+
+        User buyer = notary.getUser(buyerId);
+        User seller = notary.getUser(sellerId);
+
+        buyer.setTimestamp(buyerBody.getTimestamp());
+        seller.setTimestamp(sellerBody.getTimestamp());
 
         if (buyerId == sellerId) {
             String errorMessage = "The user cannot buy from itself.";
