@@ -1,8 +1,8 @@
-package pt.ist.sec.g27.hds_client.utils;
+package pt.ist.sec.g27.hds_client_malicious.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
+import pt.ist.sec.g27.hds_client_malicious.exceptions.UnverifiedException;
 
 import java.io.FileInputStream;
 import java.io.IOException;

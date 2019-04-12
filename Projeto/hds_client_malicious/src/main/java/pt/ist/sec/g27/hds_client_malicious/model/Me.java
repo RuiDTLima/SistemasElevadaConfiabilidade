@@ -1,7 +1,7 @@
-package pt.ist.sec.g27.hds_client.model;
+package pt.ist.sec.g27.hds_client_malicious.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
+import pt.ist.sec.g27.hds_client_malicious.utils.SecurityUtils;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;

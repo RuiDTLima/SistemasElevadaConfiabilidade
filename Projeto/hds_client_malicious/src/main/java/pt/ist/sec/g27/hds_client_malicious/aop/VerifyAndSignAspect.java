@@ -1,4 +1,4 @@
-package pt.ist.sec.g27.hds_client.aop;
+package pt.ist.sec.g27.hds_client_malicious.aop;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -6,22 +6,22 @@ import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import pt.ist.sec.g27.hds_client.HdsClientApplication;
-import pt.ist.sec.g27.hds_client.exceptions.ConnectionException;
-import pt.ist.sec.g27.hds_client.exceptions.ResponseException;
-import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
-import pt.ist.sec.g27.hds_client.model.Body;
-import pt.ist.sec.g27.hds_client.model.Message;
-import pt.ist.sec.g27.hds_client.model.User;
-import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
-import pt.ist.sec.g27.hds_client.utils.Utils;
+import pt.ist.sec.g27.hds_client_malicious.HdsClientMaliciousApplication;
+import pt.ist.sec.g27.hds_client_malicious.exceptions.ConnectionException;
+import pt.ist.sec.g27.hds_client_malicious.exceptions.ResponseException;
+import pt.ist.sec.g27.hds_client_malicious.exceptions.UnverifiedException;
+import pt.ist.sec.g27.hds_client_malicious.model.Body;
+import pt.ist.sec.g27.hds_client_malicious.model.Message;
+import pt.ist.sec.g27.hds_client_malicious.model.User;
+import pt.ist.sec.g27.hds_client_malicious.utils.SecurityUtils;
+import pt.ist.sec.g27.hds_client_malicious.utils.Utils;
 
 @Aspect
 @Component
 public class VerifyAndSignAspect {
     private final static Logger log = LoggerFactory.getLogger(VerifyAndSignAspect.class);
 
-    @Around("@annotation(pt.ist.sec.g27.hds_client.aop.VerifyAndSign)")
+    @Around("@annotation(pt.ist.sec.g27.hds_client_malicious.aop.VerifyAndSign)")
     public Object callHandler(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         try {
             before(proceedingJoinPoint.getArgs());
@@ -63,7 +63,7 @@ public class VerifyAndSignAspect {
 
     private Object after(Object returnedValue) throws Exception {
         try {
-            User me = HdsClientApplication.getMe();
+            User me = HdsClientMaliciousApplication.getMe();
             byte[] sign = SecurityUtils.sign(me.getPrivateKey(), Utils.jsonObjectToByteArray(returnedValue));
             return new Message((Body) returnedValue, sign);
         } catch (Exception e) {
@@ -75,7 +75,7 @@ public class VerifyAndSignAspect {
     private void verifyMessageStructure(Body body) {
         int userId = body.getUserId();
 
-        if (userId == -1 || body.getTimestamp() == null || HdsClientApplication.getUser(userId) == null) {
+        if (userId == -1 || body.getTimestamp() == null || HdsClientMaliciousApplication.getUser(userId) == null) {
             String errorMessage = "The message structure specification was not followed.";
             log.info(errorMessage);
             throw new UnverifiedException(errorMessage);
@@ -85,7 +85,7 @@ public class VerifyAndSignAspect {
     private void verifySignature(Message message) {
         boolean verified;
         try {
-            verified = Utils.verifySingleMessage(HdsClientApplication.getUser(message.getBody().getUserId()).getPublicKey(), message);
+            verified = Utils.verifySingleMessage(HdsClientMaliciousApplication.getUser(message.getBody().getUserId()).getPublicKey(), message);
         } catch (Exception e) {
             String errorMessage = "Could not verify the signature of the message";
             log.warn(errorMessage);

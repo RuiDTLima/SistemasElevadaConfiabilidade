@@ -1,4 +1,4 @@
-package pt.ist.sec.g27.hds_client.model;
+package pt.ist.sec.g27.hds_client_malicious.model;
 
 public class Message {
     private Body body;

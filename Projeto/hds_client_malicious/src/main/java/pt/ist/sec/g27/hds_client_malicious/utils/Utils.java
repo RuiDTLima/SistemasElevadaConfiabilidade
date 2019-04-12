@@ -1,15 +1,15 @@
-package pt.ist.sec.g27.hds_client.utils;
+package pt.ist.sec.g27.hds_client_malicious.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pt.ist.sec.g27.hds_client.HdsClientApplication;
-import pt.ist.sec.g27.hds_client.exceptions.ResponseException;
-import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
-import pt.ist.sec.g27.hds_client.model.Body;
-import pt.ist.sec.g27.hds_client.model.Message;
-import pt.ist.sec.g27.hds_client.model.User;
+import pt.ist.sec.g27.hds_client_malicious.HdsClientMaliciousApplication;
+import pt.ist.sec.g27.hds_client_malicious.exceptions.ResponseException;
+import pt.ist.sec.g27.hds_client_malicious.exceptions.UnverifiedException;
+import pt.ist.sec.g27.hds_client_malicious.model.Body;
+import pt.ist.sec.g27.hds_client_malicious.model.Message;
+import pt.ist.sec.g27.hds_client_malicious.model.User;
 
 import java.security.PublicKey;
 
@@ -58,7 +58,7 @@ public class Utils {
             log.info(errorMessage);
             throw new ResponseException(errorMessage);
         }
-        if (body.getTimestampInUTC().compareTo(HdsClientApplication.getNotary().getTimestampInUTC()) <= 0) {
+        if (body.getTimestampInUTC().compareTo(HdsClientMaliciousApplication.getNotary().getTimestampInUTC()) <= 0) {
             String errorMessage = "The response received was duplicated.";
             log.info(errorMessage);
             throw new ResponseException(errorMessage);
@@ -92,7 +92,7 @@ public class Utils {
         }
 
         int userId = body.getUserId();
-        User user = HdsClientApplication.getUser(userId);
+        User user = HdsClientMaliciousApplication.getUser(userId);
 
         if (user == null) {
             String errorMessage = String.format("The user with id %d does not exist.", userId);

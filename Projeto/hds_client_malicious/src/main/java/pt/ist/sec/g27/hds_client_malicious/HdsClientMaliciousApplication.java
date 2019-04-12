@@ -1,23 +1,23 @@
-package pt.ist.sec.g27.hds_client;
+package pt.ist.sec.g27.hds_client_malicious;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import pt.ist.sec.g27.hds_client.exceptions.ConnectionException;
-import pt.ist.sec.g27.hds_client.exceptions.ResponseException;
-import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
-import pt.ist.sec.g27.hds_client.model.*;
-import pt.ist.sec.g27.hds_client.utils.Utils;
+import pt.ist.sec.g27.hds_client_malicious.exceptions.ConnectionException;
+import pt.ist.sec.g27.hds_client_malicious.exceptions.ResponseException;
+import pt.ist.sec.g27.hds_client_malicious.exceptions.UnverifiedException;
+import pt.ist.sec.g27.hds_client_malicious.model.*;
+import pt.ist.sec.g27.hds_client_malicious.utils.Utils;
 
 import java.io.FileInputStream;
 import java.util.Scanner;
 
 @SpringBootApplication
-public class HdsClientApplication {
+public class HdsClientMaliciousApplication {
     private static final String STATE_PATH = "state.json";
-    private static final Logger log = LoggerFactory.getLogger(HdsClientApplication.class);
+    private static final Logger log = LoggerFactory.getLogger(HdsClientMaliciousApplication.class);
     private static final RestClient restClient = new RestClient();
 
     private static AppState appState;
@@ -75,10 +75,10 @@ public class HdsClientApplication {
 
         notary = appState.getNotary();
 
-        SpringApplication.run(HdsClientApplication.class, args);
+        SpringApplication.run(HdsClientMaliciousApplication.class, args);
 
-        HdsClientApplication hdsClientApplication = new HdsClientApplication();
-        hdsClientApplication.run();
+        HdsClientMaliciousApplication hdsClientMaliciousApplication = new HdsClientMaliciousApplication();
+        hdsClientMaliciousApplication.run();
     }
 
     private void run() {

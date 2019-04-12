@@ -1,20 +1,20 @@
-package pt.ist.sec.g27.hds_client.controller;
+package pt.ist.sec.g27.hds_client_malicious.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import pt.ist.sec.g27.hds_client.HdsClientApplication;
-import pt.ist.sec.g27.hds_client.RestClient;
-import pt.ist.sec.g27.hds_client.aop.VerifyAndSign;
-import pt.ist.sec.g27.hds_client.exceptions.ResponseException;
-import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
-import pt.ist.sec.g27.hds_client.model.Body;
-import pt.ist.sec.g27.hds_client.model.Message;
-import pt.ist.sec.g27.hds_client.model.TransferCertificate;
-import pt.ist.sec.g27.hds_client.model.User;
-import pt.ist.sec.g27.hds_client.utils.Utils;
+import pt.ist.sec.g27.hds_client_malicious.HdsClientMaliciousApplication;
+import pt.ist.sec.g27.hds_client_malicious.RestClient;
+import pt.ist.sec.g27.hds_client_malicious.aop.VerifyAndSign;
+import pt.ist.sec.g27.hds_client_malicious.exceptions.ResponseException;
+import pt.ist.sec.g27.hds_client_malicious.exceptions.UnverifiedException;
+import pt.ist.sec.g27.hds_client_malicious.model.Body;
+import pt.ist.sec.g27.hds_client_malicious.model.Message;
+import pt.ist.sec.g27.hds_client_malicious.model.TransferCertificate;
+import pt.ist.sec.g27.hds_client_malicious.model.User;
+import pt.ist.sec.g27.hds_client_malicious.utils.Utils;
 
 @RestController
 public class Controller {
@@ -24,14 +24,14 @@ public class Controller {
     @VerifyAndSign
     @PostMapping("/buyGood")
     public Object buyGood(@RequestBody Message message) throws Exception {
-        User notary = HdsClientApplication.getNotary();
-        User me = HdsClientApplication.getMe();
+        User notary = HdsClientMaliciousApplication.getNotary();
+        User me = HdsClientMaliciousApplication.getMe();
         int goodId = message.getBody().getGoodId();
 
         Body body = new Body(me.getId(), goodId, message);
         Message receivedMessage;
 
-        receivedMessage = restClient.post(HdsClientApplication.getNotary(), "/transferGood", body, me.getPrivateKey());
+        receivedMessage = restClient.post(HdsClientMaliciousApplication.getNotary(), "/transferGood", body, me.getPrivateKey());
 
         isValidResponse(notary, receivedMessage.getBody());
 
@@ -54,7 +54,7 @@ public class Controller {
         System.out.println(response);
 
         TransferCertificate transferCertificate = receivedBody.getTransferCertificate();
-        HdsClientApplication.addTransferCertificate(transferCertificate);
+        HdsClientMaliciousApplication.addTransferCertificate(transferCertificate);
 
         notary.setTimestamp(receivedBody.getTimestamp());
 

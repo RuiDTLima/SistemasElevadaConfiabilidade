@@ -1,4 +1,4 @@
-package pt.ist.sec.g27.hds_client;
+package pt.ist.sec.g27.hds_client_malicious;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -9,12 +9,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import pt.ist.sec.g27.hds_client.exceptions.ConnectionException;
-import pt.ist.sec.g27.hds_client.exceptions.ResponseException;
-import pt.ist.sec.g27.hds_client.model.Body;
-import pt.ist.sec.g27.hds_client.model.Message;
-import pt.ist.sec.g27.hds_client.model.User;
-import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
+import pt.ist.sec.g27.hds_client_malicious.exceptions.ConnectionException;
+import pt.ist.sec.g27.hds_client_malicious.exceptions.ResponseException;
+import pt.ist.sec.g27.hds_client_malicious.model.Body;
+import pt.ist.sec.g27.hds_client_malicious.model.Message;
+import pt.ist.sec.g27.hds_client_malicious.model.User;
+import pt.ist.sec.g27.hds_client_malicious.utils.SecurityUtils;
 
 import java.security.PrivateKey;
 

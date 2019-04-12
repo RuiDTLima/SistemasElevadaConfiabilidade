@@ -3,4 +3,4 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
-rootProject.name = 'hds_client'
+rootProject.name = 'hds_client_malicious'
