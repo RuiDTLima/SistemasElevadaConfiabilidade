@@ -1,0 +1,3 @@
+osascript -e "tell application \"Terminal\" to do script \"cd $PWD && cd notary && java -jar hds_notary-0.0.1-SNAPSHOT.jar --server.port=8080 && clear\"" > /dev/null
+osascript -e "tell application \"Terminal\" to do script \"cd $PWD && cd alice && java -jar alice.jar 1 --server.port=8081 && clear\"" > /dev/null
+osascript -e "tell application \"Terminal\" to do script \"cd $PWD && cd eve && java -jar eve.jar 3 --server.port=8083 && clear\"" > /dev/null

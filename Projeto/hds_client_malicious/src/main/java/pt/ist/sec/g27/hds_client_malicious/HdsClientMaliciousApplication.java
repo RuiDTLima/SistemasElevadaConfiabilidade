@@ -158,10 +158,6 @@ public class HdsClientMaliciousApplication {
         if (receivedMessage == null)
             return;
 
-        lastDestinyUser = notary;
-        lastUri = uri;
-        lastBody = body;
-
         Body receivedBody = receivedMessage.getBody();
 
         if (isValidResponse(receivedBody) && Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage)) {
@@ -273,7 +269,11 @@ public class HdsClientMaliciousApplication {
         }
 
         log.info("Repeating the previous message.");
-        makeRequest(lastDestinyUser, lastUri, lastBody);
+        Message receivedMessage = makeRequest(lastDestinyUser, lastUri, lastBody);
+        if (receivedMessage == null)
+            return;
+
+        Utils.verifyAllMessages(receivedMessage, lastUri);
     }
 
     private boolean validateParams(String[] params, int length, String logMessage, String outputMessage) {
