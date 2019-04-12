@@ -3,12 +3,21 @@ Os clientes podem efetuar as seguintes operações:
     intentionToSell <good-id>       em que o <good-id> é o identificador único do good.
     buyGood <good-id> <owner-id>    em que o <good-id> é o identificador único do good e o <owner-id> é o identificador único do dono do good representado por <good-id>.
 
+############################ Setup ############################
+
+Para cada um dos casos de teste há uma pasta com o nome alice ou bob, em cada uma dessas pastas deve ser copiado o ficheiro jars\hds_client.jar, sendo que o ficheiro
+deve ser renomeado para o nome correspondente ao nome da pasta, por exemplo na pasta alice, deve ser copiado o jars\hds_client.jar e renomeado para alice.jar.
+Para os casos de teste que tenham uma pasta chamada eve, deve ser copiado para essas pastas o jar jars\hds_client_malicious.jar e renomeado para eve.jar.
+Para todos os casos de teste, há uma pasta com o nome notary, e para cada uma dessas pastas deve ser copiado o jar jars\hds_notary-0.0.1-SNAPSHOT.jar.
+
 Para a realização dos testes é necessário guardar a chave pública correspondente ao cartão de cidadão a usar durante os testes, no ficheiro
 notary.pub. Esse ficheiro deve ser colocado nos seguintes diretórios Demo\alice\keys, Demo\bob\keys, FakeKeyNotary\alice\keys,
 FakeKeyAlice\alice\keys, FakeKeyBob\alice\keys, FakeKeyBob\bob\keys, FakeKeyNotary2\alice\keys, FakeKeyNotary2\bob\keys, MaliciousClient\eve\keys,
 MaliciousClient2\alice\keys e MaliciousClient2\eve\keys. Durante a realização dos testes é necessário ter os portos 8080, 8081, 8082 e 8083 vagos.
 Para executar os vários testes é necessário primeiro executar o ficheiro script.bat, caso seja usado Windows, ou o ficheiro script.sh, caso seja
-usado MacOS, da pasta correspondente ao teste, e de seguida, de acordo com o teste que se deseja executar devem ser seguidos os seguintes passos. 
+usado MacOS, da pasta correspondente ao teste, e de seguida, de acordo com o teste que se deseja executar devem ser seguidos os seguintes passos.
+
+############################ Casos de Teste ############################
 
 Demo 1:
   - Testa a compra de um bem inexistente.
