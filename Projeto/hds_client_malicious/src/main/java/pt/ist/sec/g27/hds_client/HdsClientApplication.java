@@ -24,7 +24,7 @@ public class HdsClientApplication {
     private static User me;
     private static User notary;
 
-    private User lastUser;
+    private User lastDestinyUser;
     private String lastUri;
     private Body lastBody;
 
@@ -131,10 +131,11 @@ public class HdsClientApplication {
                 if (validateParams(params,
                         0,
                         String.format("To invoke sendLastMessage there is no need to pass something. It was passed %d params.", params.length),
-                        "To invoke sendLastMessage there is no need to pass something. It was passed %d params."))
+                        "To invoke sendLastMessage there is no need to pass something."))
                     sendLastMessage();
                 break;
             case "exit":
+                log.info("Shutting down the application.");
                 System.exit(0);
                 break;
             default:
@@ -156,6 +157,10 @@ public class HdsClientApplication {
         Message receivedMessage = makeRequest(notary, uri, body);
         if (receivedMessage == null)
             return;
+
+        lastDestinyUser = notary;
+        lastUri = uri;
+        lastBody = body;
 
         Body receivedBody = receivedMessage.getBody();
 
@@ -182,6 +187,10 @@ public class HdsClientApplication {
         Message receivedMessage = makeRequest(notary, uri, body);
         if (receivedMessage == null)
             return;
+
+        lastDestinyUser = notary;
+        lastUri = uri;
+        lastBody = body;
 
         Body receivedBody = receivedMessage.getBody();
 
@@ -234,6 +243,11 @@ public class HdsClientApplication {
             return;
 
         Body body = new Body(me.getId(), goodId);
+
+        lastDestinyUser = owner;
+        lastUri = uri;
+        lastBody = body;
+
         Message receivedMessage = makeRequest(owner, uri, body);
         if (receivedMessage == null)
             return;
@@ -251,7 +265,15 @@ public class HdsClientApplication {
     }
 
     private void sendLastMessage() throws Exception {
-        this.makeRequest(lastUser,lastUri,lastBody);
+        if (lastDestinyUser == null) {
+            String errorMessage = "This is the first message. There's not a previous one to repeat.";
+            log.info(errorMessage);
+            System.out.println(errorMessage);
+            return;
+        }
+
+        log.info("Repeating the previous message.");
+        makeRequest(lastDestinyUser, lastUri, lastBody);
     }
 
     private boolean validateParams(String[] params, int length, String logMessage, String outputMessage) {
@@ -276,9 +298,6 @@ public class HdsClientApplication {
 
     private Message makeRequest(User user, String uri, Body body) throws Exception {
         try {
-            this.lastUser = user;
-            this.lastUri = uri;
-            this.lastBody = body;
             return restClient.post(user, uri, body, me.getPrivateKey());
         } catch (UnverifiedException | ResponseException e) {
             log.warn(e.getMessage(), e);
