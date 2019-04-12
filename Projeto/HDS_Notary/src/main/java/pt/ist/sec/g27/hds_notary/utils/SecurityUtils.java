@@ -10,9 +10,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.security.*;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.Signature;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 public class SecurityUtils {
@@ -24,27 +26,6 @@ public class SecurityUtils {
         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(encoded);
         KeyFactory rsa = KeyFactory.getInstance("RSA");
         return rsa.generatePublic(x509EncodedKeySpec);
-    }
-
-    // TODO remove this after testing and use sign with CC-PT
-    public static PrivateKey readPrivate(String privKeyPath) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] encoded = read(privKeyPath);
-        PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(encoded);
-        KeyFactory rsa = KeyFactory.getInstance("RSA");
-        return rsa.generatePrivate(pkcs8EncodedKeySpec);
-    }
-
-    // TODO remove this after testing and use sign with CC-PT
-    public static byte[] sign(PrivateKey privateKey, byte[] toSign) throws Exception {
-        try {
-            Signature signature = Signature.getInstance(ALGORITHM_FOR_VERIFY);
-            signature.initSign(privateKey);
-            signature.update(toSign);
-            return signature.sign();
-        } catch (Exception e) {
-            log.warn("Something related to sign not worked properly.", e);
-            throw e;
-        }
     }
 
     private static byte[] read(String keyPath) throws IOException {
