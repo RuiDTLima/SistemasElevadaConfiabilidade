@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import pt.ist.sec.g27.hds_notary.HdsNotaryApplication;
 import pt.ist.sec.g27.hds_notary.aop.VerifyAndSign;
 import pt.ist.sec.g27.hds_notary.exceptions.ForbiddenException;
 import pt.ist.sec.g27.hds_notary.exceptions.NotFoundException;
@@ -14,11 +15,13 @@ import pt.ist.sec.g27.hds_notary.model.*;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 
 @RestController
 public class Controller {
-    private static final String STATE_PATH = "state.json";
     private static final Logger log = LoggerFactory.getLogger(Controller.class);
 
     private final ObjectMapper mapper;
@@ -154,12 +157,20 @@ public class Controller {
     }
 
     private void saveState() {
-        // Writing to a file
-        try (FileOutputStream fileOutputStream = new FileOutputStream(STATE_PATH)) {
+        // Writing to a backup file
+        try (FileOutputStream fileOutputStream = new FileOutputStream(HdsNotaryApplication.BACKUP_STATE_PATH)) {
             mapper.writeValue(fileOutputStream, notary);
-            log.info("The state has been updated.");
+            log.info("The backup state has been updated.");
         } catch (IOException e) {
-            log.error("There was an error while trying to save the state.", e);
+            log.error("There was an error while trying to save the backup state.", e);
+            return;
+        }
+        // Writing to current state.
+        try {
+            Files.copy(Paths.get(HdsNotaryApplication.BACKUP_STATE_PATH), Paths.get(HdsNotaryApplication.STATE_PATH), StandardCopyOption.REPLACE_EXISTING);
+            log.info("The current state has been updated.");
+        } catch (IOException e) {
+            log.error("There was an error while trying to copy the backup state to the current state.");
         }
     }
 }
