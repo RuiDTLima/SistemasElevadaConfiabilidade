@@ -2,6 +2,9 @@ package pt.ist.sec.g27.hds_client.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import pt.ist.sec.g27.hds_client.aop.VerifyAndSignAspect;
 import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
 
 import java.io.IOException;
@@ -11,8 +14,11 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Scanner;
 
 public class User {
+    private final static Logger log = LoggerFactory.getLogger(User.class);
+
     private int id;
     private String name;
 
@@ -24,6 +30,7 @@ public class User {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String privKeyPath;
     private PrivateKey privateKey;
+    private String password;
     private int port;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -52,7 +59,35 @@ public class User {
             return this.privateKey;
         if (privKeyPath == null)
             return null;
-        this.privateKey = SecurityUtils.readPrivate(privKeyPath);
+
+        Scanner scanner = new Scanner(System.in);
+        String password;
+
+        String msg;
+        msg = "Please insert password: ";
+        System.out.print(msg);
+        System.out.flush();
+
+        try {
+            password = scanner.next();
+            this.privateKey = SecurityUtils.decryptPrivateKey(privKeyPath, password);
+        } catch (IOException e) {
+            msg = "File " + privKeyPath + " corrupted!";
+            log.warn(msg);
+            System.out.println(msg);
+            System.exit(1);
+        } catch (Exception e) {
+            msg = "Password incorrect!";
+            log.warn(msg);
+            System.out.println(msg);
+            System.exit(1);
+        }
+        finally {
+            msg = "Password Correct!";
+            log.warn(msg);
+            System.out.println(msg);
+        }
+
         return this.privateKey;
     }
 

@@ -11,7 +11,7 @@
       "id": 1,
       "name": "alice",
       "pubKey": "keys/alice.pub",
-      "privKey": "keys/alice.key",
+      "privKey": "keys/alice_enc.key",
       "port": 8081
     },
     {
