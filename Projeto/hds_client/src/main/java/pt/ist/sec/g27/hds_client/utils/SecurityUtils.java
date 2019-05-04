@@ -4,16 +4,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
 
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 public class SecurityUtils {
     private final static Logger log = LoggerFactory.getLogger(SecurityUtils.class);
     private final static String ALGORITHM_FOR_VERIFY = "SHA256withRSA";
+    private final static String SECRET_KEY_ALGORITHM = "AES";
+    private final static String CIPHER_ALGORITHM = "AES/ECB/PKCS5Padding";
+    private final static String PRIVATE_KEY_ALGORITHM = "RSA";
+    private final static int KEY_LENGTH_IN_BYTES = 16; // Number of bytes for the key with "AES/ECB/PKCS5Padding"
 
     public static PublicKey readPublic(String pubKeyPath) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] encoded = read(pubKeyPath);
@@ -25,7 +33,7 @@ public class SecurityUtils {
     public static PrivateKey readPrivate(String privKeyPath) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] encoded = read(privKeyPath);
         PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(encoded);
-        KeyFactory rsa = KeyFactory.getInstance("RSA");
+        KeyFactory rsa = KeyFactory.getInstance(PRIVATE_KEY_ALGORITHM);
         return rsa.generatePrivate(pkcs8EncodedKeySpec);
     }
 
@@ -64,5 +72,33 @@ public class SecurityUtils {
             log.warn(errorMessage);
             throw new UnverifiedException(errorMessage);
         }
+    }
+
+    public static PrivateKey decryptPrivateKey(String keyFile, String passPhrase) throws Exception {
+        byte[] padded_key = getPaddedKey(passPhrase); // Get padded key
+        SecretKey password = new SecretKeySpec(padded_key, SECRET_KEY_ALGORITHM); // Convert byte to key
+
+        String base64EncryptedKey = FileUtils.fileToString(keyFile);
+        byte[] encrypted_key_bytes = Base64.getMimeDecoder().decode(base64EncryptedKey);
+        Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
+        KeyFactory rsa = KeyFactory.getInstance(PRIVATE_KEY_ALGORITHM);
+
+        cipher.init(Cipher.DECRYPT_MODE, password); // Set to decryption mode
+        byte[] decrypted_key = cipher.doFinal(encrypted_key_bytes);
+        return rsa.generatePrivate(new PKCS8EncodedKeySpec(decrypted_key));
+    }
+
+    private static byte[] getPaddedKey(String passPhrase) throws Exception {
+        byte[] key = passPhrase.getBytes(); // Convert string to byte array
+        byte[] padded_key = new byte[KEY_LENGTH_IN_BYTES];
+        int passPhraseLength = key.length;
+
+        if (passPhraseLength > KEY_LENGTH_IN_BYTES)
+            throw new Exception("Key must be smaller than " + KEY_LENGTH_IN_BYTES + " bytes!");
+
+        // Pad the encryption key with 0's
+        for (int i = 0; i < KEY_LENGTH_IN_BYTES; i++)
+            padded_key[i] = i < passPhraseLength ? key[i] : 0;
+        return padded_key;
     }
 }

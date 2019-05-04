@@ -1,6 +1,9 @@
 package pt.ist.sec.g27.hds_client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.Dsl;
+import org.asynchttpclient.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -13,12 +16,16 @@ import pt.ist.sec.g27.hds_client.exceptions.ConnectionException;
 import pt.ist.sec.g27.hds_client.exceptions.ResponseException;
 import pt.ist.sec.g27.hds_client.model.Body;
 import pt.ist.sec.g27.hds_client.model.Message;
+import pt.ist.sec.g27.hds_client.model.Notary;
 import pt.ist.sec.g27.hds_client.model.User;
 import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
 
+import java.io.IOException;
 import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public class RestClient {
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -36,21 +43,55 @@ public class RestClient {
     }
 
     public Message post(User user, String uri, Body body, PrivateKey privateKey) throws Exception {
-        String url = user.getUrl() + uri;//server + user.getPort() + uri;
+        String url = user.getUrl() + uri;
         return makeRequest(body, privateKey, url);
     }
 
-    public Message postToMultipleNotaries(User[] notaries, String uri, Body body, PrivateKey privateKey) throws Exception {
+    public List<Message> postToMultipleNotaries(Notary[] notaries, String uri, Body body, PrivateKey privateKey) throws Exception {
         List<Message> responses = new ArrayList<>();
+        byte[] jsonBody = mapper.writeValueAsBytes(body);
+        Message message = new Message(body, SecurityUtils.sign(privateKey, jsonBody));
+        String json = mapper.writeValueAsString(message);
 
-        for (int i = 0; i < 10; i++) {
-            String url = notaries[i] + uri;
-            responses.add(makeRequest(body, privateKey, url));
-            log.info(String.format("Received response from the server %d", i));
+        List<CompletableFuture<Optional<Message>>> completableFutures = new ArrayList<>();
+        try(AsyncHttpClient asyncClient = Dsl.asyncHttpClient()) {
+
+            for (int i = 0; i < 7; i++) {
+                String url = notaries[i].getUrl() + uri;
+
+                completableFutures.add(asyncClient.preparePost(url)
+                        .setBody(json)
+                        .addHeader("Content-Type", "application/json")
+                        .execute()
+                        .toCompletableFuture()
+                        .thenApply(Response::getResponseBody)
+                        .thenApply(response -> {
+                            try {
+                                Message receivedMessage = mapper.readValue(response, Message.class);
+                                if (receivedMessage == null) {
+                                    String errorMessage = String.format("A Message wasn't received from the server %s.", url);
+                                    log.info(errorMessage);
+                                    return Optional.empty();
+                                }
+                                return Optional.of(receivedMessage);
+                            } catch (IOException e) {
+                                String errorMessage = "The message received was not a Message.";
+                                log.warn(errorMessage);
+                                System.out.println(errorMessage);
+                                return Optional.empty();
+                            }
+                        }));
+
+                log.info(String.format("Made request to the server %d", i));
+            }
+            for (CompletableFuture<Optional<Message>> cf : completableFutures) {
+                Optional<Message> possibleMessage = cf.join();
+
+                possibleMessage.ifPresent(responses::add);
+            }
         }
 
-        // TODO confirm what to return
-        return responses.stream().findFirst().get();
+        return responses;
     }
 
     private Message makeRequest(Body body, PrivateKey privateKey, String url) throws java.io.IOException {

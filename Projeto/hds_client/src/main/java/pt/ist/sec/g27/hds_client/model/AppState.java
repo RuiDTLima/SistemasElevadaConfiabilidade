@@ -1,22 +1,18 @@
 package pt.ist.sec.g27.hds_client.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 public class AppState {
-    private static final String EXCEPTION_MESSAGE = "There is an error with the state file. Must contain notary information with id 0.";
-
-    private User[] notaries;
+    private Notary[] notaries;
     private User[] users;
     private Good[] goods;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private ArrayList<TransferCertificate> transferCertificates;
 
-    public User[] getNotaries() {
+    public Notary[] getNotaries() {
         return notaries;
     }
 
@@ -32,6 +28,13 @@ public class AppState {
         return transferCertificates;
     }
 
+    public Notary getNotary(int notaryId) {
+        return Arrays.stream(notaries)
+                .filter(notary -> notary.getId() == notaryId)
+                .findFirst()
+                .orElse(null);
+    }
+
     public User getUser(int userId) {
         return Arrays.stream(users)
                 .filter(user -> user.getId() == userId)
@@ -44,11 +47,6 @@ public class AppState {
                 .filter(good -> good.getId() == goodId)
                 .findFirst()
                 .orElse(null);
-    }
-
-    public Stream<Good> getUsersGood(int userId) {
-        return Arrays.stream(goods)
-                .filter(good -> good.getOwnerId() == userId);
     }
 
     public void addTransferCertificate(TransferCertificate transferCertificate) {

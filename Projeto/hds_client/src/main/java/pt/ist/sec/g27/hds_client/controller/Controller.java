@@ -15,6 +15,7 @@ import pt.ist.sec.g27.hds_client.model.Message;
 import pt.ist.sec.g27.hds_client.model.TransferCertificate;
 import pt.ist.sec.g27.hds_client.model.User;
 import pt.ist.sec.g27.hds_client.utils.Utils;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 @RestController
 public class Controller {
@@ -24,7 +25,7 @@ public class Controller {
     @VerifyAndSign
     @PostMapping("/buyGood")
     public Object buyGood(@RequestBody Message message) throws Exception {
-        User notary = HdsClientApplication.getNotary();
+        /*User notary = HdsClientApplication.getNotary();
         User me = HdsClientApplication.getMe();
         int goodId = message.getBody().getGoodId();
 
@@ -58,7 +59,8 @@ public class Controller {
 
         notary.setTimestamp(receivedBody.getTimestamp());
 
-        return new Body(me.getId(), receivedMessage);
+        return new Body(me.getId(), receivedMessage);*/
+        throw new NotImplementedException();
     }
 
     private void isValidResponse(User notary, Body body) {

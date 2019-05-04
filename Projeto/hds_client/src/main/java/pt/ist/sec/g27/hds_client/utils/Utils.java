@@ -58,11 +58,11 @@ public class Utils {
             log.info(errorMessage);
             throw new ResponseException(errorMessage);
         }
-        if (body.getTimestampInUTC().compareTo(HdsClientApplication.getNotary().getTimestampInUTC()) <= 0) {
+        /*if (body.getTimestampInUTC().compareTo(HdsClientApplication.getNotary().getTimestampInUTC()) <= 0) {
             String errorMessage = "The response received was duplicated.";
             log.info(errorMessage);
             throw new ResponseException(errorMessage);
-        }
+        }*/
     }
 
     private static void verifyInnerTimestamp(Message message, Message innerMessage) {

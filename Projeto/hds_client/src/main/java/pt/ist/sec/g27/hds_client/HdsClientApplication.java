@@ -194,7 +194,6 @@ public class HdsClientApplication {
             return;
         }
 
-        String errorMessage = "Could not verify the message";
         log.info(errorMessage);
         System.out.println(errorMessage);
     }
