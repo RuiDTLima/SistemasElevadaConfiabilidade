@@ -22,15 +22,15 @@ public class HdsClientApplication {
 
     private static AppState appState;
     private static User me;
-    private static User notary;
+    private static User[] notaries;
 
     public static User getMe() {
         return me;
     }
 
-    public static User getNotary() {
+    /*public static User getNotary() {
         return notary;
-    }
+    }*/
 
     public static User getUser(int userId) {
         return appState.getUser(userId);
@@ -41,13 +41,14 @@ public class HdsClientApplication {
     }
 
     public static void main(String[] args) {
-        int userId;
+        int userId, byzantineFaultsLimit;
         try {
-            if (args.length == 0) {
-                System.out.println("You need to specify your user id.");
+            if (args.length < 2) {
+                System.out.println("You need to specify your user id and the number of byzantine faults to tolerate.");
                 return;
             }
             userId = Integer.parseInt(args[0]);
+            byzantineFaultsLimit = Integer.parseInt(args[1]);
         } catch (Exception e) {
             System.out.println("The argument needs to be an int.");
             return;
@@ -69,7 +70,14 @@ public class HdsClientApplication {
             return;
         }
 
-        notary = appState.getNotary();
+        notaries = appState.getNotaries();
+
+        if (byzantineFaultsLimit >= ((3 * notaries.length) + 1)) {
+            String errorMessage = String.format("The value of acceptable byzantine faults must be at most (3*N)+1 where N is number of notaries which is currently %d", notaries.length);
+            log.warn(errorMessage);
+            System.out.println(errorMessage);
+            return;
+        }
 
         SpringApplication.run(HdsClientApplication.class, args);
 
@@ -142,7 +150,7 @@ public class HdsClientApplication {
 
         Body body = new Body(me.getId(), goodId);
 
-        Message receivedMessage = makeRequest(notary, uri, body);
+        Message receivedMessage = makeRequestToMultipleNotaries(notaries, uri, body); //  TODO changed
         if (receivedMessage == null)
             return;
 
@@ -168,7 +176,7 @@ public class HdsClientApplication {
             return;
 
         Body body = new Body(me.getId(), goodId);
-        Message receivedMessage = makeRequest(notary, uri, body);
+        Message receivedMessage = makeRequestToMultipleNotaries(notary, uri, body); // TODO changed
         if (receivedMessage == null)
             return;
 
@@ -262,6 +270,19 @@ public class HdsClientApplication {
     private Message makeRequest(User user, String uri, Body body) throws Exception {
         try {
             return restClient.post(user, uri, body, me.getPrivateKey());
+        } catch (UnverifiedException | ResponseException e) {
+            log.warn(e.getMessage(), e);
+            return null;
+        } catch (ConnectionException e) {
+            System.out.println("It wasn't possible to connect to the server.");
+            log.warn(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private Message makeRequestToMultipleNotaries(User[] notaries, String uri, Body body) throws Exception {
+        try {
+            return restClient.postToMultipleNotaries(notaries, uri, body, me.getPrivateKey());
         } catch (UnverifiedException | ResponseException e) {
             log.warn(e.getMessage(), e);
             return null;

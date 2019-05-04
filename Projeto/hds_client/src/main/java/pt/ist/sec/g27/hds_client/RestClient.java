@@ -17,6 +17,8 @@ import pt.ist.sec.g27.hds_client.model.User;
 import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
 
 import java.security.PrivateKey;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RestClient {
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -34,7 +36,24 @@ public class RestClient {
     }
 
     public Message post(User user, String uri, Body body, PrivateKey privateKey) throws Exception {
-        String url = server + user.getPort() + uri;
+        String url = user.getUrl() + uri;//server + user.getPort() + uri;
+        return makeRequest(body, privateKey, url);
+    }
+
+    public Message postToMultipleNotaries(User[] notaries, String uri, Body body, PrivateKey privateKey) throws Exception {
+        List<Message> responses = new ArrayList<>();
+
+        for (int i = 0; i < 10; i++) {
+            String url = notaries[i] + uri;
+            responses.add(makeRequest(body, privateKey, url));
+            log.info(String.format("Received response from the server %d", i));
+        }
+
+        // TODO confirm what to return
+        return responses.stream().findFirst().get();
+    }
+
+    private Message makeRequest(Body body, PrivateKey privateKey, String url) throws java.io.IOException {
         byte[] jsonBody = mapper.writeValueAsBytes(body);
         Message message = new Message(body, SecurityUtils.sign(privateKey, jsonBody));
         String json = mapper.writeValueAsString(message);

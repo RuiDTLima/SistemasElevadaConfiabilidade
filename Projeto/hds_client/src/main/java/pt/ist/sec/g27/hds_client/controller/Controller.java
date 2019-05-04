@@ -31,7 +31,7 @@ public class Controller {
         Body body = new Body(me.getId(), goodId, message);
         Message receivedMessage;
 
-        receivedMessage = restClient.post(HdsClientApplication.getNotary(), "/transferGood", body, me.getPrivateKey());
+        receivedMessage = restClient.postToMultipleNotaries(HdsClientApplication.getNotary(), "/transferGood", body, me.getPrivateKey());
 
         isValidResponse(notary, receivedMessage.getBody());
 

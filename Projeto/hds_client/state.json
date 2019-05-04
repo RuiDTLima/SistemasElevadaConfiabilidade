@@ -1,30 +1,60 @@
 {
-  "users": [
+  "notaries": [
     {
-      "id": 0,
-      "name": "notary",
-      "pubKey": "keys/notary.pub",
-      "port": 8080,
+      "url": "http://localhost:8080",
+      "pubKey": "keys/notary1.pub",
       "timestamp": "1970-01-01T00:00:00.000Z"
     },
+    {
+      "url": "http://localhost:8079",
+      "pubKey": "keys/notary2.pub",
+      "timestamp": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "url": "http://localhost:8078",
+      "pubKey": "keys/notary3.pub",
+      "timestamp": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "url": "http://localhost:8077",
+      "pubKey": "keys/notary4.pub",
+      "timestamp": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "url": "http://localhost:8076",
+      "pubKey": "keys/notary5.pub",
+      "timestamp": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "url": "http://localhost:8075",
+      "pubKey": "keys/notary6.pub",
+      "timestamp": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "url": "http://localhost:8074",
+      "pubKey": "keys/notary7.pub",
+      "timestamp": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "users": [
     {
       "id": 1,
       "name": "alice",
       "pubKey": "keys/alice.pub",
       "privKey": "keys/alice.key",
-      "port": 8081
+      "url": "http://localhost:8081"
     },
     {
       "id": 2,
       "name": "bob",
       "pubKey": "keys/bob.pub",
-      "port": 8082
+      "url": "http://localhost:8082"
     },
     {
       "id": 3,
       "name": "eve",
       "pubKey": "keys/eve.pub",
-      "port": 8083
+      "url": "http://localhost:8083"
     }
   ],
   "goods": [

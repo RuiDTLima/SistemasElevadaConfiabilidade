@@ -9,11 +9,16 @@ import java.util.stream.Stream;
 public class AppState {
     private static final String EXCEPTION_MESSAGE = "There is an error with the state file. Must contain notary information with id 0.";
 
+    private User[] notaries;
     private User[] users;
     private Good[] goods;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private ArrayList<TransferCertificate> transferCertificates;
+
+    public User[] getNotaries() {
+        return notaries;
+    }
 
     public User[] getUsers() {
         return users;
@@ -39,13 +44,6 @@ public class AppState {
                 .filter(good -> good.getId() == goodId)
                 .findFirst()
                 .orElse(null);
-    }
-
-    public User getNotary() {
-        return Arrays.stream(this.users)
-                .filter(user -> user.getId() == 0)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException(EXCEPTION_MESSAGE));
     }
 
     public Stream<Good> getUsersGood(int userId) {

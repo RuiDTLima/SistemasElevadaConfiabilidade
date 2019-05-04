@@ -24,7 +24,7 @@ public class User {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String privKeyPath;
     private PrivateKey privateKey;
-    private int port;
+    private String url;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String timestamp;
@@ -56,8 +56,8 @@ public class User {
         return this.privateKey;
     }
 
-    public int getPort() {
-        return port;
+    public String getUrl() {
+        return url;
     }
 
     public String getTimestamp() {
