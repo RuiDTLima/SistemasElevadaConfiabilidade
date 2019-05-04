@@ -44,7 +44,6 @@ public class Body implements Serializable {
     public Body() {
     }
 
-
     public Body(int senderId, int userId, State state) {
         this.senderId = senderId;
         this.status = HttpStatus.OK;
@@ -53,28 +52,23 @@ public class Body implements Serializable {
         this.state = state.getState();
     }
 
-    public Body(String response) {
+    public Body(int senderId, String response) {
+        this.senderId = senderId;
         this.status = HttpStatus.OK;
         this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
         this.response = response;
     }
 
-    public Body(int notaryId, String response) {
-        this.userId = notaryId;
-        this.status = HttpStatus.OK;
-        this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
-        this.response = response;
-    }
-
-    public Body(int notaryId, String response, TransferCertificate transferCertificate) {
-        this.userId = notaryId;
+    public Body(int senderId, String response, TransferCertificate transferCertificate) {
+        this.senderId = senderId;
         this.status = HttpStatus.OK;
         this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
         this.response = response;
         this.transferCertificate = transferCertificate;
     }
 
-    public Body(HttpExceptions httpExceptions) {
+    public Body(int senderId, HttpExceptions httpExceptions) {
+        this.senderId = senderId;
         this.response = httpExceptions.getErrorMessage();
         this.status = httpExceptions.getHttpStatus();
         this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();

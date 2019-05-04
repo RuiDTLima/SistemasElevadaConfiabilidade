@@ -76,10 +76,12 @@ public class Controller {
             throw new ForbiddenException("You do not have that good.");
         }
 
+        int notaryId = notary.getNotary().getId();
+
         if (good.getState().equals(State.ON_SALE)) {
             String errorMessage = "The good is already on sale.";
             log.info(errorMessage);
-            return new Body("NO");
+            return new Body(notaryId, "NO");
         }
 
         good.setState(State.ON_SALE);
@@ -88,7 +90,7 @@ public class Controller {
 
         saveState();
 
-        return new Body("YES");
+        return new Body(notaryId, "YES");
     }
 
     @VerifyAndSign

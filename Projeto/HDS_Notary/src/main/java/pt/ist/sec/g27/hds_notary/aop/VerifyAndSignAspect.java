@@ -40,17 +40,18 @@ public class VerifyAndSignAspect {
 
     @Around("@annotation(pt.ist.sec.g27.hds_notary.aop.VerifyAndSign)")
     public Object callHandler(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+        int notaryId = notary.getNotary().getId();
         try {
             before(proceedingJoinPoint.getArgs());
         } catch (HttpExceptions e) {
-            return after(new Body(e));
+            return after(new Body(notaryId, e));
         }
 
         Object returnedValue;
         try {
             returnedValue = proceedingJoinPoint.proceed();
         } catch (HttpExceptions e) {
-            returnedValue = new Body(e);
+            returnedValue = new Body(notaryId, e);
         }
 
         return after(returnedValue);
