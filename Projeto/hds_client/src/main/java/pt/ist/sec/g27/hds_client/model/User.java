@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pt.ist.sec.g27.hds_client.aop.VerifyAndSignAspect;
 import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
 
 import java.io.IOException;
@@ -30,8 +29,7 @@ public class User {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String privKeyPath;
     private PrivateKey privateKey;
-    private String password;
-    private int port;
+    private String url;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String timestamp;
@@ -50,49 +48,55 @@ public class User {
     public PublicKey getPublicKey() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
         if (this.publicKey != null)
             return this.publicKey;
+        if (this.pubKeyPath == null) {
+            String errorMessage = "The public key path is not defined in the state.";
+            log.warn(errorMessage);
+            System.out.println(errorMessage);
+            throw new NullPointerException();
+        }
         this.publicKey = SecurityUtils.readPublic(this.pubKeyPath);
         return this.publicKey;
     }
 
-    public PrivateKey getPrivateKey() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
+    public PrivateKey getPrivateKey() throws IOException {
         if (this.privateKey != null)
             return this.privateKey;
-        if (privKeyPath == null)
-            return null;
+        if (this.privKeyPath == null) {
+            String errorMessage = "The private key path is not defined in the state.";
+            log.warn(errorMessage);
+            System.out.println(errorMessage);
+            throw new NullPointerException();
+        }
 
         Scanner scanner = new Scanner(System.in);
-        String password;
 
-        String msg;
-        msg = "Please insert password: ";
-        System.out.print(msg);
-        System.out.flush();
+        while (true) {
+            String msg = "Please insert password: ";
+            System.out.print(msg);
+            System.out.flush();
 
-        try {
-            password = scanner.next();
-            this.privateKey = SecurityUtils.decryptPrivateKey(privKeyPath, password);
-        } catch (IOException e) {
-            msg = "File " + privKeyPath + " corrupted!";
-            log.warn(msg);
-            System.out.println(msg);
-            System.exit(1);
-        } catch (Exception e) {
-            msg = "Password incorrect!";
-            log.warn(msg);
-            System.out.println(msg);
-            System.exit(1);
+            try {
+                String password = scanner.next();
+                this.privateKey = SecurityUtils.decryptPrivateKey(privKeyPath, password);
+                break;
+            } catch (IOException e) {
+                msg = "File " + privKeyPath + " corrupted!";
+                log.warn(msg);
+                System.out.println(msg);
+                throw e;
+            } catch (Exception e) {
+                msg = "Password incorrect! Try again.";
+                log.warn(msg);
+                System.out.println(msg);
+            }
         }
-        finally {
-            msg = "Password Correct!";
-            log.warn(msg);
-            System.out.println(msg);
-        }
+        System.out.println("Password correct!");
 
         return this.privateKey;
     }
 
-    public int getPort() {
-        return port;
+    public String getUrl() {
+        return url;
     }
 
     public String getTimestamp() {

@@ -3,170 +3,66 @@
     {
       "id": 0,
       "name": "notary",
-      "port": 8080
+      "pubKey": "keys/notary.pub",
+      "port": 8080,
+      "timestamp": "1970-01-01T00:00:00.000Z"
     },
     {
       "id": 1,
       "name": "alice",
-      "port": 8081,
-      "timestamp": "1970-01-01T00:00:00.000Z",
-      "pubKey": "keys/alice.pub"
+      "pubKey": "keys/alice.pub",
+      "privKey": "keys/alice.key",
+      "port": 8081
     },
     {
       "id": 2,
       "name": "bob",
-      "port": 8082,
-      "timestamp": "1970-01-01T00:00:00.000Z",
-      "pubKey": "keys/bob.pub"
+      "pubKey": "keys/bob.pub",
+      "port": 8082
     },
     {
       "id": 3,
       "name": "eve",
-      "port": 8083,
-      "timestamp": "1970-01-01T00:00:00.000Z",
-      "pubKey": "keys/eve.pub"
+      "pubKey": "keys/eve.pub",
+      "port": 8083
     }
   ],
   "goods": [
     {
       "id": 1,
+      "owner-id": 1,
       "name": "house",
-      "state": "on-sale",
-      "owner-id": 1
+      "state": "not-on-sale"
     },
     {
       "id": 2,
+      "owner-id": 1,
       "name": "car",
-      "state": "on-sale",
-      "owner-id": 1
+      "state": "not-on-sale"
     },
     {
       "id": 3,
+      "owner-id": 2,
       "name": "motorcycle",
-      "state": "not-on-sale",
-      "owner-id": 2
+      "state": "not-on-sale"
     },
     {
       "id": 4,
+      "owner-id": 2,
       "name": "pool table",
-      "state": "not-on-sale",
-      "owner-id": 2
+      "state": "not-on-sale"
     },
     {
       "id": 5,
+      "owner-id": 1,
       "name": "makeup set",
-      "state": "not-on-sale",
-      "owner-id": 1
+      "state": "not-on-sale"
     },
     {
       "id": 6,
+      "owner-id": 2,
       "name": "phone",
-      "state": "not-on-sale",
-      "owner-id": 2
-    }
-  ],
-  "transfer-certificates": [
-    {
-      "timestamp": "2019-04-06T08:14:31.900Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T08:46:59.184Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T08:50:02.721Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T08:52:18.355Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T08:53:34.374Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T08:55:12.695Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T08:59:58.237Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T09:03:25.145Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T09:08:33.989Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T09:16:21.633Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T09:29:48.086Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T09:34:37.118Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T09:36:44.131Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T11:44:10.587Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T13:41:13.084Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T15:57:05.831Z",
-      "buyer-id": 2,
-      "seller-id": 1,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T15:59:46.976Z",
-      "buyer-id": 2,
-      "seller-id": 1,
-      "good-id": 3
+      "state": "not-on-sale"
     }
   ]
 }

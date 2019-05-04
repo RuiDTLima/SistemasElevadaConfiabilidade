@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
 
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.FileInputStream;
@@ -19,6 +18,10 @@ import java.util.Base64;
 public class SecurityUtils {
     private final static Logger log = LoggerFactory.getLogger(SecurityUtils.class);
     private final static String ALGORITHM_FOR_VERIFY = "SHA256withRSA";
+    private final static String SECRET_KEY_ALGORITHM = "AES";
+    private final static String CIPHER_ALGORITHM = "AES/ECB/PKCS5Padding";
+    private final static String PRIVATE_KEY_ALGORITHM = "RSA";
+    private final static int KEY_LENGTH_IN_BYTES = 16; // Number of bytes for the key with "AES/ECB/PKCS5Padding"
 
     public static PublicKey readPublic(String pubKeyPath) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] encoded = read(pubKeyPath);
@@ -30,7 +33,7 @@ public class SecurityUtils {
     public static PrivateKey readPrivate(String privKeyPath) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] encoded = read(privKeyPath);
         PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(encoded);
-        KeyFactory rsa = KeyFactory.getInstance("RSA");
+        KeyFactory rsa = KeyFactory.getInstance(PRIVATE_KEY_ALGORITHM);
         return rsa.generatePrivate(pkcs8EncodedKeySpec);
     }
 
@@ -71,70 +74,31 @@ public class SecurityUtils {
         }
     }
 
-    public static String encryptPrivateKey(String keyFile, String passPhrase)
-            throws NoSuchPaddingException,
-            NoSuchAlgorithmException,
-            java.security.spec.InvalidKeySpecException,
-            java.security.InvalidKeyException,
-            java.io.IOException,
-            javax.crypto.IllegalBlockSizeException,
-            javax.crypto.BadPaddingException,
-            Exception
-    {
+    public static PrivateKey decryptPrivateKey(String keyFile, String passPhrase) throws Exception {
         byte[] padded_key = getPaddedKey(passPhrase); // Get padded key
-        SecretKey password = new SecretKeySpec(padded_key, "AES"); // Convert byte to key
+        SecretKey password = new SecretKeySpec(padded_key, SECRET_KEY_ALGORITHM); // Convert byte to key
 
-        byte[] encrypted_key;
-        PrivateKey privateKey = readPrivate(keyFile); // Read file to private key
-        byte[] private_key_bytes =  privateKey.getEncoded(); // Private key to bytes
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding"); // Aes with padding 128 bit = 16 byte
-        String base64EncryptedKey;
-
-        cipher.init(Cipher.ENCRYPT_MODE, password); // Set to encrypt mode
-        encrypted_key = cipher.doFinal(private_key_bytes); // Private key encrypted
-        base64EncryptedKey = Base64.getMimeEncoder().encodeToString(encrypted_key);
-
-        return base64EncryptedKey;
-    }
-
-    public static PrivateKey decryptPrivateKey(String keyFile, String passPhrase)
-            throws NoSuchPaddingException,
-            NoSuchAlgorithmException,
-            java.security.spec.InvalidKeySpecException,
-            java.security.InvalidKeyException,
-            java.io.IOException,
-            javax.crypto.IllegalBlockSizeException,
-            javax.crypto.BadPaddingException,
-            Exception
-    {
-        byte[] padded_key = getPaddedKey(passPhrase); // Get padded key
-        SecretKey password = new SecretKeySpec(padded_key, "AES"); // Convert byte to key
-
-        byte[] decrypted_key;
         String base64EncryptedKey = FileUtils.fileToString(keyFile);
         byte[] encrypted_key_bytes = Base64.getMimeDecoder().decode(base64EncryptedKey);
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        KeyFactory rsa = KeyFactory.getInstance("RSA");
-        PrivateKey privateKey;
+        Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
+        KeyFactory rsa = KeyFactory.getInstance(PRIVATE_KEY_ALGORITHM);
 
         cipher.init(Cipher.DECRYPT_MODE, password); // Set to decryption mode
-        decrypted_key = cipher.doFinal(encrypted_key_bytes);
-        privateKey = rsa.generatePrivate(new PKCS8EncodedKeySpec(decrypted_key));
-
-        return privateKey;
+        byte[] decrypted_key = cipher.doFinal(encrypted_key_bytes);
+        return rsa.generatePrivate(new PKCS8EncodedKeySpec(decrypted_key));
     }
 
-    private static byte[] getPaddedKey(String passPhrase) throws Exception{
-        int N = 16; // Number of bytes for the key with "AES/ECB/PKCS5Padding"
-        byte[] key  = passPhrase.getBytes(); // Convert string to byte array
-        byte[] padded_key = new byte[N];
+    private static byte[] getPaddedKey(String passPhrase) throws Exception {
+        byte[] key = passPhrase.getBytes(); // Convert string to byte array
+        byte[] padded_key = new byte[KEY_LENGTH_IN_BYTES];
         int passPhraseLength = key.length;
 
-        if( key.length > N ){ throw new Exception("Key must be smaller than " + N + " bytes!"); }
+        if (passPhraseLength > KEY_LENGTH_IN_BYTES)
+            throw new Exception("Key must be smaller than " + KEY_LENGTH_IN_BYTES + " bytes!");
 
-        // Padd the encryption key with 0's
-        for(int i=0 ; i<N ; i++){ padded_key[i] = i<passPhraseLength ? key[i] : 0; }
+        // Pad the encryption key with 0's
+        for (int i = 0; i < KEY_LENGTH_IN_BYTES; i++)
+            padded_key[i] = i < passPhraseLength ? key[i] : 0;
         return padded_key;
     }
-
 }

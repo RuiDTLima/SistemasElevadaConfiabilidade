@@ -10,9 +10,8 @@ public class FileUtils {
 
     public static String fileToString(String filePath) throws IOException {
         StringBuilder contentBuilder = new StringBuilder();
-        Stream<String> stream = Files.lines( Paths.get(filePath), StandardCharsets.UTF_8);
+        Stream<String> stream = Files.lines(Paths.get(filePath), StandardCharsets.UTF_8);
         stream.forEach(s -> contentBuilder.append(s).append("\n"));
         return contentBuilder.toString();
     }
-
 }

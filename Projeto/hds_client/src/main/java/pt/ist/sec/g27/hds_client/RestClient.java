@@ -34,7 +34,7 @@ public class RestClient {
     }
 
     public Message post(User user, String uri, Body body, PrivateKey privateKey) throws Exception {
-        String url = server + user.getPort() + uri;
+        String url = server + user.getUrl() + uri;
         byte[] jsonBody = mapper.writeValueAsBytes(body);
         Message message = new Message(body, SecurityUtils.sign(privateKey, jsonBody));
         String json = mapper.writeValueAsString(message);
