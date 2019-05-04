@@ -12,6 +12,7 @@ import pt.ist.sec.g27.hds_client.model.*;
 import pt.ist.sec.g27.hds_client.utils.Utils;
 
 import java.io.FileInputStream;
+import java.util.List;
 import java.util.Scanner;
 
 @SpringBootApplication
@@ -22,15 +23,11 @@ public class HdsClientApplication {
 
     private static AppState appState;
     private static User me;
-    private static User[] notaries;
+    private static Notary[] notaries;
 
     public static User getMe() {
         return me;
     }
-
-    /*public static User getNotary() {
-        return notary;
-    }*/
 
     public static User getUser(int userId) {
         return appState.getUser(userId);
@@ -142,7 +139,7 @@ public class HdsClientApplication {
     }
 
     private void intentionToSell(String[] params) throws Exception {
-        String uri = "/intentionToSell";
+        /*String uri = "/intentionToSell";
         int goodId = Integer.parseInt(params[0]);
 
         if (!goodExist(goodId))
@@ -150,7 +147,7 @@ public class HdsClientApplication {
 
         Body body = new Body(me.getId(), goodId);
 
-        Message receivedMessage = makeRequestToMultipleNotaries(notaries, uri, body); //  TODO changed
+        List<Message> receivedMessage = makeRequestToMultipleNotaries(notaries, uri, body); //  TODO changed
         if (receivedMessage == null)
             return;
 
@@ -165,7 +162,7 @@ public class HdsClientApplication {
 
         String errorMessage = "Could not verify the message";
         log.info(errorMessage);
-        System.out.println(errorMessage);
+        System.out.println(errorMessage);*/
     }
 
     private void getStateOfGood(String[] params) throws Exception {
@@ -176,30 +173,45 @@ public class HdsClientApplication {
             return;
 
         Body body = new Body(me.getId(), goodId);
-        Message receivedMessage = makeRequestToMultipleNotaries(notary, uri, body); // TODO changed
-        if (receivedMessage == null)
+        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, uri, body); // TODO changed
+        Body currentBody = null;
+
+        if (receivedMessages == null)
             return;
 
-        Body receivedBody = receivedMessage.getBody();
+        for (Message receivedMessage : receivedMessages) {
+            Body receivedBody = receivedMessage.getBody();
+            Notary notary = appState.getNotary(receivedBody.getUserId());
 
-        if (isValidResponse(receivedBody) && Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage)) {
-            notary.setTimestamp(receivedBody.getTimestamp());
-            String message = String.format("The good with id %d is owned by user with id %d and his state is %s.",
-                    body.getGoodId(),
-                    receivedBody.getUserId(),
-                    receivedBody.getState());
+            if (isValidResponse(notary, receivedBody) && Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage)) {
+                notary.setTimestamp(receivedBody.getTimestamp());
 
-            log.info(message);
-            System.out.println(message);
+                if (currentBody == null)
+                    currentBody = receivedBody;
+                else if (currentBody.getTimestampInUTC().compareTo(receivedBody.getTimestampInUTC()) < 0) {
+                    currentBody = receivedBody;
+                }
+            }
+        }
+
+        if (currentBody == null) {
+            String errorMessage = "There was no valid responses.";
+            log.info(errorMessage);
+            System.out.println(errorMessage);
             return;
         }
 
-        log.info(errorMessage);
-        System.out.println(errorMessage);
+        String message = String.format("The good with id %d is owned by user with id %d and his state is %s.",
+                body.getGoodId(),
+                currentBody.getUserId(),
+                currentBody.getState());
+
+        log.info(message);
+        System.out.println(message);
     }
 
     private void buyGood(String[] params) throws Exception {
-        String uri = "/buyGood";
+        /*String uri = "/buyGood";
         int goodId, userId;
 
         try {
@@ -243,7 +255,7 @@ public class HdsClientApplication {
 
         String response = notaryBody.getResponse();
         log.info(response);
-        System.out.println(response);
+        System.out.println(response);*/
     }
 
     private boolean validateParams(String[] params, int length, String logMessage, String outputMessage) {
@@ -279,7 +291,7 @@ public class HdsClientApplication {
         }
     }
 
-    private Message makeRequestToMultipleNotaries(User[] notaries, String uri, Body body) throws Exception {
+    private List<Message> makeRequestToMultipleNotaries(Notary[] notaries, String uri, Body body) throws Exception {
         try {
             return restClient.postToMultipleNotaries(notaries, uri, body, me.getPrivateKey());
         } catch (UnverifiedException | ResponseException e) {
@@ -292,7 +304,7 @@ public class HdsClientApplication {
         }
     }
 
-    private boolean isValidResponse(Body body) {
+    private boolean isValidResponse(Notary notary, Body body) {
         if (body == null) {
             String errorMessage = "The server could not respond.";
             log.info(errorMessage);

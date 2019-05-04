@@ -44,7 +44,7 @@ public class Controller {
 
         return Arrays.stream(notary.getGoods())
                 .filter(good -> good.getId() == goodId)
-                .map(good -> new Body(good.getOwnerId(), good.getState()))
+                .map(good -> new Body(notary.getNotary().getId(), good.getOwnerId(), good.getState()))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("The id that you specify does not exist."));
     }

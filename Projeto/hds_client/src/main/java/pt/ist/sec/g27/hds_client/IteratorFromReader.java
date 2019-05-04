@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package util;
+package pt.ist.sec.g27.hds_client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
