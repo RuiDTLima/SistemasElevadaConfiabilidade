@@ -25,12 +25,14 @@ public class Controller {
     private static final Logger log = LoggerFactory.getLogger(Controller.class);
 
     private final ObjectMapper mapper;
-    private final Notary notary;
+    private final AppState appState;
+    private final int notaryId;
 
     @Autowired
-    public Controller(ObjectMapper objectMapper, Notary notary) {
+    public Controller(ObjectMapper objectMapper, AppState appState, int notaryId) {
         this.mapper = objectMapper;
-        this.notary = notary;
+        this.appState = appState;
+        this.notaryId = notaryId;
     }
 
     @VerifyAndSign
@@ -39,14 +41,16 @@ public class Controller {
         final int goodId = message.getBody().getGoodId();
         log.info(String.format("Obtaining the state of good with id %d", goodId));
 
-        User user = notary.getUser(message.getBody().getUserId());
+        User user = appState.getUser(message.getBody().getSenderId());
         user.setTimestamp(message.getBody().getTimestamp());
 
-        return Arrays.stream(notary.getGoods())
-                .filter(good -> good.getId() == goodId)
-                .map(good -> new Body(notary.getNotary().getId(), good.getOwnerId(), good.getState()))
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("The id that you specify does not exist."));
+        Good good = appState.getGood(goodId);
+
+        if (good == null)
+            throw new NotFoundException("The id that you specify does not exist.");
+
+        log.info(String.format("The good with id %d belongs to the user with id %d", goodId, good.getOwnerId()));
+        return new Body(notaryId, good.getOwnerId(), good.getState());
     }
 
     @VerifyAndSign
@@ -54,15 +58,15 @@ public class Controller {
     public Object intentionToSell(@RequestBody Message message) {
         Body body = message.getBody();
 
-        int userId = body.getUserId();
+        int userId = body.getSenderId();
 
         int goodId = body.getGoodId();
 
         log.info(String.format("The public key of the user %d was successfully obtained.", userId));
 
-        Good good = notary.getGood(goodId);
+        Good good = appState.getGood(goodId);
 
-        User user = notary.getUser(userId);
+        User user = appState.getUser(userId);
         user.setTimestamp(message.getBody().getTimestamp());
 
         if (good == null) {
@@ -75,8 +79,6 @@ public class Controller {
             log.info(String.format("The state of the good %d could not be changed by the user %d.", goodId, userId));
             throw new ForbiddenException("You do not have that good.");
         }
-
-        int notaryId = notary.getNotary().getId();
 
         if (good.getState().equals(State.ON_SALE)) {
             String errorMessage = "The good is already on sale.";
@@ -101,11 +103,11 @@ public class Controller {
 
         int buyerGoodId = buyerBody.getGoodId();
         int sellerGoodId = sellerBody.getGoodId();
-        int buyerId = buyerBody.getUserId();
-        int sellerId = sellerBody.getUserId();
+        int buyerId = buyerBody.getSenderId();
+        int sellerId = sellerBody.getSenderId();
 
-        User buyer = notary.getUser(buyerId);
-        User seller = notary.getUser(sellerId);
+        User buyer = appState.getUser(buyerId);
+        User seller = appState.getUser(sellerId);
 
         buyer.setTimestamp(buyerBody.getTimestamp());
         seller.setTimestamp(sellerBody.getTimestamp());
@@ -122,7 +124,7 @@ public class Controller {
             throw new ForbiddenException(errorMessage);
         }
 
-        Good g = notary.getGood(buyerGoodId);
+        Good g = appState.getGood(buyerGoodId);
 
         if (g == null) {
             String errorMessage = "Good not found.";
@@ -137,8 +139,6 @@ public class Controller {
             throw new ForbiddenException(errorMessage);
         }
 
-        int notaryId = notary.getNotary().getId();
-
         if (g.getState() != State.ON_SALE) {
             String errorMessage = String.format("The good with id %d is not on sale.", buyerGoodId);
             log.info(errorMessage);
@@ -149,7 +149,7 @@ public class Controller {
         g.setOwnerId(buyerId);
 
         TransferCertificate transferCertificate = new TransferCertificate(buyerId, sellerId, buyerGoodId);
-        notary.addTransferCertificate(transferCertificate);
+        appState.addTransferCertificate(transferCertificate);
 
         log.info(String.format("The good with id %d was transferred from the user with id %d to the user with id %d.", buyerGoodId, sellerId, buyerId));
 
@@ -161,7 +161,7 @@ public class Controller {
     private void saveState() {
         // Writing to a backup file
         try (FileOutputStream fileOutputStream = new FileOutputStream(HdsNotaryApplication.BACKUP_STATE_PATH)) {
-            mapper.writeValue(fileOutputStream, notary);
+            mapper.writeValue(fileOutputStream, appState);
             log.info("The backup state has been updated.");
         } catch (IOException e) {
             log.error("There was an error while trying to save the backup state.", e);

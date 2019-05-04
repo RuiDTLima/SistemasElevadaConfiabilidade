@@ -6,8 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import pt.ist.sec.g27.hds_notary.model.Notary;
-
+import pt.ist.sec.g27.hds_notary.model.AppState;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,15 +19,15 @@ public class HdsNotaryApplication {
     public final static String BACKUP_STATE_PATH = "backup_state.json";
     private final static Logger log = LoggerFactory.getLogger(HdsNotaryApplication.class);
 
-    private static Notary notary;
+    private static AppState appState;
 
     public static void main(String[] args) {
         ObjectMapper mapper = new ObjectMapper();
         try (FileInputStream fileInputStream = new FileInputStream(STATE_PATH)) {
-            notary = mapper.readValue(fileInputStream, Notary.class);
+            appState = mapper.readValue(fileInputStream, AppState.class);
         } catch (Exception e) {
             try (FileInputStream fileInputStream = new FileInputStream(BACKUP_STATE_PATH)) {
-                notary = mapper.readValue(fileInputStream, Notary.class);
+                appState = mapper.readValue(fileInputStream, AppState.class);
             } catch (Exception e1) {
                 log.error("An error occurred.", e1);
                 return;
@@ -43,7 +42,12 @@ public class HdsNotaryApplication {
     }
 
     @Bean
-    public Notary getNotary() {
-        return notary;
+    public AppState getAppState() {
+        return appState;
+    }
+
+    @Bean
+    public int getNotaryId(AppState appState) {
+        return appState.getNotary().getId();
     }
 }

@@ -73,9 +73,9 @@ public class VerifyAndSignAspect {
     }
 
     private void verifyMessageStructure(Body body) {
-        int userId = body.getUserId();
+        int userId = body.getSenderId();
 
-        if (userId == -1 || body.getTimestamp() == null || HdsClientApplication.getUser(userId) == null) {
+        if (body.getTimestamp() == null || HdsClientApplication.getUser(userId) == null) {
             String errorMessage = "The message structure specification was not followed.";
             log.info(errorMessage);
             throw new UnverifiedException(errorMessage);
@@ -85,7 +85,7 @@ public class VerifyAndSignAspect {
     private void verifySignature(Message message) {
         boolean verified;
         try {
-            verified = Utils.verifySingleMessage(HdsClientApplication.getUser(message.getBody().getUserId()).getPublicKey(), message);
+            verified = Utils.verifySingleMessage(HdsClientApplication.getUser(message.getBody().getSenderId()).getPublicKey(), message);
         } catch (Exception e) {
             String errorMessage = "Could not verify the signature of the message";
             log.warn(errorMessage);

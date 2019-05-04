@@ -9,6 +9,7 @@ import pt.ist.sec.g27.hds_client.exceptions.ResponseException;
 import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
 import pt.ist.sec.g27.hds_client.model.Body;
 import pt.ist.sec.g27.hds_client.model.Message;
+import pt.ist.sec.g27.hds_client.model.Notary;
 import pt.ist.sec.g27.hds_client.model.User;
 
 import java.security.PublicKey;
@@ -45,53 +46,53 @@ public class Utils {
         if (!receivedBody.getStatus().is2xxSuccessful())
             throw new ResponseException(receivedBody.getResponse());
 
-        verifyInnerTimestamp(receivedMessage, receivedMessage.getBody().getMessage());
+        Message innerMessage = receivedBody.getMessage();
+        if (innerMessage == null || innerMessage.getBody() == null){
+            String errorMessage = "The message structure specification was not followed.";
+            log.info(errorMessage);
+            throw new ResponseException(errorMessage);
+        }
 
-        if (!verifyAllSignatures(receivedMessage))
+        verifyInnerTimestamp(receivedMessage, innerMessage);
+
+        if (!verifyUserSignature(receivedMessage) || !verifyNotarySignature(innerMessage))
             throw new UnverifiedException("The response received did not originate from the expected source.");
     }
 
-    private static void verifyTimestamp(Message message) {
-        Body body = message.getBody();
-        if (body.getTimestamp() == null) {
-            String errorMessage = "The message structure specification was not followed.";
+    private static boolean verifyNotarySignature(Message receivedMessage) {
+        Body receivedBody = receivedMessage.getBody();
+        int notaryId = receivedBody.getSenderId();
+        Notary notary = HdsClientApplication.getNotary(notaryId);
+
+        if (notary == null) {
+            String errorMessage = String.format("The user with id %d does not exist.", notaryId);
             log.info(errorMessage);
-            throw new ResponseException(errorMessage);
+            throw new UnverifiedException(errorMessage);
         }
-        /*if (body.getTimestampInUTC().compareTo(HdsClientApplication.getNotary().getTimestampInUTC()) <= 0) {
-            String errorMessage = "The response received was duplicated.";
+
+        PublicKey publicKey;
+        try {
+            publicKey = notary.getPublicKey();
+        } catch (Exception e) {
+            String errorMessage = "Cannot find/load the public key of one user";
             log.info(errorMessage);
-            throw new ResponseException(errorMessage);
-        }*/
+            throw new UnverifiedException(errorMessage);
+        }
+
+        byte[] jsonBody;
+        try {
+            jsonBody = jsonObjectToByteArray(receivedBody);
+        } catch (JsonProcessingException e) {
+            log.warn("An error occurred while trying to convert object to byte[]", e);
+            throw new UnverifiedException("Something went wrong while verifying the signature.");
+        }
+
+        return SecurityUtils.verify(publicKey, jsonBody, receivedMessage.getSignature());
     }
 
-    private static void verifyInnerTimestamp(Message message, Message innerMessage) {
-        if (innerMessage == null) {
-            verifyTimestamp(message);
-            return;
-        }
-
-        if (innerMessage.getBody() == null) {
-            String errorMessage = "The message structure specification was not followed.";
-            log.info(errorMessage);
-            throw new ResponseException(errorMessage);
-        }
-        verifyInnerTimestamp(innerMessage, innerMessage.getBody().getMessage());
-    }
-
-    private static boolean verifyAllSignatures(Message message) {
-        if (message == null)    // It is known that in the first iteration the message is not null.
-            return true;
-
-        Body body = message.getBody();
-
-        if (body == null) {
-            String errorMessage = "The server could not respond correctly.";
-            log.info(errorMessage);
-            throw new ResponseException(errorMessage);
-        }
-
-        int userId = body.getUserId();
+    private static boolean verifyUserSignature(Message receivedMessage) {
+        Body receivedBody = receivedMessage.getBody();
+        int userId = receivedBody.getSenderId();
         User user = HdsClientApplication.getUser(userId);
 
         if (user == null) {
@@ -111,12 +112,40 @@ public class Utils {
 
         byte[] jsonBody;
         try {
-            jsonBody = jsonObjectToByteArray(body);
+            jsonBody = jsonObjectToByteArray(receivedBody);
         } catch (JsonProcessingException e) {
             log.warn("An error occurred while trying to convert object to byte[]", e);
             throw new UnverifiedException("Something went wrong while verifying the signature.");
         }
 
-        return SecurityUtils.verify(publicKey, jsonBody, message.getSignature()) && verifyAllSignatures(body.getMessage());
+        return SecurityUtils.verify(publicKey, jsonBody, receivedMessage.getSignature());
+    }
+
+    private static void verifyTimestamp(Message message) {
+        Body body = message.getBody();
+        if (body.getTimestamp() == null) {
+            String errorMessage = "The message structure specification was not followed.";
+            log.info(errorMessage);
+            throw new ResponseException(errorMessage);
+        }
+        if (body.getTimestampInUTC().compareTo(HdsClientApplication.getNotary(body.getSenderId()).getTimestampInUTC()) <= 0) {
+            String errorMessage = "The response received was duplicated.";
+            log.info(errorMessage);
+            throw new ResponseException(errorMessage);
+        }
+    }
+
+    private static void verifyInnerTimestamp(Message message, Message innerMessage) {
+        if (innerMessage == null) {
+            verifyTimestamp(message);
+            return;
+        }
+
+        if (innerMessage.getBody() == null) {
+            String errorMessage = "The message structure specification was not followed.";
+            log.info(errorMessage);
+            throw new ResponseException(errorMessage);
+        }
+        verifyInnerTimestamp(innerMessage, innerMessage.getBody().getMessage());
     }
 }

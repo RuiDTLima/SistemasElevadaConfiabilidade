@@ -1,10 +1,10 @@
 {
+  "notary": {
+    "id": 0,
+    "name": "notary",
+    "port": 8080
+  },
   "users": [
-    {
-      "id": 0,
-      "name": "notary",
-      "port": 8080
-    },
     {
       "id": 1,
       "name": "alice",

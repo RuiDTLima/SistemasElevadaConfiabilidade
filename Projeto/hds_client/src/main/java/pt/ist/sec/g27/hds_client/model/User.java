@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pt.ist.sec.g27.hds_client.HdsClientApplication;
 import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
 
 import java.io.IOException;
@@ -58,40 +59,7 @@ public class User {
         return this.publicKey;
     }
 
-    public PrivateKey getPrivateKey() throws IOException {
-        if (this.privateKey != null)
-            return this.privateKey;
-        if (this.privKeyPath == null) {
-            String errorMessage = "The private key path is not defined in the state.";
-            log.warn(errorMessage);
-            System.out.println(errorMessage);
-            throw new NullPointerException();
-        }
-
-        Scanner scanner = new Scanner(System.in);
-
-        while (true) {
-            String msg = "Please insert password: ";
-            System.out.print(msg);
-            System.out.flush();
-
-            try {
-                String password = scanner.next();
-                this.privateKey = SecurityUtils.decryptPrivateKey(privKeyPath, password);
-                break;
-            } catch (IOException e) {
-                msg = "File " + privKeyPath + " corrupted!";
-                log.warn(msg);
-                System.out.println(msg);
-                throw e;
-            } catch (Exception e) {
-                msg = "Password incorrect! Try again.";
-                log.warn(msg);
-                System.out.println(msg);
-            }
-        }
-        System.out.println("Password correct!");
-
+    public PrivateKey getPrivateKey() {
         return this.privateKey;
     }
 
@@ -111,7 +79,19 @@ public class User {
         return ZonedDateTime.parse(timestamp).withZoneSameInstant(ZoneOffset.UTC);
     }
 
-    public boolean validateUser() {
-        return privKeyPath != null;
+    public boolean validateUser(String password) {
+        if (privKeyPath == null) {
+            String errorMessage = "There is a problem with the state file. It needs a privKey for the user.";
+            throw new IllegalStateException(errorMessage);
+        }
+        try {
+            this.privateKey = SecurityUtils.decryptPrivateKey(privKeyPath, password);
+        } catch (Exception e) {
+            String errorMessage = "The password is incorrect. Try again.";
+            log.info(errorMessage);
+            System.out.println(errorMessage);
+            return false;
+        }
+        return true;
     }
 }

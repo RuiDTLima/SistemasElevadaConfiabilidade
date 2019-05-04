@@ -78,6 +78,10 @@ public class Body implements Serializable {
         return userId;
     }
 
+    public int getSenderId() {
+        return senderId;
+    }
+
     public int getGoodId() {
         return goodId;
     }

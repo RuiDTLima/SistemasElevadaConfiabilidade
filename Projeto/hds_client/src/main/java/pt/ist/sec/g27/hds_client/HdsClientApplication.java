@@ -9,9 +9,11 @@ import pt.ist.sec.g27.hds_client.exceptions.ConnectionException;
 import pt.ist.sec.g27.hds_client.exceptions.ResponseException;
 import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
 import pt.ist.sec.g27.hds_client.model.*;
+import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
 import pt.ist.sec.g27.hds_client.utils.Utils;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -31,6 +33,14 @@ public class HdsClientApplication {
 
     public static User getUser(int userId) {
         return appState.getUser(userId);
+    }
+
+    public static Notary[] getNotaries() {
+        return notaries;
+    }
+
+    public static Notary getNotary(int notaryId) {
+        return appState.getNotary(notaryId);
     }
 
     public static void addTransferCertificate(TransferCertificate transferCertificate) {
@@ -61,11 +71,29 @@ public class HdsClientApplication {
         }
 
         me = appState.getUser(userId);
-        if (!me.validateUser()) {
-            log.warn("The user tried to access the system with an invalid state.");
-            System.out.println("The private key to the given user was not provided in the state.");
-            return;
+        Scanner scanner = new Scanner(System.in);
+        String password = "";
+
+        try {
+            do {
+                String msg = "Please insert password: ";
+                System.out.print(msg);
+                System.out.flush();
+
+                try {
+                    password = scanner.next();
+                } catch (Exception e) {
+                    msg = "Something went wrong while trying to read the password.";
+                    log.warn(msg);
+                    System.out.println(msg);
+                }
+            } while (!me.validateUser(password));
+        } catch (Exception e) {
+            log.warn(e.getMessage());
+            System.out.println(e.getMessage());
         }
+
+        System.out.println("Password is correct.");
 
         notaries = appState.getNotaries();
 
@@ -139,7 +167,7 @@ public class HdsClientApplication {
     }
 
     private void intentionToSell(String[] params) throws Exception {
-        /*String uri = "/intentionToSell";
+        String uri = "/intentionToSell";
         int goodId = Integer.parseInt(params[0]);
 
         if (!goodExist(goodId))
@@ -147,22 +175,35 @@ public class HdsClientApplication {
 
         Body body = new Body(me.getId(), goodId);
 
-        List<Message> receivedMessage = makeRequestToMultipleNotaries(notaries, uri, body); //  TODO changed
-        if (receivedMessage == null)
+        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, uri, body);
+        if (receivedMessages == null)
             return;
 
-        Body receivedBody = receivedMessage.getBody();
+        Body currentBody = null;
+        for (Message receivedMessage : receivedMessages) {
+            Body receivedBody = receivedMessage.getBody();
+            Notary notary = appState.getNotary(receivedBody.getSenderId());
 
-        if (isValidResponse(receivedBody) && Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage)) {
-            notary.setTimestamp(receivedBody.getTimestamp());
-            log.info(String.format("The good with id %d is on sale.", body.getGoodId()));
-            System.out.println(receivedBody.getResponse());
+            if (isValidResponse(notary, receivedBody) && Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage)) {
+                notary.setTimestamp(receivedBody.getTimestamp());
+
+                if (currentBody == null)
+                    currentBody = receivedBody;
+                else if (currentBody.getTimestampInUTC().compareTo(receivedBody.getTimestampInUTC()) < 0) {
+                    currentBody = receivedBody;
+                }
+            }
+        }
+
+        if (currentBody == null) {
+            String errorMessage = "There was no valid responses.";
+            log.info(errorMessage);
+            System.out.println(errorMessage);
             return;
         }
 
-        String errorMessage = "Could not verify the message";
-        log.info(errorMessage);
-        System.out.println(errorMessage);*/
+        log.info(String.format("The good with id %d is on sale.", goodId));
+        System.out.println(currentBody.getResponse());
     }
 
     private void getStateOfGood(String[] params) throws Exception {
@@ -181,7 +222,7 @@ public class HdsClientApplication {
 
         for (Message receivedMessage : receivedMessages) {
             Body receivedBody = receivedMessage.getBody();
-            Notary notary = appState.getNotary(receivedBody.getUserId());
+            Notary notary = appState.getNotary(receivedBody.getSenderId());
 
             if (isValidResponse(notary, receivedBody) && Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage)) {
                 notary.setTimestamp(receivedBody.getTimestamp());
@@ -211,7 +252,7 @@ public class HdsClientApplication {
     }
 
     private void buyGood(String[] params) throws Exception {
-        /*String uri = "/buyGood";
+        String uri = "/buyGood";
         int goodId, userId;
 
         try {
@@ -250,12 +291,14 @@ public class HdsClientApplication {
 
         Body notaryBody = receivedMessage.getBody().getMessage().getBody();
 
+        Notary notary = appState.getNotary(notaryBody.getSenderId());
+
         notary.setTimestamp(notaryBody.getTimestamp());
         addTransferCertificate(notaryBody.getTransferCertificate());
 
         String response = notaryBody.getResponse();
         log.info(response);
-        System.out.println(response);*/
+        System.out.println(response);
     }
 
     private boolean validateParams(String[] params, int length, String logMessage, String outputMessage) {
@@ -312,11 +355,12 @@ public class HdsClientApplication {
             return false;
         }
 
-        if (!body.getStatus().is2xxSuccessful()) {
+        // TODO check invalid requests.
+        /*if (!body.getStatus().is2xxSuccessful()) {
             log.info(body.getResponse());
             System.out.println(body.getResponse());
             return false;
-        }
+        }*/
 
         if (body.getTimestampInUTC().compareTo(notary.getTimestampInUTC()) <= 0) {
             String errorMessage = "The message received is a repeat of a previous one.";

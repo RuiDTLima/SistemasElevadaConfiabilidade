@@ -13,13 +13,12 @@ import pt.ist.sec.g27.hds_notary.exceptions.ForbiddenException;
 import pt.ist.sec.g27.hds_notary.exceptions.HttpExceptions;
 import pt.ist.sec.g27.hds_notary.exceptions.NotFoundException;
 import pt.ist.sec.g27.hds_notary.exceptions.UnauthorizedException;
+import pt.ist.sec.g27.hds_notary.model.AppState;
 import pt.ist.sec.g27.hds_notary.model.Body;
 import pt.ist.sec.g27.hds_notary.model.Message;
-import pt.ist.sec.g27.hds_notary.model.Notary;
 import pt.ist.sec.g27.hds_notary.model.User;
 import pt.ist.sec.g27.hds_notary.utils.SecurityUtils;
 import pt.ist.sec.g27.hds_notary.utils.Utils;
-
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.time.ZonedDateTime;
@@ -29,18 +28,19 @@ import java.time.ZonedDateTime;
 public class VerifyAndSignAspect {
     private final static Logger log = LoggerFactory.getLogger(VerifyAndSignAspect.class);
 
-    private final Notary notary;
+    private final AppState appState;
     private final ObjectMapper objectMapper;
+    private final int notaryId;
 
     @Autowired
-    public VerifyAndSignAspect(Notary notary, ObjectMapper objectMapper) {
-        this.notary = notary;
+    public VerifyAndSignAspect(AppState appState, ObjectMapper objectMapper, int notaryId) {
+        this.appState = appState;
         this.objectMapper = objectMapper;
+        this.notaryId = notaryId;
     }
 
     @Around("@annotation(pt.ist.sec.g27.hds_notary.aop.VerifyAndSign)")
     public Object callHandler(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-        int notaryId = notary.getNotary().getId();
         try {
             before(proceedingJoinPoint.getArgs());
         } catch (HttpExceptions e) {
@@ -90,9 +90,9 @@ public class VerifyAndSignAspect {
             return;
 
         Body body = message.getBody();
-        int userId = body.getUserId();
+        int userId = body.getSenderId();
 
-        if (userId == -1 || body.getTimestamp() == null || notary.getUser(userId) == null) {
+        if (userId == -1 || body.getTimestamp() == null || appState.getUser(userId) == null) {
             String errorMessage = "The message structure specification was not followed.";
             log.info(errorMessage);
             throw new UnauthorizedException(errorMessage);
@@ -106,9 +106,9 @@ public class VerifyAndSignAspect {
             return;
 
         Body body = message.getBody();
-        int userId = body.getUserId();
+        int userId = body.getSenderId();
 
-        ZonedDateTime lastUserTimestamp = notary.getUser(userId).getTimestampInUTC();
+        ZonedDateTime lastUserTimestamp = appState.getUser(userId).getTimestampInUTC();
 
         if (body.getTimestampInUTC().compareTo(lastUserTimestamp) <= 0) {
             String errorMessage = "The message received is out of time, it was sent before the last one.";
@@ -131,8 +131,8 @@ public class VerifyAndSignAspect {
 
         Body body = message.getBody();
 
-        int userId = body.getUserId();
-        User user = notary.getUser(userId);
+        int userId = body.getSenderId();
+        User user = appState.getUser(userId);
 
         if (user == null) {
             String errorMessage = String.format("The user with id %d does not exist.", userId);

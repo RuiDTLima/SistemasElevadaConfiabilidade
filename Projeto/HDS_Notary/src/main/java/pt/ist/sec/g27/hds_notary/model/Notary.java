@@ -1,46 +1,22 @@
 package pt.ist.sec.g27.hds_notary.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-
 public class Notary {
-    private static final int notaryId = 0;
+    private int id;
+    private String name;
+    private int port;
 
-    private User[] users;
-    private Good[] goods;
-
-    @JsonProperty("transfer-certificates")
-    private ArrayList<TransferCertificate> transferCertificates;
-
-    public User[] getUsers() {
-        return users;
+    public int getId() {
+        return id;
     }
 
-    public Good[] getGoods() {
-        return goods;
+    public String getName() {
+        return name;
     }
 
-    public ArrayList<TransferCertificate> getTransferCertificates() {
-        return transferCertificates;
+    public int getPort() {
+        return port;
     }
 
-    @JsonIgnore
-    public User getNotary() {
-        return Arrays.stream(users).filter(user -> user.getId() == notaryId).findFirst().orElse(null);
-    }
-
-    public User getUser(int userId) {
-        return Arrays.stream(users).filter(user -> user.getId() == userId).findFirst().orElse(null);
-    }
-
-    public Good getGood(int goodId) {
-        return Arrays.stream(goods).filter(good -> good.getId() == goodId).findFirst().orElse(null);
-    }
-
-    public void addTransferCertificate(TransferCertificate transferCertificate) {
-        transferCertificates.add(transferCertificate);
+    public Notary() {
     }
 }
