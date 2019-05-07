@@ -1,13 +1,10 @@
 package pt.ist.sec.g27.hds_client.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.http.HttpStatus;
 
 import java.io.Serializable;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 
 public class Body implements Serializable {
     @JsonProperty("user-id")
@@ -34,7 +31,13 @@ public class Body implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private TransferCertificate transferCertificate;
 
-    private String timestamp;
+    @JsonProperty("wts")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private int wTs = -1;
+
+    @JsonProperty("rid")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private int rId = -1;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Message message;
@@ -42,29 +45,37 @@ public class Body implements Serializable {
     public Body() {
     }
 
-    public Body(int senderId, int goodId) {
-        this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
+    public Body(int senderId, int goodId, int id, boolean isRead) {
+        if (isRead)
+            this.rId = id;
+        else
+            this.wTs = id;
         this.senderId = senderId;
         this.goodId = goodId;
     }
 
-    public Body(int senderId, Message message) {
+    public Body(int senderId, int goodId) {
+        this.senderId = senderId;
+        this.goodId = goodId;
+    }
+
+    /*public Body(int senderId, Message message) {
         this.senderId = senderId;
         this.status = message.getBody().getStatus();
         this.message = message;
-    }
+    }*/
 
-    public Body(int senderId, int goodId, Message message) {
-        this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
+    public Body(int senderId, int goodId, Message message, int wTs) {
         this.senderId = senderId;
         this.goodId = goodId;
         this.message = message;
+        this.wTs = wTs;
     }
 
-    public Body(RuntimeException runtimeException) {
+    /*public Body(RuntimeException runtimeException) {
         this.response = runtimeException.getMessage();
         this.status = HttpStatus.BAD_REQUEST;
-    }
+    }*/
 
     public int getUserId() {
         return userId;
@@ -94,13 +105,12 @@ public class Body implements Serializable {
         return transferCertificate;
     }
 
-    public String getTimestamp() {
-        return timestamp;
+    public int getwTs() {
+        return wTs;
     }
 
-    @JsonIgnore
-    public ZonedDateTime getTimestampInUTC() {
-        return ZonedDateTime.parse(timestamp).withZoneSameInstant(ZoneOffset.UTC);
+    public int getrId() {
+        return rId;
     }
 
     public Message getMessage() {

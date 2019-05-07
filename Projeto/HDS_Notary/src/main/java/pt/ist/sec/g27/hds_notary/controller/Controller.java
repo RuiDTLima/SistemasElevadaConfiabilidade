@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
 
 @RestController
 public class Controller {
@@ -38,19 +37,20 @@ public class Controller {
     @VerifyAndSign
     @PostMapping("/getStateOfGood")
     public Object getStateOfGood(@RequestBody Message message) {
-        final int goodId = message.getBody().getGoodId();
+        Body body = message.getBody();
+        final int goodId = body.getGoodId();
         log.info(String.format("Obtaining the state of good with id %d", goodId));
-
-        User user = appState.getUser(message.getBody().getSenderId());
-        user.setTimestamp(message.getBody().getTimestamp());
 
         Good good = appState.getGood(goodId);
 
+        int rId = body.getrId();
+
         if (good == null)
-            throw new NotFoundException("The id that you specify does not exist.");
+            throw new NotFoundException("The id that you specify does not exist.", rId, -1);
 
         log.info(String.format("The good with id %d belongs to the user with id %d", goodId, good.getOwnerId()));
-        return new Body(notaryId, good.getOwnerId(), good.getState());
+
+        return new Body(notaryId, good.getOwnerId(), good.getState(), body.getrId(), good.getwTs());
     }
 
     @VerifyAndSign
@@ -66,33 +66,32 @@ public class Controller {
 
         Good good = appState.getGood(goodId);
 
-        User user = appState.getUser(userId);
-        user.setTimestamp(message.getBody().getTimestamp());
+        int wTs = body.getwTs();
 
         if (good == null) {
             String errorMessage = String.format("The good with id %d does not exist.", goodId);
             log.info(errorMessage);
-            throw new NotFoundException(errorMessage);
+            throw new NotFoundException(errorMessage, -1, wTs);
         }
 
         if (good.getOwnerId() != userId) {
             log.info(String.format("The state of the good %d could not be changed by the user %d.", goodId, userId));
-            throw new ForbiddenException("You do not have that good.");
+            throw new ForbiddenException("You do not have that good.", -1, wTs);
         }
 
         if (good.getState().equals(State.ON_SALE)) {
             String errorMessage = "The good is already on sale.";
             log.info(errorMessage);
-            return new Body(notaryId, "NO");
+            return new Body(notaryId, "NO", -1, wTs);
         }
 
-        good.setState(State.ON_SALE);
-
-        log.info(String.format("The good with id %d owned by the user with id %d is now on sale.", goodId, userId));
-
-        saveState();
-
-        return new Body(notaryId, "YES");
+        if (wTs > good.getwTs()) {
+            good.setState(State.ON_SALE);
+            log.info(String.format("The good with id %d owned by the user with id %d is now on sale.", goodId, userId));
+            saveState();
+            return new Body(notaryId, "YES", -1, wTs);
+        }
+        return new Body(notaryId, "NO", -1, wTs);
     }
 
     @VerifyAndSign

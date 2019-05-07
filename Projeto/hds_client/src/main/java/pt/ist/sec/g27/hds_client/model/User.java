@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pt.ist.sec.g27.hds_client.HdsClientApplication;
 import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
 
 import java.io.IOException;
@@ -14,7 +13,6 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Scanner;
 
 public class User {
     private final static Logger log = LoggerFactory.getLogger(User.class);

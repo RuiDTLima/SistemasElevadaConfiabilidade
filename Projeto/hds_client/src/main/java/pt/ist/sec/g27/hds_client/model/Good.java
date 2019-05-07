@@ -10,6 +10,9 @@ public class Good {
     private String name;
     private State state;
 
+    @JsonProperty("wts")
+    private int wTs;
+
     public int getId() {
         return id;
     }
@@ -26,11 +29,23 @@ public class Good {
         return state;
     }
 
+    public int getwTs() {
+        return wTs;
+    }
+
     public void setOwnerId(int ownerId) {
         this.ownerId = ownerId;
     }
 
     public void setState(State state) {
         this.state = state;
+    }
+
+    public void setwTs(int wTs) {
+        this.wTs = wTs;
+    }
+
+    public void incrWts() {
+        this.wTs++;
     }
 }

@@ -9,11 +9,9 @@ import pt.ist.sec.g27.hds_client.exceptions.ConnectionException;
 import pt.ist.sec.g27.hds_client.exceptions.ResponseException;
 import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
 import pt.ist.sec.g27.hds_client.model.*;
-import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
 import pt.ist.sec.g27.hds_client.utils.Utils;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -26,6 +24,12 @@ public class HdsClientApplication {
     private static AppState appState;
     private static User me;
     private static Notary[] notaries;
+    private static int byzantineFaultsLimit;
+    private static int numberOfNotaries;
+
+    private int rId;
+    private Value[] readList;
+    private boolean[] ackList;
 
     public static User getMe() {
         return me;
@@ -43,12 +47,24 @@ public class HdsClientApplication {
         return appState.getNotary(notaryId);
     }
 
+    public static Good getGood(int goodId) {
+        return appState.getGood(goodId);
+    }
+
+    public static int getByzantineFaultsLimit() {
+        return byzantineFaultsLimit;
+    }
+
+    public static int getNumberOfNotaries() {
+        return numberOfNotaries;
+    }
+
     public static void addTransferCertificate(TransferCertificate transferCertificate) {
         appState.addTransferCertificate(transferCertificate);
     }
 
     public static void main(String[] args) {
-        int userId, byzantineFaultsLimit;
+        int userId;
         try {
             if (args.length < 2) {
                 System.out.println("You need to specify your user id and the number of byzantine faults to tolerate.");
@@ -96,9 +112,10 @@ public class HdsClientApplication {
         System.out.println("Password is correct.");
 
         notaries = appState.getNotaries();
+        numberOfNotaries = notaries.length;
 
-        if (byzantineFaultsLimit >= ((3 * notaries.length) + 1)) {
-            String errorMessage = String.format("The value of acceptable byzantine faults must be at most (3*N)+1 where N is number of notaries which is currently %d", notaries.length);
+        if (byzantineFaultsLimit >= ((3 * numberOfNotaries) + 1)) {
+            String errorMessage = String.format("The value of acceptable byzantine faults must be at most (3*N)+1 where N is number of notaries which is currently %d", numberOfNotaries);
             log.warn(errorMessage);
             System.out.println(errorMessage);
             return;
@@ -107,7 +124,14 @@ public class HdsClientApplication {
         SpringApplication.run(HdsClientApplication.class, args);
 
         HdsClientApplication hdsClientApplication = new HdsClientApplication();
+        hdsClientApplication.init();
         hdsClientApplication.run();
+    }
+
+    private void init() {
+        rId = 0;
+        readList = new Value[numberOfNotaries];
+        ackList = new boolean[numberOfNotaries];
     }
 
     private void run() {
@@ -170,40 +194,66 @@ public class HdsClientApplication {
         String uri = "/intentionToSell";
         int goodId = Integer.parseInt(params[0]);
 
-        if (!goodExist(goodId))
+        Good good = appState.getGood(goodId);
+
+        if (good == null)
             return;
 
-        Body body = new Body(me.getId(), goodId);
+        good.incrWts();
+        int wTs = good.getwTs();
+        ackList = new boolean[numberOfNotaries];
+        Body body = new Body(me.getId(), goodId, wTs, false);
 
         List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, uri, body);
         if (receivedMessages == null)
             return;
 
-        Body currentBody = null;
+        int receives = 0;
+        int yesReceives = 0, noReceives = 0, invalidReceives = 0;
+        Body yesBody = null, noBody = null, invalidBody = null;
         for (Message receivedMessage : receivedMessages) {
             Body receivedBody = receivedMessage.getBody();
-            Notary notary = appState.getNotary(receivedBody.getSenderId());
 
-            if (isValidResponse(notary, receivedBody) && Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage)) {
-                notary.setTimestamp(receivedBody.getTimestamp());
+            if (receivedBody != null) {
+                int notaryId = receivedBody.getSenderId();
+                Notary notary = appState.getNotary(notaryId);
+                if (Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage) && receivedBody.getwTs() == wTs) {
+                    ackList[notaryId] = true;
+                    receives++;
 
-                if (currentBody == null)
-                    currentBody = receivedBody;
-                else if (currentBody.getTimestampInUTC().compareTo(receivedBody.getTimestampInUTC()) < 0) {
-                    currentBody = receivedBody;
+                    if (!receivedBody.getStatus().is2xxSuccessful()) {
+                        invalidReceives++;
+                        invalidBody = receivedBody;
+                    } else if (receivedBody.getResponse().equals("YES")) {
+                        yesReceives++;
+                        yesBody = receivedBody;
+                    } else {
+                        noReceives++;
+                        noBody = receivedBody;
+                    }
+
+                    if (receives > (numberOfNotaries + byzantineFaultsLimit) / 2) {
+                        ackList = new boolean[numberOfNotaries];
+
+                        if (yesReceives > noReceives && yesReceives > invalidReceives) {
+                            log.info(String.format("The good with id %d is on sale.", goodId));
+                            System.out.println(yesBody.getResponse());
+                            return;
+                        } else if (noReceives > invalidReceives) {
+                            log.info(noBody.getResponse());
+                            System.out.println(noBody.getResponse());
+                            return;
+                        }
+                        log.info(invalidBody.getResponse());
+                        System.out.println(invalidBody.getResponse());
+                        return;
+                    }
                 }
             }
-        }
-
-        if (currentBody == null) {
             String errorMessage = "There was no valid responses.";
             log.info(errorMessage);
             System.out.println(errorMessage);
-            return;
         }
-
-        log.info(String.format("The good with id %d is on sale.", goodId));
-        System.out.println(currentBody.getResponse());
     }
 
     private void getStateOfGood(String[] params) throws Exception {
@@ -213,42 +263,57 @@ public class HdsClientApplication {
         if (!goodExist(goodId))
             return;
 
-        Body body = new Body(me.getId(), goodId);
-        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, uri, body); // TODO changed
-        Body currentBody = null;
+        rId++;
+        readList = new Value[numberOfNotaries];
+        Body body = new Body(me.getId(), goodId, rId, true);
+
+        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, uri, body);
 
         if (receivedMessages == null)
             return;
 
+        int receives = 0;
         for (Message receivedMessage : receivedMessages) {
             Body receivedBody = receivedMessage.getBody();
-            Notary notary = appState.getNotary(receivedBody.getSenderId());
 
-            if (isValidResponse(notary, receivedBody) && Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage)) {
-                notary.setTimestamp(receivedBody.getTimestamp());
+            if (receivedBody != null) {
+                int notaryId = receivedBody.getSenderId();
+                Notary notary = appState.getNotary(notaryId);
+                if (Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage) && body.getrId() == rId) {
+                    readList[notaryId] = new Value(receivedBody.getwTs(), receivedBody);
+                    receives++;
+                    if (receives > (numberOfNotaries + byzantineFaultsLimit) / 2) {
+                        int higher = -1;
+                        Body toReturn = null;
+                        for (Value currentValue : readList) {
+                            if (currentValue.getTimestamp() > higher) {
+                                toReturn = currentValue.getValue();
+                                higher = currentValue.getTimestamp();
+                            }
+                        }
+                        readList = new Value[numberOfNotaries];
+                        if (toReturn == null)
+                            continue;
+                        if (!toReturn.getStatus().is2xxSuccessful()) {
+                            log.info(toReturn.getResponse());
+                            System.out.println(toReturn.getResponse());
+                            return;
+                        }
+                        String message = String.format("The good with id %d is owned by user with id %d and his state is %s.",
+                                body.getGoodId(),
+                                toReturn.getUserId(),
+                                toReturn.getState());
 
-                if (currentBody == null)
-                    currentBody = receivedBody;
-                else if (currentBody.getTimestampInUTC().compareTo(receivedBody.getTimestampInUTC()) < 0) {
-                    currentBody = receivedBody;
+                        log.info(message);
+                        System.out.println(message);
+                        return;
+                    }
                 }
             }
         }
-
-        if (currentBody == null) {
-            String errorMessage = "There was no valid responses.";
-            log.info(errorMessage);
-            System.out.println(errorMessage);
-            return;
-        }
-
-        String message = String.format("The good with id %d is owned by user with id %d and his state is %s.",
-                body.getGoodId(),
-                currentBody.getUserId(),
-                currentBody.getState());
-
-        log.info(message);
-        System.out.println(message);
+        String errorMessage = "Did not received a valid response.";
+        log.info(errorMessage);
+        System.out.println(errorMessage);
     }
 
     private void buyGood(String[] params) throws Exception {
@@ -279,7 +344,9 @@ public class HdsClientApplication {
             return;
         }
 
-        if (!goodExist(goodId))
+        Good good = appState.getGood(goodId);
+
+        if (good == null)
             return;
 
         Body body = new Body(me.getId(), goodId);
@@ -291,12 +358,11 @@ public class HdsClientApplication {
 
         Body notaryBody = receivedMessage.getBody().getMessage().getBody();
 
-        Notary notary = appState.getNotary(notaryBody.getSenderId());
-
-        notary.setTimestamp(notaryBody.getTimestamp());
-        addTransferCertificate(notaryBody.getTransferCertificate());
-
         String response = notaryBody.getResponse();
+        if (response.equals("YES")) {
+            good.setwTs(notaryBody.getwTs());
+            addTransferCertificate(notaryBody.getTransferCertificate());
+        }
         log.info(response);
         System.out.println(response);
     }
@@ -345,30 +411,5 @@ public class HdsClientApplication {
             log.warn(e.getMessage(), e);
             return null;
         }
-    }
-
-    private boolean isValidResponse(Notary notary, Body body) {
-        if (body == null) {
-            String errorMessage = "The server could not respond.";
-            log.info(errorMessage);
-            System.out.println(errorMessage);
-            return false;
-        }
-
-        // TODO check invalid requests.
-        /*if (!body.getStatus().is2xxSuccessful()) {
-            log.info(body.getResponse());
-            System.out.println(body.getResponse());
-            return false;
-        }*/
-
-        if (body.getTimestampInUTC().compareTo(notary.getTimestampInUTC()) <= 0) {
-            String errorMessage = "The message received is a repeat of a previous one.";
-            log.info(errorMessage);
-            System.out.println(errorMessage);
-            return false;
-        }
-
-        return true;
     }
 }

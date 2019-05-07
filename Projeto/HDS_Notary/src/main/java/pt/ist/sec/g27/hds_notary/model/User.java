@@ -9,8 +9,6 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 
 public class User {
     private int id;
@@ -21,9 +19,6 @@ public class User {
     private String pubKeyPath;
     private PublicKey publicKey;
     private int port;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String timestamp;
 
     public User() {
     }
@@ -46,18 +41,5 @@ public class User {
 
     public int getPort() {
         return port;
-    }
-
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    @JsonIgnore
-    public ZonedDateTime getTimestampInUTC() {
-        return ZonedDateTime.parse(timestamp).withZoneSameInstant(ZoneOffset.UTC);
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
     }
 }

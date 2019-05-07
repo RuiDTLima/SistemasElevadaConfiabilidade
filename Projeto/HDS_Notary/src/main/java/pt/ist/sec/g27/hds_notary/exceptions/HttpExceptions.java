@@ -1,15 +1,18 @@
 package pt.ist.sec.g27.hds_notary.exceptions;
 
 import org.springframework.http.HttpStatus;
-import pt.ist.sec.g27.hds_notary.model.ErrorModel;
 
 public class HttpExceptions extends RuntimeException {
-    private String errorMessage;
-    private HttpStatus httpStatus;
+    private final String errorMessage;
+    private final HttpStatus httpStatus;
+    private final int rId;
+    private final int wTs;
 
-    HttpExceptions(String errorMessage, HttpStatus httpStatus) {
+    HttpExceptions(String errorMessage, HttpStatus httpStatus, int rId, int wTs) {
         this.errorMessage = errorMessage;
         this.httpStatus = httpStatus;
+        this.rId = rId;
+        this.wTs = wTs;
     }
 
     public String getErrorMessage() {
@@ -18,5 +21,13 @@ public class HttpExceptions extends RuntimeException {
 
     public HttpStatus getHttpStatus() {
         return httpStatus;
+    }
+
+    public int getrId() {
+        return rId;
+    }
+
+    public int getwTs() {
+        return wTs;
     }
 }

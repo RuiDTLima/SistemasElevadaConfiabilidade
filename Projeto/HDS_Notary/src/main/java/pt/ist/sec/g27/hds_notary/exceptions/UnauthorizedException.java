@@ -1,11 +1,9 @@
 package pt.ist.sec.g27.hds_notary.exceptions;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import pt.ist.sec.g27.hds_notary.model.ErrorModel;
 
 public class UnauthorizedException extends HttpExceptions {
-    public UnauthorizedException(String errorMessage) {
-        super(errorMessage, HttpStatus.UNAUTHORIZED);
+    public UnauthorizedException(String errorMessage, int rId, int wTs) {
+        super(errorMessage, HttpStatus.UNAUTHORIZED, rId, wTs);
     }
 }

@@ -1,14 +1,11 @@
 package pt.ist.sec.g27.hds_notary.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.http.HttpStatus;
 import pt.ist.sec.g27.hds_notary.exceptions.HttpExceptions;
 
 import java.io.Serializable;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 
 public class Body implements Serializable {
     @JsonProperty("user-id")
@@ -35,8 +32,11 @@ public class Body implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private TransferCertificate transferCertificate;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String timestamp;
+    @JsonProperty("rid")
+    private int rId;
+
+    @JsonProperty("wts")
+    private int wTs;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Message message;
@@ -44,34 +44,45 @@ public class Body implements Serializable {
     public Body() {
     }
 
-    public Body(int senderId, int userId, State state) {
+    public Body(int senderId, int userId, State state, int rId, int wTs) {
+        this.senderId = senderId;
+        this.status = HttpStatus.OK;
+        this.userId = userId;
+        this.state = state.getState();
+        this.rId = rId;
+        this.wTs = wTs;
+    }
+
+    /*public Body(int senderId, int userId, State state) {
         this.senderId = senderId;
         this.status = HttpStatus.OK;
         this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
         this.userId = userId;
         this.state = state.getState();
-    }
+    }*/
 
-    public Body(int senderId, String response) {
+    public Body(int senderId, String response, int rId, int wTs) {
         this.senderId = senderId;
         this.status = HttpStatus.OK;
-        this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
         this.response = response;
+        this.rId = rId;
+        this.wTs = wTs;
     }
 
-    public Body(int senderId, String response, TransferCertificate transferCertificate) {
+    /*public Body(int senderId, String response, TransferCertificate transferCertificate) {
         this.senderId = senderId;
         this.status = HttpStatus.OK;
         this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
         this.response = response;
         this.transferCertificate = transferCertificate;
-    }
+    }*/
 
-    public Body(int senderId, HttpExceptions httpExceptions) {
+    public Body(int senderId, HttpExceptions httpExceptions, int rId, int wTs) {
         this.senderId = senderId;
         this.response = httpExceptions.getErrorMessage();
         this.status = httpExceptions.getHttpStatus();
-        this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
+        this.rId = rId;
+        this.wTs = wTs;
     }
 
     public int getUserId() {
@@ -102,13 +113,12 @@ public class Body implements Serializable {
         return transferCertificate;
     }
 
-    public String getTimestamp() {
-        return timestamp;
+    public int getrId() {
+        return rId;
     }
 
-    @JsonIgnore
-    public ZonedDateTime getTimestampInUTC() {
-        return ZonedDateTime.parse(timestamp).withZoneSameInstant(ZoneOffset.UTC);
+    public int getwTs() {
+        return wTs;
     }
 
     public Message getMessage() {
