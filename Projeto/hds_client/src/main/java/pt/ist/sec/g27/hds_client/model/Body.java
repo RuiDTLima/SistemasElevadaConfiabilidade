@@ -12,7 +12,7 @@ public class Body implements Serializable {
     private int userId = -1;
 
     @JsonProperty("sender-id")
-    private int senderId;
+    private int senderId = -1;
 
     @JsonProperty("good-id")
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -59,11 +59,11 @@ public class Body implements Serializable {
         this.goodId = goodId;
     }
 
-    /*public Body(int senderId, Message message) {
+    public Body(int senderId, Message message) {
         this.senderId = senderId;
         this.status = message.getBody().getStatus();
         this.message = message;
-    }*/
+    }
 
     public Body(int senderId, int goodId, Message message, int wTs) {
         this.senderId = senderId;
@@ -72,10 +72,11 @@ public class Body implements Serializable {
         this.wTs = wTs;
     }
 
-    /*public Body(RuntimeException runtimeException) {
+    public Body(int senderId, RuntimeException runtimeException) {
+        this.senderId = senderId;
         this.response = runtimeException.getMessage();
         this.status = HttpStatus.BAD_REQUEST;
-    }*/
+    }
 
     public int getUserId() {
         return userId;

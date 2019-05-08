@@ -87,6 +87,7 @@ public class Controller {
 
         if (wTs > good.getwTs()) {
             good.setState(State.ON_SALE);
+            good.setwTs(wTs);
             log.info(String.format("The good with id %d owned by the user with id %d is now on sale.", goodId, userId));
             saveState();
             return new Body(notaryId, "YES", -1, wTs);
@@ -105,56 +106,52 @@ public class Controller {
         int buyerId = buyerBody.getSenderId();
         int sellerId = sellerBody.getSenderId();
 
-        User buyer = appState.getUser(buyerId);
-        User seller = appState.getUser(sellerId);
-
-        buyer.setTimestamp(buyerBody.getTimestamp());
-        seller.setTimestamp(sellerBody.getTimestamp());
+        int wTs = sellerBody.getwTs();
 
         if (buyerId == sellerId) {
             String errorMessage = "The user cannot buy from itself.";
             log.info(errorMessage);
-            throw new ForbiddenException(errorMessage);
+            throw new ForbiddenException(errorMessage, -1, wTs);
         }
 
         if (buyerGoodId != sellerGoodId) {
             String errorMessage = "The good id sent from the seller does not match the good id sent from the buyer.";
             log.info(errorMessage);
-            throw new ForbiddenException(errorMessage);
+            throw new ForbiddenException(errorMessage, -1, wTs);
         }
 
-        Good g = appState.getGood(buyerGoodId);
+        Good good = appState.getGood(buyerGoodId);
 
-        if (g == null) {
+        if (good == null) {
             String errorMessage = "Good not found.";
             log.info(errorMessage);
-            throw new NotFoundException(errorMessage);
+            throw new NotFoundException(errorMessage, -1, wTs);
         }
 
         // Check if owner id coincides
-        if (g.getOwnerId() != sellerId) {
+        if (good.getOwnerId() != sellerId) {
             String errorMessage = String.format("Good with id %d does not belong to the seller.", buyerGoodId);
             log.info(errorMessage);
-            throw new ForbiddenException(errorMessage);
+            throw new ForbiddenException(errorMessage, -1, wTs);
         }
 
-        if (g.getState() != State.ON_SALE) {
+        if (good.getState() != State.ON_SALE) {
             String errorMessage = String.format("The good with id %d is not on sale.", buyerGoodId);
             log.info(errorMessage);
-            return new Body(notaryId, "No");
+            return new Body(notaryId, "No", -1, wTs);
         }
 
-        g.setState(State.NOT_ON_SALE);
-        g.setOwnerId(buyerId);
-
-        TransferCertificate transferCertificate = new TransferCertificate(buyerId, sellerId, buyerGoodId);
-        appState.addTransferCertificate(transferCertificate);
-
-        log.info(String.format("The good with id %d was transferred from the user with id %d to the user with id %d.", buyerGoodId, sellerId, buyerId));
-
-        saveState();
-
-        return new Body(notaryId, "Yes", transferCertificate);
+        if (wTs > good.getwTs()) {
+            good.setState(State.NOT_ON_SALE);
+            good.setOwnerId(buyerId);
+            good.setwTs(wTs);
+            TransferCertificate transferCertificate = new TransferCertificate(buyerId, sellerId, buyerGoodId);
+            appState.addTransferCertificate(transferCertificate);
+            log.info(String.format("The good with id %d was transferred from the user with id %d to the user with id %d.", buyerGoodId, sellerId, buyerId));
+            saveState();
+            return new Body(notaryId, "Yes", transferCertificate, wTs);
+        }
+        return new Body(notaryId, "NO", -1, wTs);
     }
 
     private void saveState() {

@@ -20,7 +20,7 @@ public class Controller {
     private static final Logger log = LoggerFactory.getLogger(Controller.class);
     private static final RestClient restClient = new RestClient();
 
-    private boolean[] ackList; //TODO check if can be two, and if it is needed
+    private boolean[] ackList; //TODO check if can be two, in hds client application and here, and if it is needed
 
     @VerifyAndSign
     @PostMapping("/buyGood")
@@ -46,7 +46,7 @@ public class Controller {
 
 
         int receives = 0, invalidReceives = 0, yesReceives = 0, noReceives = 0;
-        Body invalidBody = null, yesBody = null, noBody = null;
+        Message invalidMessage = null, yesMessage = null, noMessage = null;
         for (Message receivedMessage : receivedMessages) {
             Body receivedBody = receivedMessage.getBody();
 
@@ -59,19 +59,19 @@ public class Controller {
 
                     if (!receivedBody.getStatus().is2xxSuccessful()) {
                         invalidReceives++;
-                        invalidBody = receivedBody;
+                        invalidMessage = receivedMessage;
                     } else if (receivedBody.getResponse().equals("YES")) {
                         yesReceives++;
-                        yesBody = receivedBody;
+                        yesMessage = receivedMessage;
                     } else {
                         noReceives++;
-                        noBody = receivedBody;
+                        noMessage = receivedMessage;
                     }
 
                     if (receives > (numberOfNotaries + HdsClientApplication.getByzantineFaultsLimit()) / 2) {
                         ackList = new boolean[numberOfNotaries];
-
                         if (yesReceives > noReceives && yesReceives > invalidReceives) {
+                            Body yesBody = yesMessage.getBody();
                             String response = String.format("When trying to transfer the good with id %d from the user with id %d to " +
                                             "user with the id %d, the response from the notary was %s",
                                     goodId,
@@ -84,87 +84,30 @@ public class Controller {
                             TransferCertificate transferCertificate = yesBody.getTransferCertificate();
                             HdsClientApplication.addTransferCertificate(transferCertificate);
 
-                            return new Body(me.getId(), currentMessage);
-
-                            // TODO ficamos aqui, alterar bodies para messages
+                            return new Body(me.getId(), yesMessage);
                         } else if (noReceives > invalidReceives) {
-                            log.info(noBody.getResponse());
-                            System.out.println(noBody.getResponse());
-                            return;
+                            Body noBody = noMessage.getBody();
+                            String response = String.format("When trying to transfer the good with id %d from the user with id %d to " +
+                                            "user with the id %d, the response from the notary was %s",
+                                    goodId,
+                                    me.getId(),
+                                    message.getBody().getSenderId(),
+                                    noBody.getResponse());
+                            log.info(response);
+                            System.out.println(response);
+                            return new Body(me.getId(), noMessage);
                         }
+                        Body invalidBody = invalidMessage.getBody();
                         log.info(invalidBody.getResponse());
                         System.out.println(invalidBody.getResponse());
-                        return;
+                        return new Body(me.getId(), invalidMessage);
                     }
                 }
             }
-
-            // TODO apagar desde aqui
-            if (!isValidResponse(currentNotary, receivedBody))
-                continue;
-
-            if (!Utils.verifySingleMessage(currentNotary.getPublicKey(), receivedMessage)) {
-                String errorMessage = "Could not verify the message.";
-                log.info(errorMessage);
-                continue;
-            }
-
-            if (currentMessage == null) {
-                currentMessage = receivedMessage;
-                notary = currentNotary;
-            } else if (currentMessage.getBody().getTimestampInUTC().compareTo(receivedBody.getTimestampInUTC()) < 0) {
-                currentMessage = receivedMessage;
-                notary = currentNotary;
-            }
         }
-
-        if (currentMessage == null || currentMessage.getBody() == null) {
-            String errorMessage = "There was no valid responses.";
-            log.info(errorMessage);
-            System.out.println(errorMessage);
-            throw new ResponseException(errorMessage);
-        }
-
-        Body receivedBody = currentMessage.getBody();
-
-        String response = String.format("When trying to transfer the good with id %d from the user with id %d to " +
-                        "user with the id %d, the response from the notary was %s",
-                goodId,
-                me.getId(),
-                message.getBody().getSenderId(),
-                receivedBody.getResponse());
-
-        log.info(response);
-        System.out.println(response);
-
-        TransferCertificate transferCertificate = receivedBody.getTransferCertificate();
-        HdsClientApplication.addTransferCertificate(transferCertificate);
-
-        notary.setTimestamp(receivedBody.getTimestamp());
-
-        return new Body(me.getId(), currentMessage);
-    }
-
-    private boolean isValidResponse(Notary notary, Body body) {
-        if (body == null) {
-            String errorMessage = "The server could not respond.";
-            log.info(errorMessage);
-            System.out.println(errorMessage);
-            return false;
-        }
-
-        if (!body.getStatus().is2xxSuccessful()) {
-            log.info(body.getResponse());
-            System.out.println(body.getResponse());
-            return false;
-        }
-
-        if (body.getTimestampInUTC().compareTo(notary.getTimestampInUTC()) <= 0) {
-            String errorMessage = "The message received is a repeat of a previous one.";
-            log.info(errorMessage);
-            System.out.println(errorMessage);
-            return false;
-        }
-        return true;
+        String errorMessage = "There was no valid responses.";
+        log.info(errorMessage);
+        System.out.println(errorMessage);
+        throw new ResponseException(errorMessage);
     }
 }

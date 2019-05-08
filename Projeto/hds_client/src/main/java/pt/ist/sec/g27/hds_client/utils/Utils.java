@@ -47,13 +47,16 @@ public class Utils {
             throw new ResponseException(receivedBody.getResponse());
 
         Message innerMessage = receivedBody.getMessage();
-        if (innerMessage == null || innerMessage.getBody() == null){
+        if (innerMessage == null || innerMessage.getBody() == null) {
             String errorMessage = "The message structure specification was not followed.";
             log.info(errorMessage);
             throw new ResponseException(errorMessage);
         }
 
-        verifyInnerTimestamp(receivedMessage, innerMessage);
+        Body innerBody = innerMessage.getBody();
+
+        if (!innerBody.getStatus().is2xxSuccessful())
+            throw new ResponseException(innerBody.getResponse());
 
         if (!verifyUserSignature(receivedMessage) || !verifyNotarySignature(innerMessage))
             throw new UnverifiedException("The response received did not originate from the expected source.");
@@ -119,33 +122,5 @@ public class Utils {
         }
 
         return SecurityUtils.verify(publicKey, jsonBody, receivedMessage.getSignature());
-    }
-
-    private static void verifyTimestamp(Message message) {
-        Body body = message.getBody();
-        if (body.getTimestamp() == null) {
-            String errorMessage = "The message structure specification was not followed.";
-            log.info(errorMessage);
-            throw new ResponseException(errorMessage);
-        }
-        if (body.getTimestampInUTC().compareTo(HdsClientApplication.getNotary(body.getSenderId()).getTimestampInUTC()) <= 0) {
-            String errorMessage = "The response received was duplicated.";
-            log.info(errorMessage);
-            throw new ResponseException(errorMessage);
-        }
-    }
-
-    private static void verifyInnerTimestamp(Message message, Message innerMessage) {
-        if (innerMessage == null) {
-            verifyTimestamp(message);
-            return;
-        }
-
-        if (innerMessage.getBody() == null) {
-            String errorMessage = "The message structure specification was not followed.";
-            log.info(errorMessage);
-            throw new ResponseException(errorMessage);
-        }
-        verifyInnerTimestamp(innerMessage, innerMessage.getBody().getMessage());
     }
 }

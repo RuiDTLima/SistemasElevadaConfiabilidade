@@ -69,13 +69,14 @@ public class Body implements Serializable {
         this.wTs = wTs;
     }
 
-    /*public Body(int senderId, String response, TransferCertificate transferCertificate) {
+    public Body(int senderId, String response, TransferCertificate transferCertificate, int wTs) {
         this.senderId = senderId;
         this.status = HttpStatus.OK;
-        this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
         this.response = response;
         this.transferCertificate = transferCertificate;
-    }*/
+        this.rId = -1;
+        this.wTs = wTs;
+    }
 
     public Body(int senderId, HttpExceptions httpExceptions, int rId, int wTs) {
         this.senderId = senderId;

@@ -23,12 +23,13 @@ public class VerifyAndSignAspect {
 
     @Around("@annotation(pt.ist.sec.g27.hds_client.aop.VerifyAndSign)")
     public Object callHandler(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+        User me = HdsClientApplication.getMe();
         try {
             before(proceedingJoinPoint.getArgs());
         } catch (UnverifiedException | ResponseException e) {
             log.info(e.getMessage(), e);
             System.out.println(e.getMessage());
-            return after(new Body(e));
+            return after(new Body(me.getId(), e));
         }
 
         Object returnedValue;
@@ -37,7 +38,7 @@ public class VerifyAndSignAspect {
         } catch (UnverifiedException | ResponseException | ConnectionException e) {
             log.info(e.getMessage(), e);
             System.out.println(e.getMessage());
-            returnedValue = new Body(e);
+            returnedValue = new Body(me.getId(), e);
         } catch (Exception e) {
             String errorMessage = "There was an error while trying to handle the buyGood request.";
             log.warn(errorMessage, e);
@@ -75,7 +76,7 @@ public class VerifyAndSignAspect {
     private void verifyMessageStructure(Body body) {
         int userId = body.getSenderId();
 
-        if (body.getTimestamp() == null || HdsClientApplication.getUser(userId) == null) {
+        if (HdsClientApplication.getUser(userId) == null) {
             String errorMessage = "The message structure specification was not followed.";
             log.info(errorMessage);
             throw new UnverifiedException(errorMessage);

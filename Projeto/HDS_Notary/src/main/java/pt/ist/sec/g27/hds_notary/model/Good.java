@@ -40,4 +40,8 @@ public class Good {
     public void setState(State state) {
         this.state = state;
     }
+
+    public void setwTs(int wTs) {
+        this.wTs = wTs;
+    }
 }

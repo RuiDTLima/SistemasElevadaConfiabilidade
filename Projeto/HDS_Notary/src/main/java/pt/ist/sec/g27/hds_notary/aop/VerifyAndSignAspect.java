@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import pt.ist.sec.g27.hds_notary.exceptions.ForbiddenException;
 import pt.ist.sec.g27.hds_notary.exceptions.HttpExceptions;
 import pt.ist.sec.g27.hds_notary.exceptions.NotFoundException;
 import pt.ist.sec.g27.hds_notary.exceptions.UnauthorizedException;
@@ -22,7 +21,6 @@ import pt.ist.sec.g27.hds_notary.utils.Utils;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.time.ZonedDateTime;
 
 @Aspect
 @Component
@@ -82,7 +80,6 @@ public class VerifyAndSignAspect {
             throw new NotFoundException("The incoming message does not follow the specification.", -1, -1);
 
         verifyMessageStructure(message);
-        verifyTimestamp(message);
         verifySignature(message);
     }
 
@@ -93,31 +90,12 @@ public class VerifyAndSignAspect {
         Body body = message.getBody();
         int userId = body.getSenderId();
 
-        if (userId == -1 || body.getTimestamp() == null || appState.getUser(userId) == null) {
+        if (userId == -1 || appState.getUser(userId) == null) {
             String errorMessage = "The message structure specification was not followed.";
             log.info(errorMessage);
             throw new UnauthorizedException(errorMessage, -1, -1);
         }
-
         verifyMessageStructure(body.getMessage());
-    }
-
-    private void verifyTimestamp(Message message) {
-        if (message == null)    // It is known that in the first iteration the message is not null.
-            return;
-
-        Body body = message.getBody();
-        int userId = body.getSenderId();
-
-        ZonedDateTime lastUserTimestamp = appState.getUser(userId).getTimestampInUTC();
-
-        if (body.getTimestampInUTC().compareTo(lastUserTimestamp) <= 0) {
-            String errorMessage = "The message received is out of time, it was sent before the last one.";
-            log.info(errorMessage);
-            throw new ForbiddenException(errorMessage, -1, -1);
-        }
-
-        verifyTimestamp(body.getMessage());
     }
 
     private void verifySignature(Message message) {
