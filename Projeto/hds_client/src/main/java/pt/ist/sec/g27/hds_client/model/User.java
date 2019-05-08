@@ -11,8 +11,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 
 public class User {
     private final static Logger log = LoggerFactory.getLogger(User.class);
@@ -29,9 +27,6 @@ public class User {
     private String privKeyPath;
     private PrivateKey privateKey;
     private String url;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String timestamp;
 
     public User() {
     }
@@ -63,18 +58,6 @@ public class User {
 
     public String getUrl() {
         return url;
-    }
-
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public ZonedDateTime getTimestampInUTC() {
-        return ZonedDateTime.parse(timestamp).withZoneSameInstant(ZoneOffset.UTC);
     }
 
     public boolean validateUser(String password) {

@@ -19,21 +19,6 @@
       "id": 3,
       "url": "http://localhost:8077",
       "pubKey": "keys/notary3.pub"
-    },
-    {
-      "id": 4,
-      "url": "http://localhost:8078",
-      "pubKey": "keys/notary4.pub"
-    },
-    {
-      "id": 5,
-      "url": "http://localhost:8079",
-      "pubKey": "keys/notary5.pub"
-    },
-    {
-      "id": 6,
-      "url": "http://localhost:8080",
-      "pubKey": "keys/notary6.pub"
     }
   ],
   "users": [

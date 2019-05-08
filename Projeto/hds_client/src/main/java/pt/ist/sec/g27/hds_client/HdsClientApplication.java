@@ -107,6 +107,7 @@ public class HdsClientApplication {
         } catch (Exception e) {
             log.warn(e.getMessage());
             System.out.println(e.getMessage());
+            return;
         }
 
         System.out.println("Password is correct.");
@@ -250,10 +251,10 @@ public class HdsClientApplication {
                     }
                 }
             }
-            String errorMessage = "There was no valid responses.";
-            log.info(errorMessage);
-            System.out.println(errorMessage);
         }
+        String errorMessage = "There was no valid responses.";
+        log.info(errorMessage);
+        System.out.println(errorMessage);
     }
 
     private void getStateOfGood(String[] params) throws Exception {
@@ -286,7 +287,7 @@ public class HdsClientApplication {
                         int higher = -1;
                         Body toReturn = null;
                         for (Value currentValue : readList) {
-                            if (currentValue.getTimestamp() > higher) {
+                            if (currentValue != null && currentValue.getTimestamp() > higher) {
                                 toReturn = currentValue.getValue();
                                 higher = currentValue.getTimestamp();
                             }

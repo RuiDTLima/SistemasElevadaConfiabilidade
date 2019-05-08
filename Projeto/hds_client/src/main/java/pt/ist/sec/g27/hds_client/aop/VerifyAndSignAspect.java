@@ -74,9 +74,9 @@ public class VerifyAndSignAspect {
     }
 
     private void verifyMessageStructure(Body body) {
-        int userId = body.getSenderId();
+        int senderId = body.getSenderId();
 
-        if (HdsClientApplication.getUser(userId) == null) {
+        if (HdsClientApplication.getUser(senderId) == null) {
             String errorMessage = "The message structure specification was not followed.";
             log.info(errorMessage);
             throw new UnverifiedException(errorMessage);

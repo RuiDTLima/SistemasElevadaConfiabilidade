@@ -53,7 +53,7 @@ public class Controller {
             if (receivedBody != null) {
                 int notaryId = receivedBody.getSenderId();
                 Notary notary = HdsClientApplication.getNotary(notaryId);
-                if (Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage) && receivedBody.getwTs() == wTs) {
+                if (notary != null && Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage) && receivedBody.getwTs() == wTs) {
                     ackList[notaryId] = true;
                     receives++;
 

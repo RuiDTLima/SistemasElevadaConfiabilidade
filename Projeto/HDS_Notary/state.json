@@ -2,7 +2,7 @@
   "notary": {
     "id": 0,
     "name": "notary",
-    "port": 8080
+    "port": 8074
   },
   "users": [
     {

@@ -32,11 +32,11 @@ public class Body implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private TransferCertificate transferCertificate;
 
-    @JsonProperty("rid")
-    private int rId;
-
     @JsonProperty("wts")
     private int wTs;
+
+    @JsonProperty("rid")
+    private int rId;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Message message;
@@ -114,12 +114,12 @@ public class Body implements Serializable {
         return transferCertificate;
     }
 
-    public int getrId() {
-        return rId;
-    }
-
     public int getwTs() {
         return wTs;
+    }
+
+    public int getrId() {
+        return rId;
     }
 
     public Message getMessage() {

@@ -31,7 +31,6 @@ public class RestClient {
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final Logger log = LoggerFactory.getLogger(RestClient.class);
 
-    private final String server = "http://localhost:";
     private final RestTemplate rest;
     private final HttpHeaders headers;
 
@@ -54,9 +53,9 @@ public class RestClient {
         String json = mapper.writeValueAsString(message);
 
         List<CompletableFuture<Optional<Message>>> completableFutures = new ArrayList<>();
-        try(AsyncHttpClient asyncClient = Dsl.asyncHttpClient()) {
+        try (AsyncHttpClient asyncClient = Dsl.asyncHttpClient()) {
 
-            for (int i = 0; i < 7; i++) {
+            for (int i = 0; i < notaries.length; i++) {
                 String url = notaries[i].getUrl() + uri;
 
                 completableFutures.add(asyncClient.preparePost(url)
