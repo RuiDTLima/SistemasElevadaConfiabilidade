@@ -30,42 +30,48 @@
       "name": "house",
       "state": "on-sale",
       "owner-id": 1,
-      "wts": 0
+      "wts": 0,
+      "signature": []
     },
     {
       "id": 2,
       "name": "car",
       "state": "on-sale",
       "owner-id": 1,
-      "wts": 0
+      "wts": 0,
+      "signature": []
     },
     {
       "id": 3,
       "name": "motorcycle",
       "state": "not-on-sale",
       "owner-id": 2,
-      "wts": 0
+      "wts": 0,
+      "signature": []
     },
     {
       "id": 4,
       "name": "pool table",
       "state": "not-on-sale",
       "owner-id": 2,
-      "wts": 0
+      "wts": 0,
+      "signature": []
     },
     {
       "id": 5,
       "name": "makeup set",
       "state": "not-on-sale",
       "owner-id": 1,
-      "wts": 0
+      "wts": 0,
+      "signature": []
     },
     {
       "id": 6,
       "name": "phone",
       "state": "not-on-sale",
       "owner-id": 2,
-      "wts": 0
+      "wts": 0,
+      "signature": []
     }
   ],
   "transfer-certificates": [

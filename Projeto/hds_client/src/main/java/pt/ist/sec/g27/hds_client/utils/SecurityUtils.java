@@ -48,7 +48,7 @@ public class SecurityUtils {
         }
     }
 
-    public static byte[] sign(PrivateKey privateKey, byte[] toSign) {
+    public static byte[] sign(PrivateKey privateKey, byte[] toSign) { // TODO meter byte[] em Object usando o mapper
         try {
             Signature signature = Signature.getInstance(ALGORITHM_FOR_VERIFY);
             signature.initSign(privateKey);

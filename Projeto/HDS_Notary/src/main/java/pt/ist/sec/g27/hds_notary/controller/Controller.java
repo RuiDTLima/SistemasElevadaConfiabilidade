@@ -50,7 +50,7 @@ public class Controller {
 
         log.info(String.format("The good with id %d belongs to the user with id %d", goodId, good.getOwnerId()));
 
-        return new Body(notaryId, good.getOwnerId(), good.getState(), body.getrId(), good.getwTs());
+        return new Body(notaryId, good.getOwnerId(), good.getState(), body.getrId(), good.getwTs(), good.getSignature());
     }
 
     @VerifyAndSign
@@ -87,6 +87,7 @@ public class Controller {
 
         if (wTs > good.getwTs()) {
             good.setState(State.ON_SALE);
+            good.setSignature(body.getSignature());
             good.setwTs(wTs);
             log.info(String.format("The good with id %d owned by the user with id %d is now on sale.", goodId, userId));
             saveState();
@@ -144,6 +145,7 @@ public class Controller {
         if (wTs > good.getwTs()) {
             good.setState(State.NOT_ON_SALE);
             good.setOwnerId(buyerId);
+            good.setSignature(sellerBody.getSignature());
             good.setwTs(wTs);
             TransferCertificate transferCertificate = new TransferCertificate(buyerId, sellerId, buyerGoodId);
             appState.addTransferCertificate(transferCertificate);

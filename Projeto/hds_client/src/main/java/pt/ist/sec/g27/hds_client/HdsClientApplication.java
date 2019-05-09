@@ -9,6 +9,7 @@ import pt.ist.sec.g27.hds_client.exceptions.ConnectionException;
 import pt.ist.sec.g27.hds_client.exceptions.ResponseException;
 import pt.ist.sec.g27.hds_client.exceptions.UnverifiedException;
 import pt.ist.sec.g27.hds_client.model.*;
+import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
 import pt.ist.sec.g27.hds_client.utils.Utils;
 
 import java.io.FileInputStream;
@@ -30,6 +31,7 @@ public class HdsClientApplication {
     private int rId;
     private Value[] readList;
     private boolean[] ackList;
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     public static User getMe() {
         return me;
@@ -76,8 +78,6 @@ public class HdsClientApplication {
             System.out.println("The argument needs to be an int.");
             return;
         }
-
-        ObjectMapper mapper = new ObjectMapper();
 
         try (FileInputStream fileInputStream = new FileInputStream(STATE_PATH)) {
             appState = mapper.readValue(fileInputStream, AppState.class);
@@ -203,7 +203,8 @@ public class HdsClientApplication {
         good.incrWts();
         int wTs = good.getwTs();
         ackList = new boolean[numberOfNotaries];
-        Body body = new Body(me.getId(), goodId, wTs, false);
+        byte[] sigma = SecurityUtils.sign(me.getPrivateKey(), Utils.jsonObjectToByteArray(good));
+        Body body = new Body(me.getId(), goodId, wTs, false, sigma);
 
         List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, uri, body);
         if (receivedMessages == null)
@@ -281,6 +282,17 @@ public class HdsClientApplication {
                 int notaryId = receivedBody.getSenderId();
                 Notary notary = appState.getNotary(notaryId);
                 if (Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage) && body.getrId() == rId) {
+                    int userId = receivedBody.getUserId();
+                    User user = getUser(userId);
+                    if (user == null)
+                        continue;
+                    int receivedGoodId = receivedBody.getGoodId();
+                    Good good = getGood(receivedGoodId);
+                    if (good == null)
+                        continue;
+                    Good receivedGood = new Good(receivedGoodId, userId, good.getName(), State.valueOf(receivedBody.getState()), receivedBody.getwTs());
+                    if (!SecurityUtils.verify(user.getPublicKey(), Utils.jsonObjectToByteArray(receivedGood), receivedBody.getSignature()))
+                        continue;
                     readList[notaryId] = new Value(receivedBody.getwTs(), receivedBody);
                     receives++;
                     if (receives > (numberOfNotaries + byzantineFaultsLimit) / 2) {

@@ -13,6 +13,8 @@ public class Good {
     @JsonProperty("wts")
     private int wTs;
 
+    private byte[] signature;
+
     public int getId() {
         return id;
     }
@@ -33,6 +35,10 @@ public class Good {
         return wTs;
     }
 
+    public byte[] getSignature() {
+        return signature;
+    }
+
     public void setOwnerId(int ownerId) {
         this.ownerId = ownerId;
     }
@@ -43,5 +49,9 @@ public class Good {
 
     public void setwTs(int wTs) {
         this.wTs = wTs;
+    }
+
+    public void setSignature(byte[] signature) {
+        this.signature = signature;
     }
 }

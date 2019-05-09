@@ -11,6 +11,7 @@ import pt.ist.sec.g27.hds_client.aop.VerifyAndSign;
 import pt.ist.sec.g27.hds_client.exceptions.NotFoundException;
 import pt.ist.sec.g27.hds_client.exceptions.ResponseException;
 import pt.ist.sec.g27.hds_client.model.*;
+import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
 import pt.ist.sec.g27.hds_client.utils.Utils;
 
 import java.util.List;
@@ -40,7 +41,8 @@ public class Controller {
         int wTs = good.getwTs();
         int numberOfNotaries = HdsClientApplication.getNumberOfNotaries();
         ackList = new boolean[numberOfNotaries];
-        Body body = new Body(me.getId(), goodId, message, wTs);
+        byte[] sigma = SecurityUtils.sign(me.getPrivateKey(), Utils.jsonObjectToByteArray(good));
+        Body body = new Body(me.getId(), goodId, message, wTs, sigma);
 
         List<Message> receivedMessages = restClient.postToMultipleNotaries(HdsClientApplication.getNotaries(), "/transferGood", body, me.getPrivateKey());
 

@@ -39,6 +39,8 @@ public class Body implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private int rId = -1;
 
+    private byte[] signature;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Message message;
 
@@ -54,6 +56,11 @@ public class Body implements Serializable {
         this.goodId = goodId;
     }
 
+    public Body(int senderId, int goodId, int id, boolean isRead, byte[] signature) {
+        this(senderId, goodId, id, isRead);
+        this.signature = signature;
+    }
+
     public Body(int senderId, int goodId) {
         this.senderId = senderId;
         this.goodId = goodId;
@@ -65,11 +72,12 @@ public class Body implements Serializable {
         this.message = message;
     }
 
-    public Body(int senderId, int goodId, Message message, int wTs) {
+    public Body(int senderId, int goodId, Message message, int wTs, byte[] signature) {
         this.senderId = senderId;
         this.goodId = goodId;
         this.message = message;
         this.wTs = wTs;
+        this.signature = signature;
     }
 
     public Body(int senderId, RuntimeException runtimeException) {
@@ -112,6 +120,10 @@ public class Body implements Serializable {
 
     public int getrId() {
         return rId;
+    }
+
+    public byte[] getSignature() {
+        return signature;
     }
 
     public Message getMessage() {

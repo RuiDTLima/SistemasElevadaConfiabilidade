@@ -38,19 +38,19 @@ public class Body implements Serializable {
     @JsonProperty("rid")
     private int rId;
 
+    private byte[] signature;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Message message;
 
-    public Body() {
-    }
-
-    public Body(int senderId, int userId, State state, int rId, int wTs) {
+    public Body(int senderId, int userId, State state, int rId, int wTs, byte[] signature) {
         this.senderId = senderId;
         this.status = HttpStatus.OK;
         this.userId = userId;
         this.state = state.getState();
         this.rId = rId;
         this.wTs = wTs;
+        this.signature = signature;
     }
 
     /*public Body(int senderId, int userId, State state) {
@@ -120,6 +120,10 @@ public class Body implements Serializable {
 
     public int getrId() {
         return rId;
+    }
+
+    public byte[] getSignature() {
+        return signature;
     }
 
     public Message getMessage() {

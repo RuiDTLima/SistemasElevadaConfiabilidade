@@ -13,6 +13,17 @@ public class Good {
     @JsonProperty("wts")
     private int wTs;
 
+    public Good() {
+    }
+
+    public Good(int id, int ownerId, String name, State state, int wTs) {
+        this.id = id;
+        this.ownerId = ownerId;
+        this.name = name;
+        this.state = state;
+        this.wTs = wTs;
+    }
+
     public int getId() {
         return id;
     }
