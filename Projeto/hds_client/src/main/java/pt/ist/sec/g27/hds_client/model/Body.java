@@ -14,6 +14,9 @@ public class Body implements Serializable {
     @JsonProperty("sender-id")
     private int senderId = -1;
 
+    @JsonProperty("signed-id")
+    private int signedId;
+
     @JsonProperty("good-id")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private int goodId;
@@ -92,6 +95,10 @@ public class Body implements Serializable {
 
     public int getSenderId() {
         return senderId;
+    }
+
+    public int getSignedId() {
+        return signedId;
     }
 
     public int getGoodId() {

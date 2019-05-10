@@ -15,6 +15,9 @@ public class Body implements Serializable {
     @JsonProperty("sender-id")
     private int senderId;
 
+    @JsonProperty("signed-id")
+    private int signedId;
+
     @JsonProperty("good-id")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private int goodId;
@@ -46,7 +49,7 @@ public class Body implements Serializable {
     public Body() {
     }
 
-    public Body(int senderId, int userId, State state, int rId, int wTs, byte[] signature) {
+    public Body(int senderId, int userId, State state, int rId, int wTs, byte[] signature, int signedId) {
         this.senderId = senderId;
         this.status = HttpStatus.OK;
         this.userId = userId;
@@ -54,6 +57,7 @@ public class Body implements Serializable {
         this.rId = rId;
         this.wTs = wTs;
         this.signature = signature;
+        this.signedId = signedId;
     }
 
     /*public Body(int senderId, int userId, State state) {

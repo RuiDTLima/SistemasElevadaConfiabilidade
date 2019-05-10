@@ -27,7 +27,8 @@ public class Controller {
     @PostMapping("/buyGood")
     public Object buyGood(@RequestBody Message message) throws Exception {
         User me = HdsClientApplication.getMe();
-        int goodId = message.getBody().getGoodId();
+        Body buyerBody = message.getBody();
+        int goodId = buyerBody.getGoodId();
 
         Good good = HdsClientApplication.getGood(goodId);
 
@@ -41,11 +42,10 @@ public class Controller {
         int wTs = good.getwTs();
         int numberOfNotaries = HdsClientApplication.getNumberOfNotaries();
         ackList = new boolean[numberOfNotaries];
-        byte[] sigma = SecurityUtils.sign(me.getPrivateKey(), Utils.jsonObjectToByteArray(good));
+        byte[] sigma = SecurityUtils.sign(me.getPrivateKey(), Utils.jsonObjectToByteArray(new Good(goodId, buyerBody.getSenderId(), good.getName(), State.NOT_ON_SALE, wTs, me.getId())));
         Body body = new Body(me.getId(), goodId, message, wTs, sigma);
 
         List<Message> receivedMessages = restClient.postToMultipleNotaries(HdsClientApplication.getNotaries(), "/transferGood", body, me.getPrivateKey());
-
 
         int receives = 0, invalidReceives = 0, yesReceives = 0, noReceives = 0;
         Message invalidMessage = null, yesMessage = null, noMessage = null;

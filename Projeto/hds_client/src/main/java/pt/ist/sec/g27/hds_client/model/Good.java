@@ -7,6 +7,8 @@ public class Good {
 
     @JsonProperty("owner-id")
     private int ownerId;
+    @JsonProperty("signed-id")
+    private int signedId;
     private String name;
     private State state;
 
@@ -16,12 +18,13 @@ public class Good {
     public Good() {
     }
 
-    public Good(int id, int ownerId, String name, State state, int wTs) {
+    public Good(int id, int ownerId, String name, State state, int wTs, int signedId) {
         this.id = id;
         this.ownerId = ownerId;
         this.name = name;
         this.state = state;
         this.wTs = wTs;
+        this.signedId = signedId;
     }
 
     public int getId() {
@@ -30,6 +33,10 @@ public class Good {
 
     public int getOwnerId() {
         return ownerId;
+    }
+
+    public int getSignedId() {
+        return signedId;
     }
 
     public String getName() {

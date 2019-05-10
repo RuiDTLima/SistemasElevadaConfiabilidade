@@ -7,6 +7,8 @@ public class Good {
 
     @JsonProperty("owner-id")
     private int ownerId;
+    @JsonProperty("signed-id")
+    private int signedId;
     private String name;
     private State state;
 
@@ -21,6 +23,10 @@ public class Good {
 
     public int getOwnerId() {
         return ownerId;
+    }
+
+    public int getSignedId() {
+        return signedId;
     }
 
     public String getName() {
@@ -41,6 +47,10 @@ public class Good {
 
     public void setOwnerId(int ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public void setSignedId(int signedId) {
+        this.signedId = signedId;
     }
 
     public void setState(State state) {

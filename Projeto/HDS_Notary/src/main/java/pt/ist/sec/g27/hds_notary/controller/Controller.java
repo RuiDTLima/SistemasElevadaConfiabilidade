@@ -50,7 +50,7 @@ public class Controller {
 
         log.info(String.format("The good with id %d belongs to the user with id %d", goodId, good.getOwnerId()));
 
-        return new Body(notaryId, good.getOwnerId(), good.getState(), body.getrId(), good.getwTs(), good.getSignature());
+        return new Body(notaryId, good.getOwnerId(), good.getState(), body.getrId(), good.getwTs(), good.getSignature(), good.getSignedId());
     }
 
     @VerifyAndSign
@@ -58,11 +58,11 @@ public class Controller {
     public Object intentionToSell(@RequestBody Message message) {
         Body body = message.getBody();
 
-        int userId = body.getSenderId();
+        int senderId = body.getSenderId();
 
         int goodId = body.getGoodId();
 
-        log.info(String.format("The public key of the user %d was successfully obtained.", userId));
+        log.info(String.format("The public key of the user %d was successfully obtained.", senderId));
 
         Good good = appState.getGood(goodId);
 
@@ -74,8 +74,8 @@ public class Controller {
             throw new NotFoundException(errorMessage, -1, wTs);
         }
 
-        if (good.getOwnerId() != userId) {
-            log.info(String.format("The state of the good %d could not be changed by the user %d.", goodId, userId));
+        if (good.getOwnerId() != senderId) {
+            log.info(String.format("The state of the good %d could not be changed by the user %d.", goodId, senderId));
             throw new ForbiddenException("You do not have that good.", -1, wTs);
         }
 
@@ -89,7 +89,8 @@ public class Controller {
             good.setState(State.ON_SALE);
             good.setSignature(body.getSignature());
             good.setwTs(wTs);
-            log.info(String.format("The good with id %d owned by the user with id %d is now on sale.", goodId, userId));
+            good.setSignedId(senderId);
+            log.info(String.format("The good with id %d owned by the user with id %d is now on sale.", goodId, senderId));
             saveState();
             return new Body(notaryId, "YES", -1, wTs);
         }
@@ -147,6 +148,7 @@ public class Controller {
             good.setOwnerId(buyerId);
             good.setSignature(sellerBody.getSignature());
             good.setwTs(wTs);
+            good.setSignedId(sellerId);
             TransferCertificate transferCertificate = new TransferCertificate(buyerId, sellerId, buyerGoodId);
             appState.addTransferCertificate(transferCertificate);
             log.info(String.format("The good with id %d was transferred from the user with id %d to the user with id %d.", buyerGoodId, sellerId, buyerId));

@@ -203,7 +203,7 @@ public class HdsClientApplication {
         good.incrWts();
         int wTs = good.getwTs();
         ackList = new boolean[numberOfNotaries];
-        byte[] sigma = SecurityUtils.sign(me.getPrivateKey(), Utils.jsonObjectToByteArray(good));
+        byte[] sigma = SecurityUtils.sign(me.getPrivateKey(), Utils.jsonObjectToByteArray(new Good(goodId, good.getOwnerId(), good.getName(), State.ON_SALE, wTs, me.getId())));
         Body body = new Body(me.getId(), goodId, wTs, false, sigma);
 
         List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, uri, body);
@@ -283,15 +283,15 @@ public class HdsClientApplication {
                 Notary notary = appState.getNotary(notaryId);
                 if (Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage) && receivedBody.getrId() == rId) {
                     int userId = receivedBody.getUserId();
-                    User user = getUser(userId);
-                    if (user == null)
+                    int signedId = receivedBody.getSignedId();
+                    User signedUser = getUser(signedId);
+                    if (signedUser == null)
                         continue;
-                    int receivedGoodId = receivedBody.getGoodId();
-                    Good good = getGood(receivedGoodId);
+                    Good good = getGood(goodId);
                     if (good == null)
                         continue;
-                    Good receivedGood = new Good(receivedGoodId, userId, good.getName(), State.valueOf(receivedBody.getState()), receivedBody.getwTs());
-                    if (!SecurityUtils.verify(user.getPublicKey(), Utils.jsonObjectToByteArray(receivedGood), receivedBody.getSignature()))
+                    Good receivedGood = new Good(goodId, userId, good.getName(), State.getStateFromString(receivedBody.getState()), receivedBody.getwTs(), signedId);
+                    if (!SecurityUtils.verify(signedUser.getPublicKey(), Utils.jsonObjectToByteArray(receivedGood), receivedBody.getSignature()))
                         continue;
                     readList[notaryId] = new Value(receivedBody.getwTs(), receivedBody);
                     receives++;
@@ -339,13 +339,6 @@ public class HdsClientApplication {
         } catch (NumberFormatException e) {
             log.warn("The provided id was not an integer.");
             System.out.println("The id you provide must be an integer.");
-            return;
-        }
-
-        if (userId == me.getId()) {
-            String errorMessage = "The user cannot buy from itself.";
-            log.info(errorMessage);
-            System.out.println(errorMessage);
             return;
         }
 
