@@ -43,6 +43,9 @@ public class Body implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Message message;
 
+    public Body() {
+    }
+
     public Body(int senderId, int userId, State state, int rId, int wTs, byte[] signature) {
         this.senderId = senderId;
         this.status = HttpStatus.OK;

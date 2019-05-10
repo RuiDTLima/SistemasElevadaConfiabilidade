@@ -281,7 +281,7 @@ public class HdsClientApplication {
             if (receivedBody != null) {
                 int notaryId = receivedBody.getSenderId();
                 Notary notary = appState.getNotary(notaryId);
-                if (Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage) && body.getrId() == rId) {
+                if (Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage) && receivedBody.getrId() == rId) {
                     int userId = receivedBody.getUserId();
                     User user = getUser(userId);
                     if (user == null)

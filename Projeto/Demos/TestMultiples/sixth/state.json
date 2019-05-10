@@ -1,8 +1,8 @@
 {
   "notary": {
-    "id": 5,
+    "id": 0,
     "name": "notary",
-    "port": 8079
+    "port": 8074
   },
   "users": [
     {
@@ -29,6 +29,7 @@
       "id": 1,
       "name": "house",
       "state": "on-sale",
+      "signature": "gr3cKnuNeW+M3SNHZ8JerqUPMhexUFBBxo3TWKcN4Pc0f6TPnhxLqGB4tLCwqntZej10EdNXrAVdb7Gny7dC7GawMQWDcTeTHxChCXXiEFSgRqcduokCBqmFXZoahb7fRtf87+DjTZkAHcYXyJxQFhgPZkHO5UCkoH85grTUiyg=",
       "owner-id": 1,
       "wts": 0
     },
@@ -36,6 +37,7 @@
       "id": 2,
       "name": "car",
       "state": "on-sale",
+      "signature": "Si3mfB45XQDJ8yFQ9rzrneEZfbJ2eJrWH5S9Yg7biJtccnkAEFXeZlPwemUVeUDb2Q3rY8wsiMit9y6jeDTIasVEqlwp5seBnQJDy9lmZ0QyT0ONIX0brrlJEK0LrN3kJGNu5W9u2DhipgA7+0aL2upuz6TI/cZ8EFbHzQU9V20=",
       "owner-id": 1,
       "wts": 0
     },
@@ -43,6 +45,7 @@
       "id": 3,
       "name": "motorcycle",
       "state": "not-on-sale",
+      "signature": "O81SLWoA/t3DHmZQ99bJyNji9q7QdbLU6eXJezgaRi4ZN8Hca51zs8/U1BKzkGYG19ryYXU8XFmDZvGS/tQvaWu0eddEVlYv5c33kLp+s7v+Mr/mnyZxjfRhDFhqnmEMD3bozCShebVOCo04kvyHAokLD/6wpOaS+xgvGmH1Pns=",
       "owner-id": 2,
       "wts": 0
     },
@@ -50,6 +53,7 @@
       "id": 4,
       "name": "pool table",
       "state": "not-on-sale",
+      "signature": "qISxgj6Cr6TOwac6GKChOwGS41tUYrunPJjYjifLbgbG7sTpOdm4z7+nhVGQCYAnJ7ngc5EJQNuFud5VLVdTwnYTNByDF8He42VBgNxPEHjMxVLUTcjOHkOv4ddez55emWVn5/esBRk4+1L4d5XWG/JViFlTyu77xfEcPj1Cyrk=",
       "owner-id": 2,
       "wts": 0
     },
@@ -57,6 +61,7 @@
       "id": 5,
       "name": "makeup set",
       "state": "not-on-sale",
+      "signature": "KKufcaYHqQmOdz4Mp/Gab9PVu5bJDILLRsA8KwUdvDTOGI9YDGmWD1ga6C1P1WkFvdz0kHvNRGHfu1qrzK3bz82powEfuwgqaxhSz85ODbFkBdTTVCCkdnchC0Aw8dqRUlPMR+0aIz2mHBcggqtlDotz71YpveLWiHW0aj+naeA=",
       "owner-id": 1,
       "wts": 0
     },
@@ -64,6 +69,7 @@
       "id": 6,
       "name": "phone",
       "state": "not-on-sale",
+      "signature": "dw+5vTAVAAQso0n+V0LJvf8/k7o8ayDmM/9DrSlq7/XMIpGD1OnorhM6Emk5CCuBtsROupp8uPQqFb59Z5W74qLhdIkyWTUCdUTj+FgYhgIH6uNPyY/GNeRdn1KUo+wdsNtRjGMBkzlKrnxN4NXcg41cuzI/EpF5HyeOvdp47jQ=",
       "owner-id": 2,
       "wts": 0
     }
