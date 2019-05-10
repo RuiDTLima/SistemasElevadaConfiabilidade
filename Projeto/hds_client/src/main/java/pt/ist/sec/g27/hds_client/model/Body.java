@@ -47,9 +47,6 @@ public class Body implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Message message;
 
-    public Body() {
-    }
-
     public Body(int senderId, int goodId, int id, boolean isRead) {
         if (isRead)
             this.rId = id;
@@ -73,6 +70,13 @@ public class Body implements Serializable {
         this.senderId = senderId;
         this.status = message.getBody().getStatus();
         this.message = message;
+    }
+
+    public Body(int senderId, String response, Message message) {
+        this.senderId = senderId;
+        this.status = message.getBody().getStatus();
+        this.message = message;
+        this.response = response;
     }
 
     public Body(int senderId, int goodId, Message message, int wTs, byte[] signature) {

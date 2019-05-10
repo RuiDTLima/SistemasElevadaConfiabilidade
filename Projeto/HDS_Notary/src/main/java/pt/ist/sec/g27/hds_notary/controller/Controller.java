@@ -1,6 +1,7 @@
 package pt.ist.sec.g27.hds_notary.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.ser.YearSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,8 @@ import java.nio.file.StandardCopyOption;
 @RestController
 public class Controller {
     private static final Logger log = LoggerFactory.getLogger(Controller.class);
+    private static final String YES = "YES";
+    private static final String NO= "NO";
 
     private final ObjectMapper mapper;
     private final AppState appState;
@@ -82,7 +85,7 @@ public class Controller {
         if (good.getState().equals(State.ON_SALE)) {
             String errorMessage = "The good is already on sale.";
             log.info(errorMessage);
-            return new Body(notaryId, "NO", -1, wTs);
+            return new Body(notaryId, NO, -1, wTs);
         }
 
         if (wTs > good.getwTs()) {
@@ -92,10 +95,10 @@ public class Controller {
             good.setSignedId(senderId);
             log.info(String.format("The good with id %d owned by the user with id %d is now on sale.", goodId, senderId));
             saveState();
-            return new Body(notaryId, "YES", -1, wTs);
+            return new Body(notaryId,YES, -1, wTs);
         }
 
-        return new Body(notaryId, "NO", -1, wTs);
+        return new Body(notaryId, NO, -1, wTs);
     }
 
     @VerifyAndSign
@@ -141,7 +144,7 @@ public class Controller {
         if (good.getState() != State.ON_SALE) {
             String errorMessage = String.format("The good with id %d is not on sale.", buyerGoodId);
             log.info(errorMessage);
-            return new Body(notaryId, "No", -1, wTs);
+            return new Body(notaryId, NO, -1, wTs);
         }
 
         if (wTs > good.getwTs()) {
@@ -154,9 +157,9 @@ public class Controller {
             appState.addTransferCertificate(transferCertificate);
             log.info(String.format("The good with id %d was transferred from the user with id %d to the user with id %d.", buyerGoodId, sellerId, buyerId));
             saveState();
-            return new Body(notaryId, "Yes", transferCertificate, wTs);
+            return new Body(notaryId, YES, transferCertificate, wTs);
         }
-        return new Body(notaryId, "NO", -1, wTs);
+        return new Body(notaryId, NO, -1, wTs);
     }
 
     @VerifyAndSign
@@ -180,10 +183,10 @@ public class Controller {
             good.setwTs(wTs);
             good.setSignature(receivedBody.getSignature());
             good.setSignedId(receivedBody.getSignedId());
-            return new Body(notaryId, "YES", receivedBody.getrId(), wTs);
+            return new Body(notaryId, YES, receivedBody.getrId(), wTs);
         }
 
-        return new Body(notaryId, "NO", receivedBody.getrId(), wTs);
+        return new Body(notaryId, NO, receivedBody.getrId(), wTs);
     }
 
     private void saveState() {

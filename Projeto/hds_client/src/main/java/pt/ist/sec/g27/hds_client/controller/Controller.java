@@ -1,5 +1,6 @@
 package pt.ist.sec.g27.hds_client.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,9 @@ import java.util.List;
 public class Controller {
     private static final Logger log = LoggerFactory.getLogger(Controller.class);
     private static final RestClient restClient = new RestClient();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String YES = "YES";
+    private static final String NO = "NO";
 
     private boolean[] ackList; //TODO check if can be two, in hds client application and here, and if it is needed
 
@@ -42,7 +46,9 @@ public class Controller {
         int wTs = good.getwTs();
         int numberOfNotaries = HdsClientApplication.getNumberOfNotaries();
         ackList = new boolean[numberOfNotaries];
-        byte[] sigma = SecurityUtils.sign(me.getPrivateKey(), Utils.jsonObjectToByteArray(new Good(goodId, buyerBody.getSenderId(), good.getName(), State.NOT_ON_SALE, wTs, me.getId())));
+        Good signedGood = new Good(goodId, buyerBody.getSenderId(), good.getName(), State.NOT_ON_SALE, wTs, me.getId());
+        System.out.println(objectMapper.writeValueAsString(signedGood));
+        byte[] sigma = SecurityUtils.sign(me.getPrivateKey(), Utils.jsonObjectToByteArray(signedGood));
         Body body = new Body(me.getId(), goodId, message, wTs, sigma);
 
         List<Message> receivedMessages = restClient.postToMultipleNotaries(HdsClientApplication.getNotaries(), "/transferGood", body, me.getPrivateKey());
@@ -62,7 +68,7 @@ public class Controller {
                     if (!receivedBody.getStatus().is2xxSuccessful()) {
                         invalidReceives++;
                         invalidMessage = receivedMessage;
-                    } else if (receivedBody.getResponse().equals("YES")) {
+                    } else if (receivedBody.getResponse().equals(YES)) {
                         yesReceives++;
                         yesMessage = receivedMessage;
                     } else {
@@ -86,7 +92,7 @@ public class Controller {
                             TransferCertificate transferCertificate = yesBody.getTransferCertificate();
                             HdsClientApplication.addTransferCertificate(transferCertificate);
 
-                            return new Body(me.getId(), yesMessage);
+                            return new Body(me.getId(), YES, yesMessage);
                         } else if (noReceives > invalidReceives) {
                             Body noBody = noMessage.getBody();
                             String response = String.format("When trying to transfer the good with id %d from the user with id %d to " +
@@ -97,12 +103,12 @@ public class Controller {
                                     noBody.getResponse());
                             log.info(response);
                             System.out.println(response);
-                            return new Body(me.getId(), noMessage);
+                            return new Body(me.getId(), NO, noMessage);
                         }
                         Body invalidBody = invalidMessage.getBody();
                         log.info(invalidBody.getResponse());
                         System.out.println(invalidBody.getResponse());
-                        return new Body(me.getId(), invalidMessage);
+                        return new Body(me.getId(), invalidBody.getResponse(), invalidMessage);
                     }
                 }
             }

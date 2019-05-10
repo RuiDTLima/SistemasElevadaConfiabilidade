@@ -21,6 +21,7 @@ public class HdsClientApplication {
     private static final String STATE_PATH = "state.json";
     private static final Logger log = LoggerFactory.getLogger(HdsClientApplication.class);
     private static final RestClient restClient = new RestClient();
+    public static final String YES = "YES";
 
     private static AppState appState;
     private static User me;
@@ -203,7 +204,7 @@ public class HdsClientApplication {
         good.incrWts();
         int wTs = good.getwTs();
         ackList = new boolean[numberOfNotaries];
-        byte[] sigma = SecurityUtils.sign(me.getPrivateKey(), Utils.jsonObjectToByteArray(new Good(goodId, good.getOwnerId(), good.getName(), State.ON_SALE, wTs, me.getId())));
+        byte[] sigma = SecurityUtils.sign(me.getPrivateKey(), Utils.jsonObjectToByteArray(new Good(goodId, me.getId(), good.getName(), State.ON_SALE, wTs, me.getId())));
         Body body = new Body(me.getId(), goodId, wTs, false, sigma);
 
         List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, uri, body);
@@ -226,7 +227,7 @@ public class HdsClientApplication {
                     if (!receivedBody.getStatus().is2xxSuccessful()) {
                         invalidReceives++;
                         invalidBody = receivedBody;
-                    } else if (receivedBody.getResponse().equals("YES")) {
+                    } else if (receivedBody.getResponse().equals(YES)) {
                         yesReceives++;
                         yesBody = receivedBody;
                     } else {
@@ -369,7 +370,7 @@ public class HdsClientApplication {
         Body notaryBody = receivedMessage.getBody().getMessage().getBody();
 
         String response = notaryBody.getResponse();
-        if (response.equals("YES")) {
+        if (response.equals(YES)) {
             good.setwTs(notaryBody.getwTs());
             addTransferCertificate(notaryBody.getTransferCertificate());
         }
