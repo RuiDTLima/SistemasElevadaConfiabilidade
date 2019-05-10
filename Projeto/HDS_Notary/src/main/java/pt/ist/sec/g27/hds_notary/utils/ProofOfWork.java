@@ -8,7 +8,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 // Proof of work
-public class Pow {
+public class ProofOfWork {
     private static final String SHA256 = "SHA-256";
     private static final int BYTE_SIZE = 8; // 8 BIT
 
@@ -16,7 +16,7 @@ public class Pow {
     private int numberBit;
     private final MessageDigest digest;
 
-    Pow(byte[] message, int numberBit) throws NoSuchAlgorithmException {
+    ProofOfWork(byte[] message, int numberBit) throws NoSuchAlgorithmException {
         if (numberBit > 256)
             throw new IllegalArgumentException("Number of bits must be at max 256 bit.");
         this.digest = MessageDigest.getInstance(SHA256);
@@ -24,7 +24,7 @@ public class Pow {
         this.numberBit = numberBit;
     }
 
-    Pow(String message, int numberBit) throws NoSuchAlgorithmException {
+    ProofOfWork(String message, int numberBit) throws NoSuchAlgorithmException {
         this(message.getBytes(StandardCharsets.UTF_8), numberBit);
     }
 
@@ -69,10 +69,5 @@ public class Pow {
         byte[] hash = digest.digest(input);
         digest.reset();
         return hash;
-    }
-
-    public static void main(String[] args) throws NoSuchAlgorithmException {
-        Pow p = new Pow("hello", 8);
-        System.out.println(p.compute().toString());
     }
 }

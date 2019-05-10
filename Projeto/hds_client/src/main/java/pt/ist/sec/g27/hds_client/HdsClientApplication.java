@@ -13,6 +13,8 @@ import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
 import pt.ist.sec.g27.hds_client.utils.Utils;
 
 import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
@@ -161,19 +163,19 @@ public class HdsClientApplication {
 
     private void commands(String command, String[] params) throws Exception {
         switch (command) {
-            case "intentionToSell":
-                if (validateParams(params,
-                        1,
-                        String.format("To invoke intentionToSell there needs to be passed one id. It was passed %d ids.", params.length),
-                        "To invoke intentionToSell there needs to be passed one id."))
-                    intentionToSell(params);
-                break;
             case "getStateOfGood":
                 if (validateParams(params,
                         1,
                         String.format("To invoke getStateOfGood there needs to be passed one id. It was passed %d ids.", params.length),
                         "To invoke getStateOfGood there needs to be passed one id."))
                     getStateOfGood(params);
+                break;
+            case "intentionToSell":
+                if (validateParams(params,
+                        1,
+                        String.format("To invoke intentionToSell there needs to be passed one id. It was passed %d ids.", params.length),
+                        "To invoke intentionToSell there needs to be passed one id."))
+                    intentionToSell(params);
                 break;
             case "buyGood":
                 if (validateParams(params,
@@ -190,73 +192,6 @@ public class HdsClientApplication {
                 System.out.println("Unknown command.");
                 break;
         }
-    }
-
-    private void intentionToSell(String[] params) throws Exception {
-        String uri = "/intentionToSell";
-        int goodId = Integer.parseInt(params[0]);
-
-        Good good = appState.getGood(goodId);
-
-        if (good == null)
-            return;
-
-        good.incrWts();
-        int wTs = good.getwTs();
-        ackList = new boolean[numberOfNotaries];
-        byte[] sigma = SecurityUtils.sign(me.getPrivateKey(), Utils.jsonObjectToByteArray(new Good(goodId, me.getId(), good.getName(), State.ON_SALE, wTs, me.getId())));
-        Body body = new Body(me.getId(), goodId, wTs, false, sigma);
-
-        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, uri, body);
-        if (receivedMessages == null)
-            return;
-
-        int receives = 0;
-        int yesReceives = 0, noReceives = 0, invalidReceives = 0;
-        Body yesBody = null, noBody = null, invalidBody = null;
-        for (Message receivedMessage : receivedMessages) {
-            Body receivedBody = receivedMessage.getBody();
-
-            if (receivedBody != null) {
-                int notaryId = receivedBody.getSenderId();
-                Notary notary = appState.getNotary(notaryId);
-                if (notary != null && Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage) && receivedBody.getwTs() == wTs) {
-                    ackList[notaryId] = true;
-                    receives++;
-
-                    if (!receivedBody.getStatus().is2xxSuccessful()) {
-                        invalidReceives++;
-                        invalidBody = receivedBody;
-                    } else if (receivedBody.getResponse().equals(YES)) {
-                        yesReceives++;
-                        yesBody = receivedBody;
-                    } else {
-                        noReceives++;
-                        noBody = receivedBody;
-                    }
-
-                    if (receives > (numberOfNotaries + byzantineFaultsLimit) / 2) {
-                        ackList = new boolean[numberOfNotaries];
-
-                        if (yesReceives > noReceives && yesReceives > invalidReceives) {
-                            log.info(String.format("The good with id %d is on sale.", goodId));
-                            System.out.println(yesBody.getResponse());
-                            return;
-                        } else if (noReceives > invalidReceives) {
-                            log.info(noBody.getResponse());
-                            System.out.println(noBody.getResponse());
-                            return;
-                        }
-                        log.info(invalidBody.getResponse());
-                        System.out.println(invalidBody.getResponse());
-                        return;
-                    }
-                }
-            }
-        }
-        String errorMessage = "There was no valid responses.";
-        log.info(errorMessage);
-        System.out.println(errorMessage);
     }
 
     private void getStateOfGood(String[] params) throws Exception {
@@ -330,6 +265,86 @@ public class HdsClientApplication {
             }
         }
         String errorMessage = "Did not received a valid response.";
+        log.info(errorMessage);
+        System.out.println(errorMessage);
+    }
+
+    private void intentionToSell(String[] params) throws Exception {
+        String uri = "/intentionToSell";
+        int goodId = Integer.parseInt(params[0]);
+
+        Good good = appState.getGood(goodId);
+
+        if (good == null)
+            return;
+
+        good.incrWts();
+        int wTs = good.getwTs();
+        ackList = new boolean[numberOfNotaries];
+        byte[] sigma = SecurityUtils.sign(me.getPrivateKey(), Utils.jsonObjectToByteArray(new Good(goodId, me.getId(), good.getName(), State.ON_SALE, wTs, me.getId())));
+        Body body = new Body(me.getId(), goodId, wTs, false, sigma);
+
+        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, uri, body);
+        if (receivedMessages == null)
+            return;
+
+        int receives = 0;
+        int yesReceives = 0, noReceives = 0, invalidReceives = 0;
+        Body yesBody = null, noBody = null, invalidBody = null;
+
+        List<Integer> receivedwTs = new ArrayList<>();
+        for (Message receivedMessage : receivedMessages) {
+            Body receivedBody = receivedMessage.getBody();
+
+            if (receivedBody != null) {
+                int notaryId = receivedBody.getSenderId();
+                Notary notary = appState.getNotary(notaryId);
+
+                if (notary != null && Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage)) {
+                    int currentwTs = receivedBody.getwTs();
+                    receivedwTs.add(currentwTs);
+                    if (currentwTs == wTs) {
+                        ackList[notaryId] = true;
+                        receives++;
+
+                        if (!receivedBody.getStatus().is2xxSuccessful()) {
+                            invalidReceives++;
+                            invalidBody = receivedBody;
+                        } else if (receivedBody.getResponse().equals(YES)) {
+                            yesReceives++;
+                            yesBody = receivedBody;
+                        } else {
+                            noReceives++;
+                            noBody = receivedBody;
+                        }
+
+                        if (receives > (numberOfNotaries + byzantineFaultsLimit) / 2) {
+                            ackList = new boolean[numberOfNotaries];
+
+                            if (yesReceives > noReceives && yesReceives > invalidReceives) {
+                                log.info(String.format("The good with id %d is on sale.", goodId));
+                                System.out.println(yesBody.getResponse());
+                                return;
+                            } else if (noReceives > invalidReceives) {
+                                log.info(noBody.getResponse());
+                                System.out.println(noBody.getResponse());
+                                return;
+                            }
+                            log.info(invalidBody.getResponse());
+                            System.out.println(invalidBody.getResponse());
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        if (receivedwTs.size() > (numberOfNotaries + byzantineFaultsLimit) / 2) {
+            int max = Collections.max(receivedwTs);
+            good.setwTs(max);
+            intentionToSell(params);
+            return;
+        }
+        String errorMessage = "There was no valid responses.";
         log.info(errorMessage);
         System.out.println(errorMessage);
     }

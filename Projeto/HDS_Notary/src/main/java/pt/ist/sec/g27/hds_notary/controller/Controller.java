@@ -1,7 +1,6 @@
 package pt.ist.sec.g27.hds_notary.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.ser.YearSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,7 @@ import java.nio.file.StandardCopyOption;
 public class Controller {
     private static final Logger log = LoggerFactory.getLogger(Controller.class);
     private static final String YES = "YES";
-    private static final String NO= "NO";
+    private static final String NO = "NO";
 
     private final ObjectMapper mapper;
     private final AppState appState;
@@ -82,23 +81,24 @@ public class Controller {
             throw new ForbiddenException("You do not have that good.", -1, wTs);
         }
 
+        int goodwTs = good.getwTs();
         if (good.getState().equals(State.ON_SALE)) {
             String errorMessage = "The good is already on sale.";
             log.info(errorMessage);
-            return new Body(notaryId, NO, -1, wTs);
+            return new Body(notaryId, NO, -1, wTs > goodwTs ? wTs : goodwTs);
         }
 
-        if (wTs > good.getwTs()) {
+        if (wTs > goodwTs) {
             good.setState(State.ON_SALE);
             good.setSignature(body.getSignature());
             good.setwTs(wTs);
             good.setSignedId(senderId);
             log.info(String.format("The good with id %d owned by the user with id %d is now on sale.", goodId, senderId));
             saveState();
-            return new Body(notaryId,YES, -1, wTs);
+            return new Body(notaryId, YES, -1, wTs);
         }
 
-        return new Body(notaryId, NO, -1, wTs);
+        return new Body(notaryId, NO, -1, goodwTs);
     }
 
     @VerifyAndSign
@@ -141,13 +141,14 @@ public class Controller {
             throw new ForbiddenException(errorMessage, -1, wTs);
         }
 
+        int goodwTs = good.getwTs();
         if (good.getState() != State.ON_SALE) {
             String errorMessage = String.format("The good with id %d is not on sale.", buyerGoodId);
             log.info(errorMessage);
-            return new Body(notaryId, NO, -1, wTs);
+            return new Body(notaryId, NO, -1, wTs > goodwTs ? wTs : goodwTs);
         }
 
-        if (wTs > good.getwTs()) {
+        if (wTs > goodwTs) {
             good.setState(State.NOT_ON_SALE);
             good.setOwnerId(buyerId);
             good.setSignature(sellerBody.getSignature());
@@ -159,7 +160,7 @@ public class Controller {
             saveState();
             return new Body(notaryId, YES, transferCertificate, wTs);
         }
-        return new Body(notaryId, NO, -1, wTs);
+        return new Body(notaryId, NO, -1, goodwTs);
     }
 
     @VerifyAndSign
