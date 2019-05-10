@@ -94,6 +94,7 @@ public class Controller {
             saveState();
             return new Body(notaryId, "YES", -1, wTs);
         }
+
         return new Body(notaryId, "NO", -1, wTs);
     }
 
@@ -156,6 +157,33 @@ public class Controller {
             return new Body(notaryId, "Yes", transferCertificate, wTs);
         }
         return new Body(notaryId, "NO", -1, wTs);
+    }
+
+    @VerifyAndSign
+    @PostMapping("/update")
+    public Object updateState(@RequestBody Message message) {
+        Body receivedBody = message.getBody();
+        int goodId = receivedBody.getGoodId();
+        int ownerId = receivedBody.getUserId();
+        int wTs = receivedBody.getwTs();
+
+        Good good = appState.getGood(goodId);
+
+        if (good == null) {
+            String errorMessage = "The good was not found.";
+            log.info(errorMessage);
+            throw new NotFoundException(errorMessage, receivedBody.getrId(), wTs);
+        }
+        if (wTs > good.getwTs()) {
+            good.setState(State.getStateFromString(receivedBody.getState()));
+            good.setOwnerId(ownerId);
+            good.setwTs(wTs);
+            good.setSignature(receivedBody.getSignature());
+            good.setSignedId(receivedBody.getSignedId());
+            return new Body(notaryId, "YES", receivedBody.getrId(), wTs);
+        }
+
+        return new Body(notaryId, "NO", receivedBody.getrId(), wTs);
     }
 
     private void saveState() {

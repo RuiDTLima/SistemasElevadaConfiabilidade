@@ -18,4 +18,15 @@ public enum State {
     public String getState() {
         return state;
     }
+
+    public static State getStateFromString(String state) {
+        switch (state) {
+            case "not-on-sale":
+                return NOT_ON_SALE;
+            case "on-sale":
+                return ON_SALE;
+            default:
+                throw new IllegalArgumentException("The received state is invalid.");
+        }
+    }
 }

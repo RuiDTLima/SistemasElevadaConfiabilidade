@@ -219,7 +219,7 @@ public class HdsClientApplication {
             if (receivedBody != null) {
                 int notaryId = receivedBody.getSenderId();
                 Notary notary = appState.getNotary(notaryId);
-                if (Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage) && receivedBody.getwTs() == wTs) {
+                if (notary != null && Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage) && receivedBody.getwTs() == wTs) {
                     ackList[notaryId] = true;
                     receives++;
 
@@ -312,6 +312,10 @@ public class HdsClientApplication {
                             System.out.println(toReturn.getResponse());
                             return;
                         }
+
+                        // TODO changed
+                        updateNotaries(toReturn);
+
                         String message = String.format("The good with id %d is owned by user with id %d and his state is %s.",
                                 body.getGoodId(),
                                 toReturn.getUserId(),
@@ -371,6 +375,31 @@ public class HdsClientApplication {
         }
         log.info(response);
         System.out.println(response);
+    }
+
+    private void updateNotaries(Body body) throws Exception {
+        body.setrId(rId);
+        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, "/update", body);
+
+        if (receivedMessages == null)
+            return;
+
+        int acks = 0;
+        for (Message receivedMessage : receivedMessages) {
+            Body receivedBody = receivedMessage.getBody();
+
+            if (receivedBody != null) {
+                int notaryId = receivedBody.getSenderId();
+                Notary notary = appState.getNotary(notaryId);
+                if (Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage) && receivedBody.getrId() == rId) {
+                    acks++;
+
+                    if (acks > (numberOfNotaries / 2)) {
+                        return;
+                    }
+                }
+            }
+        }
     }
 
     private boolean validateParams(String[] params, int length, String logMessage, String outputMessage) {

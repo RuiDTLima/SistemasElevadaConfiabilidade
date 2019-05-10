@@ -101,6 +101,10 @@ public class Body implements Serializable {
         return senderId;
     }
 
+    public int getSignedId() {
+        return signedId;
+    }
+
     public int getGoodId() {
         return goodId;
     }

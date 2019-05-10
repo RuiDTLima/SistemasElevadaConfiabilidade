@@ -136,4 +136,8 @@ public class Body implements Serializable {
     public Message getMessage() {
         return message;
     }
+
+    public void setrId(int rId) {
+        this.rId = rId;
+    }
 }
