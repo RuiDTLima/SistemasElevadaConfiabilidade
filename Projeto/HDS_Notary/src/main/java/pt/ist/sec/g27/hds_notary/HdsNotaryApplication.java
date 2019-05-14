@@ -21,12 +21,23 @@ public class HdsNotaryApplication {
     private final static Logger log = LoggerFactory.getLogger(HdsNotaryApplication.class);
 
     private static AppState appState;
+    private static int notaryId;
 
     public static void main(String[] args) {
         ObjectMapper mapper = new ObjectMapper();
+        try {
+            if (args.length < 1) {
+                System.out.println("You need to specify your notary id.");
+                return;
+            }
+            notaryId = Integer.parseInt(args[0]);
+        } catch (Exception e) {
+            System.out.println("The argument needs to be an int.");
+            return;
+        }
         try (FileInputStream fileInputStream = new FileInputStream(STATE_PATH)) {
             appState = mapper.readValue(fileInputStream, AppState.class);
-            log.info(String.format("Successfully read the state for notary with id %d", appState.getNotary().getId()));
+            log.info(String.format("Successfully read the state for notary with id %d", notaryId));
         } catch (Exception e) {
             try (FileInputStream fileInputStream = new FileInputStream(BACKUP_STATE_PATH)) {
                 appState = mapper.readValue(fileInputStream, AppState.class);
@@ -43,13 +54,17 @@ public class HdsNotaryApplication {
         SpringApplication.run(HdsNotaryApplication.class, args);
     }
 
+    public static int getTotalNotaries() {
+        return appState.getNotaries().length;
+    }
+
     @Bean
     public AppState getAppState() {
         return appState;
     }
 
     @Bean
-    public int getNotaryId(AppState appState) {
-        return appState.getNotary().getId();
+    public int getNotaryId() {
+        return notaryId;
     }
 }
