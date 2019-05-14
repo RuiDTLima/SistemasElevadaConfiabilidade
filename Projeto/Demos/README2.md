@@ -14,6 +14,8 @@ Como estes testes executam todos no mesmo computador era imprático ter cada not
 
 Durante a realização dos testes é necessário ter os portos **8074**, **8075**, **8076**, **8077**,  **8081**, **8082** vagos. Para executar os vários testes é necessário primeiro executar o ficheiro script.bat, da pasta correspondente ao teste, e de seguida, de acordo com o teste que se deseja executar devem ser seguidos os seguintes passos.
 
+As chaves privadas dos clientes estão protegidas por uma password de forma a que se uma chave privada for _leaked_ não possa ser usada sem o conhecimento da password que a protege. Assim a password para a chave privada da Alice é _alice_ e a password para a chave privada do Bob é _bob_. Sempre que iniciar estes clientes será pedido ao utilizador para introduzir a password de forma a aplicação puder inicializar.
+
 # Casos de Teste 
 
 ## Demo 1:
@@ -62,7 +64,7 @@ Durante a realização dos testes é necessário ter os portos **8074**, **8075*
 ## Demo 7:
   - Testa assinar resposta a pedidos com chaves falsas, a chave privada do Notary é falsa, usa um cartão diferente do original.
   - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
-  - Durante este teste, deve ser usado um cartão de cidadão diferente do usado para gerar a chave pública.
+  - Durante este teste, cada notário deve ter uma chave privada que não corresponda à chave pública no cliente.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta FakeKeyNotaries.
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "getStateOfGood 1".
   - No fim espera-se receber como mensagem na Alice "Did not received a valid response."
@@ -85,25 +87,25 @@ Durante a realização dos testes é necessário ter os portos **8074**, **8075*
   - No fim espera-se receber como mensagem na Alice "There was no valid responses."
   - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes aos clientes Alice e Bob e ao Notary devem ser encerradas.
 
-## Demo 10: Falta State !!!!!!!!!!!!!!!!
+## Demo 10:
   - Testa o envio de um intentionToSell com o wts errado.
   - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
   - De seguida deve ser executado o ficheiro script.bat, na pasta AdvancedState.
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "intentionToSell 1".
   - No fim espera-se receber como mensagem na Alice "Yes".
   - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes aos clientes Alice e Bob e ao Notary devem ser encerradas.
-  - Para testar este teste uma segunda vez é necessário copiar o conteúdo do ficheiro state_copy.json para o ficheiro state.json.
+  - Para testar este teste uma segunda vez é necessário, em todas as pastas de notários, copiar o conteúdo do ficheiro "state - Cópia.json" para o ficheiro state.json.
 
-## Demo 11: Falta State !!!!!!!!!!!!!!!!
+## Demo 11:
   - Testa o envio de um buyGood com o wts errado.
   - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
   - De seguida deve ser executado o ficheiro script.bat, na pasta AdvancedState.
-  - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 1 1".
+  - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 3 2".
   - No fim espera-se receber como mensagem na Alice "Yes".
   - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes aos clientes Alice e Bob e ao Notary devem ser encerradas.
-  - Para testar este teste uma segunda vez é necessário, em todas as pastas de notários, copiar o conteúdo do ficheiro state - Cópia.json para o ficheiro state.json.
+  - Para testar este teste uma segunda vez é necessário, em todas as pastas de notários, copiar o conteúdo do ficheiro "state - Cópia.json" para o ficheiro state.json.
 
-## Demo 10: Falta malicious!!!!!!!!!!!!!!!!!!
+## Demo 12: Falta malicious!!!!!!!!!!!!!!!!!!
   - Testa o envio por parte de um cliente malicioso de mensagens repetidas.
   - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta MaliciousClient.
@@ -112,7 +114,7 @@ Durante a realização dos testes é necessário ter os portos **8074**, **8075*
   - No fim espera-se receber como mensagem na Eve "The message received is out of time, it was sent before the last one.".
   - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes à cliente Eve e ao Notary devem ser encerradas.
 
-## Demo 11:  Falta malicious!!!!!!!!!!!!!!!!!!
+## Demo 13:  Falta malicious!!!!!!!!!!!!!!!!!!
   - Testa o envio por parte de um cliente malicioso de mensagens repetidas.
   - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta MaliciousClient2.
@@ -125,18 +127,18 @@ Durante a realização dos testes é necessário ter os portos **8074**, **8075*
   - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes à cliente Alice e Eve e ao Notary devem ser encerradas.
   - Para testar este teste uma segunda vez é necessário copiar o conteúdo do ficheiro state_copy.json para o ficheiro state.json.
 
-## Demo 12:
+## Demo 14:
   - Testa a situação de dois clientes em conluio tentarem vender o mesmo bem duas vezes.
   - Este teste não é possível de executar uma vez que as aplicações cliente e notário foram feitas usando Spring e este atende cada pedido
     numa Thread diferente. A chamada ao Controller respetivo é feita de forma síncrona. Isto quer dizer que não existe concorrência no
     método do Controller que irá ser executado. Desta forma o primeiro pedido a ser atendido será realizado e a compra será efetuada. Assim, o segundo pedido
     será atendido mas não irá produzir nenhuma alteração de estado. Nessa situação, o teste passa a ser equivalente ao teste dos Demos 2 e 3.
 
-## Demo 13:
+## Demo 15:
   - Testa a situação em que um dos notários tem o write timestamps mais alto que todos os outros notários.
   - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta InconsistentState.
   - Na janela pertencente à Alice, executar o comando "getStateOfGood 1", esperar pelo resultado "The good with id 1 is owned by user with id 1 and his state is not-on-sale." e executar o comando "exit".
   - De seguida deve terminar todas as janelas correspondestes aos notários.
-  - Para verificar que os notários aceitaram o write timestamp que a Alice fez write back, deve aceder às pastas notaries/second, notaries/third, notaries/fourth e abrir o ficheiro state.json. Nesse ficheiro deve ser verificado que o wTs do good com o id 1 tem o valor 7.
-  - Para executar este teste de novo deve remover o ficheiro state.json das pastas notaries/first, notaries/second, notaries/third e notaries/fourth. De seguida deve copiar o ficheiro "state - Cópia.json" para um novo ficheiro com o nome state.json.
+  - Para verificar que os notários aceitaram o write timestamp que a Alice fez write back, deve aceder às pastas notaries/second, notaries/third, notaries/fourth e abrir o ficheiro state.json. Nesse ficheiro deve ser verificado que o wts do good com o id 1 tem o valor 7.
+  - Para testar este teste uma segunda vez é necessário, em todas as pastas de notários, copiar o conteúdo do ficheiro "state - Cópia.json" para o ficheiro state.json.
