@@ -5,9 +5,9 @@ cd ../bob
 start cmd /k java -jar bob.jar 2 1 --server.port=8082
 cd ../notaries/first
 start cmd /k java -jar hds_notary-0.0.1-SNAPSHOT.jar --server.port=8074
-cd ../notaries/second
+cd ../second
 start cmd /k java -jar hds_notary-0.0.1-SNAPSHOT.jar --server.port=8075
-cd ../notaries/third
+cd ../third
 start cmd /k java -jar hds_notary-0.0.1-SNAPSHOT.jar --server.port=8076
-cd ../notaries/fourth
+cd ../fourth
 start cmd /k java -jar hds_notary-0.0.1-SNAPSHOT.jar --server.port=8077

@@ -1,29 +1,26 @@
 {
+  "notary": {
+    "id": 3,
+    "name": "notary",
+    "port": 8077
+  },
   "users": [
-    {
-      "id": 0,
-      "name": "notary",
-      "port": 8080
-    },
     {
       "id": 1,
       "name": "alice",
       "port": 8081,
-      "timestamp": "2019-04-30T14:35:39.677Z",
       "pubKey": "keys/alice.pub"
     },
     {
       "id": 2,
       "name": "bob",
       "port": 8082,
-      "timestamp": "1970-01-01T00:00:00.000Z",
       "pubKey": "keys/bob.pub"
     },
     {
       "id": 3,
       "name": "eve",
       "port": 8083,
-      "timestamp": "1970-01-01T00:00:00.000Z",
       "pubKey": "keys/eve.pub"
     }
   ],
@@ -31,142 +28,57 @@
     {
       "id": 1,
       "name": "house",
-      "state": "on-sale",
-      "owner-id": 1
+      "state": "not-on-sale",
+      "signature": "l4diTbJ0J4vPQonPAqgME6xLgklNqCX+iKuu4gHVUYgzuCSmw1U44Rt0ZedfKHk9VGnq+OyPu4ChIFcpg2ICy1zIv9bAfWJYQGM69VGqfV1mQ0ZJWnXYrxoIZ5KJ5QY/kpL8cQCrwm73J4NKrqmg5uPXA2YtZbFnltUTtGf2FlA=",
+      "owner-id": 1,
+      "signed-id": 1,
+      "wts": 0
     },
     {
       "id": 2,
       "name": "car",
-      "state": "on-sale",
-      "owner-id": 1
+      "state": "not-on-sale",
+      "signature": "Gowxgr286FID+aOfLWpLIyKCveVL+eMUa5cGAckmRAq3DA8GXA3ZYGGA/FqC8D8Oa/EK35u7u7kd6LezO5q/ZpiVeJOsk0tmuTDCDfsydJ7325+8I9F8WJQD4N1ilv9z1UjSX9deKnjPYrl3tbdA2/WELTESRc5l7lNEa4f8YmM=",
+      "owner-id": 1,
+      "signed-id": 1,
+      "wts": 0
     },
     {
       "id": 3,
       "name": "motorcycle",
       "state": "not-on-sale",
-      "owner-id": 2
+      "signature": "q8yu6kAfXJ8jkw4yRPxw/OpWctqy83AyQtfSXAkbavRaYlRNZMstpsQiWcrNwuPBS9993ujO+k/+XmoAVnaO/mbGi/mZJ8ecDFYSocvc8v0Zu+A2i72a4vGwgi9v/SZd8MIJv7NqOUBeVnk/Jjugx6rEeRIipiJO2J9hw2H9VlU=",
+      "owner-id": 2,
+      "signed-id": 2,
+      "wts": 0
     },
     {
       "id": 4,
       "name": "pool table",
       "state": "not-on-sale",
-      "owner-id": 2
+      "signature": "mqaP0iqAyDZzqycuPQ1q+A7kuLxGQUs9fYVjTjJ8/ThfOC2PciamOtAkPJPXBjwAtOUQysATxeXBFCEO1vJkipeTTtRlQ7ta5QFNO4bpD6pS05WwlyNg/dKl2iO4Alc2yJjg1NKNqV680B6q9wir84jmRDnitYFo3+FBUIk1ZFo=",
+      "owner-id": 2,
+      "signed-id": 2,
+      "wts": 0
     },
     {
       "id": 5,
       "name": "makeup set",
       "state": "not-on-sale",
-      "owner-id": 1
+      "signature": "OJFfeWF63vEO+2CgtwtOsl0zUjgZ77RSBD5f4yJDGiys58zXNOmxos+WG2IT+xIYKJf6ia/LaCn4zzEYNp7HCo14Kammx+omztaaDaCqapTAzdwFIhNEFEVCCXhxinBW299zxoySW6hPB4/dzuahzPUVG415SarLJpxQpaNMueQ=",
+      "owner-id": 1,
+      "signed-id": 1,
+      "wts": 0
     },
     {
       "id": 6,
       "name": "phone",
       "state": "not-on-sale",
-      "owner-id": 2
+      "signature": "R/nKAwZsV118c45sKl/v6vwYv9q0EgdVq8Px5bG0dzcOhIABO/8f/WjHsSf+qCspSZfOBsFSKaY94vX3s/JY9x1H4HPszt6yss0UxWJObX2RqTAAYSbk9xkcDCIhpRwThjDeEf3ZoQV/kOUaKqWnm97/BYDB6VjAM0voomXlTLk=",
+      "owner-id": 2,
+      "signed-id": 2,
+      "wts": 0
     }
   ],
-  "transfer-certificates": [
-    {
-      "timestamp": "2019-04-06T08:14:31.900Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T08:46:59.184Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T08:50:02.721Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T08:52:18.355Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T08:53:34.374Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T08:55:12.695Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T08:59:58.237Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T09:03:25.145Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T09:08:33.989Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T09:16:21.633Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T09:29:48.086Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T09:34:37.118Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T09:36:44.131Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T11:44:10.587Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T13:41:13.084Z",
-      "buyer-id": 1,
-      "seller-id": 2,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T15:57:05.831Z",
-      "buyer-id": 2,
-      "seller-id": 1,
-      "good-id": 3
-    },
-    {
-      "timestamp": "2019-04-06T15:59:46.976Z",
-      "buyer-id": 2,
-      "seller-id": 1,
-      "good-id": 3
-    }
-  ]
+  "transfer-certificates": []
 }

@@ -23,7 +23,11 @@ public class HdsClientApplication {
     private static final String STATE_PATH = "state.json";
     private static final Logger log = LoggerFactory.getLogger(HdsClientApplication.class);
     private static final RestClient restClient = new RestClient();
-    public static final String YES = "YES";
+    private static final String YES = "YES";
+    private static final String GET_STATE_OF_GOOD_URL = "/getStateOfGood";
+    private static final String INTENTION_TO_SELL_URL = "/intentionToSell";
+    private static final String BUY_GOOD_URL = "/buyGood";
+    private static final String UPDATE_URL = "/update";
 
     private static AppState appState;
     private static User me;
@@ -195,7 +199,6 @@ public class HdsClientApplication {
     }
 
     private void getStateOfGood(String[] params) throws Exception {
-        String uri = "/getStateOfGood";
         int goodId = Integer.parseInt(params[0]);
 
         if (!goodExist(goodId))
@@ -205,14 +208,12 @@ public class HdsClientApplication {
         readList = new Value[numberOfNotaries];
         Body body = new Body(me.getId(), goodId, rId, true);
 
-        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, uri, body);
+        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, GET_STATE_OF_GOOD_URL, body);
 
         if (receivedMessages == null)
             return;
 
         int receives = 0;
-        int validReceives = 0, invalidReceives = 0;
-        Body validBody = null, invalidBody = null;
         for (Message receivedMessage : receivedMessages) {
             Body receivedBody = receivedMessage.getBody();
 
@@ -234,11 +235,9 @@ public class HdsClientApplication {
                             continue;
                         readList[notaryId] = new Value(receivedBody.getwTs(), receivedBody);
                         receives++;
-                        validReceives++;
                     } else {
                         readList[notaryId] = new Value(receivedBody.getwTs(), receivedBody);
                         receives++;
-                        invalidReceives++;
                     }
                     if (receives > (numberOfNotaries + byzantineFaultsLimit) / 2) {
                         int higher = -1;
@@ -260,7 +259,6 @@ public class HdsClientApplication {
                             return;
                         }
 
-                        // TODO changed
                         updateNotaries(toReturn);
 
                         String message = String.format("The good with id %d is owned by user with id %d and his state is %s.",
@@ -281,7 +279,6 @@ public class HdsClientApplication {
     }
 
     private void intentionToSell(String[] params) throws Exception {
-        String uri = "/intentionToSell";
         int goodId = Integer.parseInt(params[0]);
 
         Good good = appState.getGood(goodId);
@@ -295,7 +292,7 @@ public class HdsClientApplication {
         byte[] sigma = SecurityUtils.sign(me.getPrivateKey(), Utils.jsonObjectToByteArray(new Good(goodId, me.getId(), good.getName(), State.ON_SALE, wTs, me.getId())));
         Body body = new Body(me.getId(), goodId, wTs, false, sigma);
 
-        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, uri, body);
+        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, INTENTION_TO_SELL_URL, body);
         if (receivedMessages == null)
             return;
 
@@ -361,7 +358,6 @@ public class HdsClientApplication {
     }
 
     private void buyGood(String[] params) throws Exception {
-        String uri = "/buyGood";
         int goodId, userId;
 
         try {
@@ -391,11 +387,11 @@ public class HdsClientApplication {
         }
 
         Body body = new Body(me.getId(), goodId);
-        Message receivedMessage = makeRequest(owner, uri, body);
+        Message receivedMessage = makeRequest(owner, BUY_GOOD_URL, body);
         if (receivedMessage == null)
             return;
 
-        Utils.verifyAllMessages(receivedMessage, uri);
+        Utils.verifyAllMessages(receivedMessage, BUY_GOOD_URL);
 
         Body notaryBody = receivedMessage.getBody().getMessage().getBody();
 
@@ -410,7 +406,7 @@ public class HdsClientApplication {
 
     private void updateNotaries(Body body) throws Exception {
         body.setrId(rId);
-        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, "/update", body);
+        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, UPDATE_URL, body);
 
         if (receivedMessages == null)
             return;

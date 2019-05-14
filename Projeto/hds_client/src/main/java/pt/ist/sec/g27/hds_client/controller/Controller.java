@@ -24,11 +24,13 @@ public class Controller {
     private static final RestClient restClient = new RestClient();
     private static final String YES = "YES";
     private static final String NO = "NO";
+    private static final String BUY_GOOD_URL = "/buyGood";
+    private static final String TRANSFER_GOOD_URL = "/transferGood";
 
     private boolean[] ackList; //TODO check if can be two, in hds client application and here, and if it is needed
 
     @VerifyAndSign
-    @PostMapping("/buyGood")
+    @PostMapping(BUY_GOOD_URL)
     public Object buyGood(@RequestBody Message message) throws Exception {
         User me = HdsClientApplication.getMe();
         Body buyerBody = message.getBody();
@@ -50,7 +52,7 @@ public class Controller {
         byte[] sigma = SecurityUtils.sign(me.getPrivateKey(), Utils.jsonObjectToByteArray(signedGood));
         Body body = new Body(me.getId(), goodId, message, wTs, sigma);
 
-        List<Message> receivedMessages = restClient.postToMultipleNotaries(HdsClientApplication.getNotaries(), "/transferGood", body, me.getPrivateKey());
+        List<Message> receivedMessages = restClient.postToMultipleNotaries(HdsClientApplication.getNotaries(), TRANSFER_GOOD_URL, body, me.getPrivateKey());
 
         int receives = 0, invalidReceives = 0, yesReceives = 0, noReceives = 0;
         Message invalidMessage = null, yesMessage = null, noMessage = null;
@@ -69,12 +71,9 @@ public class Controller {
                         receives++;
                         invalidReceives++;
                         invalidMessage = receivedMessage;
-                        if (receives > (numberOfNotaries + HdsClientApplication.getByzantineFaultsLimit()) / 2) {
+                        if (isEnoughResponses(numberOfNotaries, receives)) {
                             ackList = new boolean[numberOfNotaries];
-                            Body invalidBody = invalidMessage.getBody();
-                            log.info(invalidBody.getResponse());
-                            System.out.println(invalidBody.getResponse());
-                            return new Body(me.getId(), invalidBody.getResponse(), invalidMessage);
+                            return invalidResponse(me, invalidMessage);
                         }
                     }
                     if (currentwTs == wTs) {
@@ -92,51 +91,69 @@ public class Controller {
                             noMessage = receivedMessage;
                         }
 
-                        if (receives > (numberOfNotaries + HdsClientApplication.getByzantineFaultsLimit()) / 2) {
+                        if (isEnoughResponses(numberOfNotaries, receives)) {
                             ackList = new boolean[numberOfNotaries];
                             if (yesReceives > noReceives && yesReceives > invalidReceives) {
-                                Body yesBody = yesMessage.getBody();
-                                String response = String.format("When trying to transfer the good with id %d from the user with id %d to " +
-                                                "user with the id %d, the response from the notary was %s",
-                                        goodId,
-                                        me.getId(),
-                                        message.getBody().getSenderId(),
-                                        yesBody.getResponse());
-
-                                log.info(response);
-                                System.out.println(response);
-                                TransferCertificate transferCertificate = yesBody.getTransferCertificate();
-                                HdsClientApplication.addTransferCertificate(transferCertificate);
-                                return new Body(me.getId(), YES, yesMessage);
+                                return yesResponse(message.getBody().getSenderId(), me, goodId, yesMessage);
                             } else if (noReceives > invalidReceives) {
-                                Body noBody = noMessage.getBody();
-                                String response = String.format("When trying to transfer the good with id %d from the user with id %d to " +
-                                                "user with the id %d, the response from the notary was %s",
-                                        goodId,
-                                        me.getId(),
-                                        message.getBody().getSenderId(),
-                                        noBody.getResponse());
-                                log.info(response);
-                                System.out.println(response);
-                                return new Body(me.getId(), NO, noMessage);
+                                return noResponse(message.getBody().getSenderId(), me, goodId, noMessage);
                             }
-                            Body invalidBody = invalidMessage.getBody();
-                            log.info(invalidBody.getResponse());
-                            System.out.println(invalidBody.getResponse());
-                            return new Body(me.getId(), invalidBody.getResponse(), invalidMessage);
+                            return invalidResponse(me, invalidMessage);
                         }
                     }
                 }
             }
         }
-        if (receivedwTs.size() > (numberOfNotaries + HdsClientApplication.getByzantineFaultsLimit()) / 2) {
+
+        if (isEnoughResponses(numberOfNotaries, receivedwTs.size())) {
             int max = Collections.max(receivedwTs);
             good.setwTs(max);
             return buyGood(message);
         }
+
         String errorMessage = "There was no valid responses.";
         log.info(errorMessage);
         System.out.println(errorMessage);
         throw new ResponseException(errorMessage);
+    }
+
+    private Object yesResponse(int senderId, User me, int goodId, Message yesMessage) {
+        Body yesBody = yesMessage.getBody();
+        String response = String.format("When trying to transfer the good with id %d from the user with id %d to " +
+                        "user with the id %d, the response from the notary was %s",
+                goodId,
+                me.getId(),
+                senderId,
+                yesBody.getResponse());
+
+        log.info(response);
+        System.out.println(response);
+        TransferCertificate transferCertificate = yesBody.getTransferCertificate();
+        HdsClientApplication.addTransferCertificate(transferCertificate);
+        return new Body(me.getId(), YES, yesMessage);
+    }
+
+    private Object noResponse(int senderId, User me, int goodId, Message noMessage) {
+        Body noBody = noMessage.getBody();
+        String response = String.format("When trying to transfer the good with id %d from the user with id %d to " +
+                        "user with the id %d, the response from the notary was %s",
+                goodId,
+                me.getId(),
+                senderId,
+                noBody.getResponse());
+        log.info(response);
+        System.out.println(response);
+        return new Body(me.getId(), NO, noMessage);
+    }
+
+    private Object invalidResponse(User me, Message invalidMessage) {
+        Body invalidBody = invalidMessage.getBody();
+        log.info(invalidBody.getResponse());
+        System.out.println(invalidBody.getResponse());
+        return new Body(me.getId(), invalidBody.getResponse(), invalidMessage);
+    }
+
+    private boolean isEnoughResponses(int numberOfNotaries, int receives) {
+        return receives > (numberOfNotaries + HdsClientApplication.getByzantineFaultsLimit()) / 2;
     }
 }

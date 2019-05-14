@@ -16,9 +16,11 @@ import pt.ist.sec.g27.hds_notary.model.AppState;
 import pt.ist.sec.g27.hds_notary.model.Body;
 import pt.ist.sec.g27.hds_notary.model.Message;
 import pt.ist.sec.g27.hds_notary.model.User;
+import pt.ist.sec.g27.hds_notary.utils.ProofOfWork;
 import pt.ist.sec.g27.hds_notary.utils.SecurityUtils;
 import pt.ist.sec.g27.hds_notary.utils.Utils;
 
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
@@ -74,7 +76,7 @@ public class VerifyAndSignAspect {
         return new Message((Body) returnedValue, sign);
     }
 
-    private void before(Object[] args) {
+    private void before(Object[] args) throws JsonProcessingException, NoSuchAlgorithmException {
         if (args == null || args.length == 0 || !(args[0] instanceof Message)) {
             String errorMessage = "The incoming message is not acceptable.";
             log.info(errorMessage);
@@ -88,10 +90,20 @@ public class VerifyAndSignAspect {
             throw new NotFoundException(errorMessage, -1, -1);
         }
 
+        log.info("Verifying message's proof of work.");
+        verifyProofOfWork(message);
         log.info("Verifying message structure.");
         verifyMessageStructure(message);
         log.info("Verifying message signature.");
         verifySignature(message);
+    }
+
+    private void verifyProofOfWork(Message message) throws JsonProcessingException, NoSuchAlgorithmException {
+        if (!ProofOfWork.verify(message.getBody(), message.getProofOfWork())) {
+            String errorMessage = "The proof of work received was not correct.";
+            log.info(errorMessage);
+            throw new UnauthorizedException(errorMessage, message.getBody().getrId(), message.getBody().getwTs());
+        }
     }
 
     private void verifyMessageStructure(Message message) {
@@ -147,7 +159,7 @@ public class VerifyAndSignAspect {
             jsonBody = objectMapper.writeValueAsBytes(body);
         } catch (JsonProcessingException e) {
             log.warn("An error occurred while trying to convert object to byte[].", e);
-            throw new UnauthorizedException("Something went wrong while verifying the signature.",message.getBody().getrId(), message.getBody().getwTs());  // TODO changed
+            throw new UnauthorizedException("Something went wrong while verifying the signature.", message.getBody().getrId(), message.getBody().getwTs());  // TODO changed
         }
 
         boolean verified;
