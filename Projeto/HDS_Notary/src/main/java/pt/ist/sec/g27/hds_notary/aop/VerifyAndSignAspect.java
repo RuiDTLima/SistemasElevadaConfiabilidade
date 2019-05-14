@@ -41,18 +41,22 @@ public class VerifyAndSignAspect {
     @Around("@annotation(pt.ist.sec.g27.hds_notary.aop.VerifyAndSign)")
     public Object callHandler(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         try {
+            log.info("Processing before method.");
             before(proceedingJoinPoint.getArgs());
         } catch (HttpExceptions e) {
-            return after(new Body(notaryId, e, -1, -1));
+            log.info(String.format("Returning before exception from notary with id %d", notaryId));
+            return after(new Body(notaryId, e));
         }
 
         Object returnedValue;
         try {
+            log.info("Processing proceed method.");
             returnedValue = proceedingJoinPoint.proceed();
         } catch (HttpExceptions e) {
-            returnedValue = new Body(notaryId, e, e.getrId(), e.getwTs());
+            returnedValue = new Body(notaryId, e);
         }
 
+        log.info("Processing after method.");
         return after(returnedValue);
     }
 
@@ -71,15 +75,22 @@ public class VerifyAndSignAspect {
     }
 
     private void before(Object[] args) {
-        if (args == null || args.length == 0 || !(args[0] instanceof Message))
-            throw new UnauthorizedException("The incoming message is not acceptable.", -1, -1);
+        if (args == null || args.length == 0 || !(args[0] instanceof Message)) {
+            String errorMessage = "The incoming message is not acceptable.";
+            log.info(errorMessage);
+            throw new UnauthorizedException(errorMessage, -1, -1);
+        }
 
         Message message = (Message) args[0];
 
-        if (message == null || message.getBody() == null)
-            throw new NotFoundException("The incoming message does not follow the specification.", -1, -1);
+        if (message == null || message.getBody() == null) {
+            String errorMessage = "The incoming message does not follow the specification.";
+            throw new NotFoundException(errorMessage, -1, -1);
+        }
 
+        log.info("Verifying message structure.");
         verifyMessageStructure(message);
+        log.info("Verifying message signature.");
         verifySignature(message);
     }
 
@@ -93,15 +104,18 @@ public class VerifyAndSignAspect {
         if (userId == -1 || appState.getUser(userId) == null) {
             String errorMessage = "The message structure specification was not followed.";
             log.info(errorMessage);
-            throw new UnauthorizedException(errorMessage, -1, -1);
+            throw new UnauthorizedException(errorMessage, message.getBody().getrId(), message.getBody().getwTs());  // TODO changed
         }
         verifyMessageStructure(body.getMessage());
     }
 
     private void verifySignature(Message message) {
         boolean verified = verifyAllMessages(message);
-        if (!verified)
-            throw new UnauthorizedException("This message is not authentic.", -1, -1);
+        if (!verified) {
+            String errorMessage = "This message is not authentic.";
+            log.info(errorMessage);
+            throw new UnauthorizedException(errorMessage, message.getBody().getrId(), message.getBody().getwTs());  // TODO changed
+        }
     }
 
     private boolean verifyAllMessages(Message message) {
@@ -116,7 +130,7 @@ public class VerifyAndSignAspect {
         if (user == null) {
             String errorMessage = String.format("The user with id %d does not exist.", userId);
             log.info(errorMessage);
-            throw new UnauthorizedException(errorMessage, -1, -1);
+            throw new UnauthorizedException(errorMessage, message.getBody().getrId(), message.getBody().getwTs());  // TODO changed
         }
 
         PublicKey publicKey;
@@ -125,7 +139,7 @@ public class VerifyAndSignAspect {
         } catch (Exception e) {
             String errorMessage = "Cannot find/load the public key of one user";
             log.info(errorMessage);
-            throw new UnauthorizedException(errorMessage, -1, -1);
+            throw new UnauthorizedException(errorMessage, message.getBody().getrId(), message.getBody().getwTs());  // TODO changed
         }
 
         byte[] jsonBody;
@@ -133,7 +147,7 @@ public class VerifyAndSignAspect {
             jsonBody = objectMapper.writeValueAsBytes(body);
         } catch (JsonProcessingException e) {
             log.warn("An error occurred while trying to convert object to byte[].", e);
-            throw new UnauthorizedException("Something went wrong while verifying the signature.", -1, -1);
+            throw new UnauthorizedException("Something went wrong while verifying the signature.",message.getBody().getrId(), message.getBody().getwTs());  // TODO changed
         }
 
         boolean verified;
@@ -141,7 +155,7 @@ public class VerifyAndSignAspect {
             verified = SecurityUtils.verify(publicKey, jsonBody, message.getSignature());
         } catch (Exception e) {
             log.warn("Cannot verify the incoming message.", e);
-            throw new UnauthorizedException("Something went wrong while verifying the signature.", -1, -1);
+            throw new UnauthorizedException("Something went wrong while verifying the signature.", message.getBody().getrId(), message.getBody().getwTs()); // TODO changed
         }
 
         return verified && verifyAllMessages(body.getMessage());

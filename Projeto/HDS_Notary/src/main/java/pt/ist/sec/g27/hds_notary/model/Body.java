@@ -85,12 +85,12 @@ public class Body implements Serializable {
         this.wTs = wTs;
     }
 
-    public Body(int senderId, HttpExceptions httpExceptions, int rId, int wTs) {
+    public Body(int senderId, HttpExceptions httpExceptions) {
         this.senderId = senderId;
         this.response = httpExceptions.getErrorMessage();
         this.status = httpExceptions.getHttpStatus();
-        this.rId = rId;
-        this.wTs = wTs;
+        this.rId = httpExceptions.getrId();
+        this.wTs = httpExceptions.getwTs();
     }
 
     public int getUserId() {

@@ -1,0 +1,89 @@
+{
+  "notaries": [
+    {
+      "id": 0,
+      "url": "http://localhost:8074",
+      "pubKey": "keys/first.pub"
+    },
+    {
+      "id": 1,
+      "url": "http://localhost:8075",
+      "pubKey": "keys/second.pub"
+    },
+    {
+      "id": 2,
+      "url": "http://localhost:8076",
+      "pubKey": "keys/third.pub"
+    },
+    {
+      "id": 3,
+      "url": "http://localhost:8077",
+      "pubKey": "keys/fourth.pub"
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "name": "alice",
+      "pubKey": "keys/alice.pub",
+      "privKey": "keys/alice.key",
+      "url": "http://localhost:8081"
+    },
+    {
+      "id": 2,
+      "name": "bob",
+      "pubKey": "keys/bob.pub",
+      "url": "http://localhost:8082"
+    },
+    {
+      "id": 3,
+      "name": "eve",
+      "pubKey": "keys/eve.pub",
+      "url": "http://localhost:8083"
+    }
+  ],
+  "goods": [
+    {
+      "id": 1,
+      "owner-id": 1,
+      "name": "house",
+      "state": "not-on-sale",
+      "wts": 0
+    },
+    {
+      "id": 2,
+      "owner-id": 1,
+      "name": "car",
+      "state": "not-on-sale",
+      "wts": 0
+    },
+    {
+      "id": 3,
+      "owner-id": 2,
+      "name": "motorcycle",
+      "state": "not-on-sale",
+      "wts": 0
+    },
+    {
+      "id": 4,
+      "owner-id": 2,
+      "name": "pool table",
+      "state": "not-on-sale",
+      "wts": 0
+    },
+    {
+      "id": 5,
+      "owner-id": 1,
+      "name": "makeup set",
+      "state": "not-on-sale",
+      "wts": 0
+    },
+    {
+      "id": 6,
+      "owner-id": 1,
+      "name": "phone",
+      "state": "not-on-sale",
+      "wts": 0
+    }
+  ]
+}

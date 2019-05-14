@@ -211,6 +211,8 @@ public class HdsClientApplication {
             return;
 
         int receives = 0;
+        int validReceives = 0, invalidReceives = 0;
+        Body validBody = null, invalidBody = null;
         for (Message receivedMessage : receivedMessages) {
             Body receivedBody = receivedMessage.getBody();
 
@@ -218,26 +220,35 @@ public class HdsClientApplication {
                 int notaryId = receivedBody.getSenderId();
                 Notary notary = appState.getNotary(notaryId);
                 if (Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage) && receivedBody.getrId() == rId) {
-                    int userId = receivedBody.getUserId();
-                    int signedId = receivedBody.getSignedId();
-                    User signedUser = getUser(signedId);
-                    if (signedUser == null)
-                        continue;
-                    Good good = getGood(goodId);
-                    if (good == null)
-                        continue;
-                    Good receivedGood = new Good(goodId, userId, good.getName(), State.getStateFromString(receivedBody.getState()), receivedBody.getwTs(), signedId);
-                    if (!SecurityUtils.verify(signedUser.getPublicKey(), Utils.jsonObjectToByteArray(receivedGood), receivedBody.getSignature()))
-                        continue;
-                    readList[notaryId] = new Value(receivedBody.getwTs(), receivedBody);
-                    receives++;
+                    if (receivedBody.getStatus().is2xxSuccessful()) {
+                        int userId = receivedBody.getUserId();
+                        int signedId = receivedBody.getSignedId();
+                        User signedUser = getUser(signedId);
+                        if (signedUser == null)
+                            continue;
+                        Good good = getGood(goodId);
+                        if (good == null)
+                            continue;
+                        Good receivedGood = new Good(goodId, userId, good.getName(), State.getStateFromString(receivedBody.getState()), receivedBody.getwTs(), signedId);
+                        if (!SecurityUtils.verify(signedUser.getPublicKey(), Utils.jsonObjectToByteArray(receivedGood), receivedBody.getSignature()))
+                            continue;
+                        readList[notaryId] = new Value(receivedBody.getwTs(), receivedBody);
+                        receives++;
+                        validReceives++;
+                    } else {
+                        readList[notaryId] = new Value(receivedBody.getwTs(), receivedBody);
+                        receives++;
+                        invalidReceives++;
+                    }
                     if (receives > (numberOfNotaries + byzantineFaultsLimit) / 2) {
                         int higher = -1;
                         Body toReturn = null;
                         for (Value currentValue : readList) {
-                            if (currentValue != null && currentValue.getTimestamp() > higher) {
-                                toReturn = currentValue.getValue();
-                                higher = currentValue.getTimestamp();
+                            if (currentValue != null) {
+                                if(!currentValue.getValue().getStatus().is2xxSuccessful() || currentValue.getTimestamp() > higher) {
+                                    toReturn = currentValue.getValue();
+                                    higher = currentValue.getTimestamp();
+                                }
                             }
                         }
                         readList = new Value[numberOfNotaries];
@@ -372,8 +383,12 @@ public class HdsClientApplication {
 
         Good good = appState.getGood(goodId);
 
-        if (good == null)
+        if (good == null) {
+            String errorMessage = String.format("The good with id %d does not exist.", goodId);
+            log.info(errorMessage);
+            System.out.println(errorMessage);
             return;
+        }
 
         Body body = new Body(me.getId(), goodId);
         Message receivedMessage = makeRequest(owner, uri, body);

@@ -64,6 +64,19 @@ public class Controller {
                 if (notary != null && Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage)) {
                     int currentwTs = receivedBody.getwTs();
                     receivedwTs.add(currentwTs);
+                    if (currentwTs == -1 && !receivedBody.getStatus().is2xxSuccessful()) {
+                        ackList[notaryId] = true;
+                        receives++;
+                        invalidReceives++;
+                        invalidMessage = receivedMessage;
+                        if (receives > (numberOfNotaries + HdsClientApplication.getByzantineFaultsLimit()) / 2) {
+                            ackList = new boolean[numberOfNotaries];
+                            Body invalidBody = invalidMessage.getBody();
+                            log.info(invalidBody.getResponse());
+                            System.out.println(invalidBody.getResponse());
+                            return new Body(me.getId(), invalidBody.getResponse(), invalidMessage);
+                        }
+                    }
                     if (currentwTs == wTs) {
                         ackList[notaryId] = true;
                         receives++;

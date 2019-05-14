@@ -25,6 +25,7 @@ public class HdsNotaryApplication {
         ObjectMapper mapper = new ObjectMapper();
         try (FileInputStream fileInputStream = new FileInputStream(STATE_PATH)) {
             appState = mapper.readValue(fileInputStream, AppState.class);
+            log.info(String.format("Successfully read the state for notary with id %d", appState.getNotary().getId()));
         } catch (Exception e) {
             try (FileInputStream fileInputStream = new FileInputStream(BACKUP_STATE_PATH)) {
                 appState = mapper.readValue(fileInputStream, AppState.class);
