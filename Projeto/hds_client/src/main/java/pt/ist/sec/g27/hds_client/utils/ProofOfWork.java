@@ -1,52 +1,40 @@
 package pt.ist.sec.g27.hds_client.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 // Proof of work
-public class Pow {
+public class ProofOfWork {
     private static final String SHA256 = "SHA-256";
     private static final int BYTE_SIZE = 8; // 8 BIT
+    private static final int NUMBER_BITS = 20;
 
-    private byte[] message;
-    private int numberBit;
-    private final MessageDigest digest;
+    public static BigInteger compute(Object body) throws NoSuchAlgorithmException, JsonProcessingException {
+        MessageDigest digest = MessageDigest.getInstance(SHA256);
+        byte[] message = Utils.jsonObjectToByteArray(body);
 
-    Pow(byte[] message, int numberBit) throws NoSuchAlgorithmException {
-        if (numberBit > 256)
-            throw new IllegalArgumentException("Number of bits must be at max 256 bit.");
-        this.digest = MessageDigest.getInstance(SHA256);
-        this.message = message;
-        this.numberBit = numberBit;
-    }
-
-    Pow(String message, int numberBit) throws NoSuchAlgorithmException {
-        this(message.getBytes(StandardCharsets.UTF_8), numberBit);
-    }
-
-    public BigInteger compute() {
         BigInteger i = BigInteger.ZERO;
 
         while (true) {
-            if (verify(i))
+            if (verify(digest, message, i))
                 return i;
             i = i.add(BigInteger.ONE);
         }
     }
 
-    private boolean verify(BigInteger i) {
+    private static boolean verify(MessageDigest digest, byte[] message, BigInteger i) {
         byte[] concatMessageI = concat(message, i.toByteArray());
-        byte[] encodedHash = digest(concatMessageI);
-        int numberOfByte = (int) Math.ceil(numberBit / 8.0);
+        byte[] encodedHash = digest(digest, concatMessageI);
+        int numberOfByte = (int) Math.ceil(NUMBER_BITS / 8.0);
 
         for (int j = 0; j < numberOfByte; j++) {
             for (int t = 0; t < BYTE_SIZE; t++) {
                 int bit = (encodedHash[j] >> t) & 1;
-                if (j * BYTE_SIZE + t >= numberBit)
+                if (j * BYTE_SIZE + t >= NUMBER_BITS)
                     break;
                 if (bit == 1)
                     return false;
@@ -55,7 +43,7 @@ public class Pow {
         return true;
     }
 
-    private byte[] concat(byte[] a, byte[] b) {
+    private static byte[] concat(byte[] a, byte[] b) {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             outputStream.write(a);
             outputStream.write(b);
@@ -65,7 +53,7 @@ public class Pow {
         }
     }
 
-    private byte[] digest(byte[] input) {
+    private static byte[] digest(MessageDigest digest, byte[] input) {
         byte[] hash = digest.digest(input);
         digest.reset();
         return hash;
