@@ -8,4 +8,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface VerifyAndSign {
+    /**
+     * @return if it is to verify and sign notary pass true, otherwise false
+     */
+    boolean value() default false;
 }

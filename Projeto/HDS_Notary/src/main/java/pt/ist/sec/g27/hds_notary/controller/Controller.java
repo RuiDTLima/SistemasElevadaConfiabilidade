@@ -163,7 +163,7 @@ public class Controller {
         return new Body(notaryId, NO, -1, goodwTs);
     }
 
-    @VerifyAndSign
+    @VerifyAndSign(true)
     @PostMapping("/update")
     public Object updateState(@RequestBody Message message) {
         Body receivedBody = message.getBody();

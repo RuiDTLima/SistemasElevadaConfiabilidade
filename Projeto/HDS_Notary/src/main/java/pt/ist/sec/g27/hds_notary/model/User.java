@@ -15,7 +15,6 @@ public class User {
     private String name;
 
     @JsonProperty("pubKey")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String pubKeyPath;
     private PublicKey publicKey;
     private int port;
