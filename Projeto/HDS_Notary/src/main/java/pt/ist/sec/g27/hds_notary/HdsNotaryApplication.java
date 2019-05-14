@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import pt.ist.sec.g27.hds_notary.model.AppState;
 import pt.ist.sec.g27.hds_notary.model.Notary;
+import pt.ist.sec.g27.hds_notary.utils.ByzantineReliableBroadcast;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -24,29 +25,38 @@ public class HdsNotaryApplication {
 
     private static AppState appState;
     private static int notaryId;
+    private static int byzantineFaultsLimit;
 
     public static Notary getMe() {
         return appState.getNotary(notaryId);
     }
 
-    public static Notary[] getRemainingNotaries() {
-        return Arrays.stream(appState.getNotaries())
-                .filter(notary -> notary.getId() != notaryId)
-                .toArray(Notary[]::new);
+    public static Notary[] getNotaries() {
+        return appState.getNotaries();
+    }
+
+    public static int getNotariesAmount() {
+        return appState.getNotaries().length;
+    }
+
+    public static int getByzantineFaultsLimit() {
+        return byzantineFaultsLimit;
     }
 
     public static void main(String[] args) {
         ObjectMapper mapper = new ObjectMapper();
         try {
-            if (args.length < 1) {
-                System.out.println("You need to specify your notary id.");
+            if (args.length < 2) {
+                System.out.println("You need to specify your notary id and the number of byzantine faults to tolerate.");
                 return;
             }
             notaryId = Integer.parseInt(args[0]);
+            byzantineFaultsLimit = Integer.parseInt(args[1]);
         } catch (Exception e) {
             System.out.println("The argument needs to be an int.");
             return;
         }
+
         try (FileInputStream fileInputStream = new FileInputStream(STATE_PATH)) {
             appState = mapper.readValue(fileInputStream, AppState.class);
             log.info(String.format("Successfully read the state for notary with id %d", notaryId));
@@ -78,5 +88,10 @@ public class HdsNotaryApplication {
     @Bean
     public int getNotaryId() {
         return notaryId;
+    }
+
+    @Bean
+    public ByzantineReliableBroadcast getBizantyneReliableBroadcast() {
+        return new ByzantineReliableBroadcast(notaryId);
     }
 }

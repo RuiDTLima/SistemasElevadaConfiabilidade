@@ -12,6 +12,7 @@ import pt.ist.sec.g27.hds_notary.aop.VerifyAndSign;
 import pt.ist.sec.g27.hds_notary.exceptions.ForbiddenException;
 import pt.ist.sec.g27.hds_notary.exceptions.NotFoundException;
 import pt.ist.sec.g27.hds_notary.model.*;
+import pt.ist.sec.g27.hds_notary.utils.ByzantineReliableBroadcast;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,12 +29,14 @@ public class Controller {
     private final ObjectMapper mapper;
     private final AppState appState;
     private final int notaryId;
+    private final ByzantineReliableBroadcast byzantineReliableBroadcast;
 
     @Autowired
-    public Controller(ObjectMapper objectMapper, AppState appState, int notaryId) {
+    public Controller(ObjectMapper objectMapper, AppState appState, int notaryId, ByzantineReliableBroadcast byzantineReliableBroadcast) {
         this.mapper = objectMapper;
         this.appState = appState;
         this.notaryId = notaryId;
+        this.byzantineReliableBroadcast = byzantineReliableBroadcast;
     }
 
     @VerifyAndSign
@@ -82,6 +85,7 @@ public class Controller {
         }
 
         // Reliable
+        HdsNotaryApplication.
 
         int goodwTs = good.getwTs();
         if (good.getState().equals(State.ON_SALE)) {
@@ -209,5 +213,21 @@ public class Controller {
         } catch (IOException e) {
             log.error("There was an error while trying to copy the backup state to the current state.");
         }
+    }
+
+
+    @PostMapping("/deliver")
+    public void deliver(@RequestBody Message message) {
+
+    }
+
+    @PostMapping("/echo")
+    public void echo(@RequestBody Message message) {
+
+    }
+
+    @PostMapping("/ready")
+    public void ready(@RequestBody Message message) {
+        
     }
 }
