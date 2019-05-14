@@ -52,7 +52,7 @@ public class Controller {
 
         log.info(String.format("The good with id %d belongs to the user with id %d", goodId, good.getOwnerId()));
 
-        return new Body(notaryId, good.getOwnerId(), good.getState(), body.getrId(), good.getwTs(), good.getSignature(), good.getSignedId());
+        return new Body(notaryId, goodId, good.getOwnerId(), good.getState(), body.getrId(), good.getwTs(), good.getSignature(), good.getSignedId());
     }
 
     @VerifyAndSign
@@ -168,7 +168,7 @@ public class Controller {
     @VerifyAndSign(true)
     @PostMapping("/update")
     public Object updateState(@RequestBody Message message) {
-        Body receivedBody = message.getBody();
+        Body receivedBody = message.getBody().getMessage().getBody();
         int goodId = receivedBody.getGoodId();
         int ownerId = receivedBody.getUserId();
         int wTs = receivedBody.getwTs();

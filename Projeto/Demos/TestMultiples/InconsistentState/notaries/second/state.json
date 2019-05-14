@@ -1,0 +1,102 @@
+{
+    "notaries": [
+        {
+            "id": 0,
+            "url": "http://localhost:8074",
+            "pubKey": "keys/first.pub"
+        },
+        {
+            "id": 1,
+            "url": "http://localhost:8075",
+            "pubKey": "keys/second.pub",
+            "privKey": "keys/notary.key"
+        },
+        {
+            "id": 2,
+            "url": "http://localhost:8076",
+            "pubKey": "keys/third.pub"
+        },
+        {
+            "id": 3,
+            "url": "http://localhost:8077",
+            "pubKey": "keys/fourth.pub"
+        }
+    ],
+    "users": [
+        {
+            "id": 1,
+            "name": "alice",
+            "port": 8081,
+            "pubKey": "keys/alice.pub"
+        },
+        {
+            "id": 2,
+            "name": "bob",
+            "port": 8082,
+            "pubKey": "keys/bob.pub"
+        },
+        {
+            "id": 3,
+            "name": "eve",
+            "port": 8083,
+            "pubKey": "keys/eve.pub"
+        }
+    ],
+    "goods": [
+        {
+            "id": 1,
+            "name": "house",
+            "state": "not-on-sale",
+            "signature": "kiEBeh64NpWRBnSx4jO6hXPopkp3IvOmkzwgilmJ9aLvwei/pKxPyD5NhkkJWYYBvW5DVJL5VKWiAUwvBrIE4q9GGd5cBYVQKnJa47Pn3Dw6McstJOpozs1q0gRPqeCcXA/KRIvzadjiLIk5Ga6yJGlldg9Ad6eqZQQ4P8RBTQM=",
+            "owner-id": 1,
+            "signed-id": 1,
+            "wts": 7
+        },
+        {
+            "id": 2,
+            "name": "car",
+            "state": "not-on-sale",
+            "signature": "Gowxgr286FID+aOfLWpLIyKCveVL+eMUa5cGAckmRAq3DA8GXA3ZYGGA/FqC8D8Oa/EK35u7u7kd6LezO5q/ZpiVeJOsk0tmuTDCDfsydJ7325+8I9F8WJQD4N1ilv9z1UjSX9deKnjPYrl3tbdA2/WELTESRc5l7lNEa4f8YmM=",
+            "owner-id": 1,
+            "signed-id": 1,
+            "wts": 0
+        },
+        {
+            "id": 3,
+            "name": "motorcycle",
+            "state": "not-on-sale",
+            "signature": "q8yu6kAfXJ8jkw4yRPxw/OpWctqy83AyQtfSXAkbavRaYlRNZMstpsQiWcrNwuPBS9993ujO+k/+XmoAVnaO/mbGi/mZJ8ecDFYSocvc8v0Zu+A2i72a4vGwgi9v/SZd8MIJv7NqOUBeVnk/Jjugx6rEeRIipiJO2J9hw2H9VlU=",
+            "owner-id": 2,
+            "signed-id": 2,
+            "wts": 0
+        },
+        {
+            "id": 4,
+            "name": "pool table",
+            "state": "not-on-sale",
+            "signature": "mqaP0iqAyDZzqycuPQ1q+A7kuLxGQUs9fYVjTjJ8/ThfOC2PciamOtAkPJPXBjwAtOUQysATxeXBFCEO1vJkipeTTtRlQ7ta5QFNO4bpD6pS05WwlyNg/dKl2iO4Alc2yJjg1NKNqV680B6q9wir84jmRDnitYFo3+FBUIk1ZFo=",
+            "owner-id": 2,
+            "signed-id": 2,
+            "wts": 0
+        },
+        {
+            "id": 5,
+            "name": "makeup set",
+            "state": "not-on-sale",
+            "signature": "OJFfeWF63vEO+2CgtwtOsl0zUjgZ77RSBD5f4yJDGiys58zXNOmxos+WG2IT+xIYKJf6ia/LaCn4zzEYNp7HCo14Kammx+omztaaDaCqapTAzdwFIhNEFEVCCXhxinBW299zxoySW6hPB4/dzuahzPUVG415SarLJpxQpaNMueQ=",
+            "owner-id": 1,
+            "signed-id": 1,
+            "wts": 0
+        },
+        {
+            "id": 6,
+            "name": "phone",
+            "state": "not-on-sale",
+            "signature": "R/nKAwZsV118c45sKl/v6vwYv9q0EgdVq8Px5bG0dzcOhIABO/8f/WjHsSf+qCspSZfOBsFSKaY94vX3s/JY9x1H4HPszt6yss0UxWJObX2RqTAAYSbk9xkcDCIhpRwThjDeEf3ZoQV/kOUaKqWnm97/BYDB6VjAM0voomXlTLk=",
+            "owner-id": 2,
+            "signed-id": 2,
+            "wts": 0
+        }
+    ],
+    "transfer-certificates": []
+}

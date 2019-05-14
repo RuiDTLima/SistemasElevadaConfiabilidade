@@ -423,9 +423,9 @@ public class HdsClientApplication {
                         nAcks++;
                     else if (receivedBody.getResponse().equals(YES))
                         acks++;
-                    if (acks > (numberOfNotaries + byzantineFaultsLimit / 2))
+                    if (acks > (numberOfNotaries + byzantineFaultsLimit) / 2)
                         return;
-                    if (nAcks > (numberOfNotaries + byzantineFaultsLimit / 2)) {
+                    if (nAcks > (numberOfNotaries + byzantineFaultsLimit) / 2) {
                         String errorMessage = "The quorum does not approved the value.";
                         log.info(errorMessage);
                         throw new ResponseException(errorMessage);

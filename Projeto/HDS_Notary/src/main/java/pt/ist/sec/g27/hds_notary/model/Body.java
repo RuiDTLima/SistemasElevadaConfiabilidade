@@ -49,8 +49,9 @@ public class Body implements Serializable {
     public Body() {
     }
 
-    public Body(int senderId, int userId, State state, int rId, int wTs, byte[] signature, int signedId) {
+    public Body(int senderId, int goodId, int userId, State state, int rId, int wTs, byte[] signature, int signedId) {
         this.senderId = senderId;
+        this.goodId = goodId;
         this.status = HttpStatus.OK;
         this.userId = userId;
         this.state = state.getState();

@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
 
 @Service
 public class ReliableBroadcast {
-    private static final ObjectMapper mapper = new ObjectMapper();
+    /*private static final ObjectMapper mapper = new ObjectMapper();
     private static final String DELIVER_URL = "/deliver";
 
     private Boolean sentEcho;
@@ -85,5 +85,5 @@ public class ReliableBroadcast {
         }
 
         return responses;
-    }
+    }*/
 }
