@@ -60,14 +60,6 @@ public class Body implements Serializable {
         this.signedId = signedId;
     }
 
-    /*public Body(int senderId, int userId, State state) {
-        this.senderId = senderId;
-        this.status = HttpStatus.OK;
-        this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
-        this.userId = userId;
-        this.state = state.getState();
-    }*/
-
     public Body(int senderId, String response, int rId, int wTs) {
         this.senderId = senderId;
         this.status = HttpStatus.OK;
@@ -91,6 +83,11 @@ public class Body implements Serializable {
         this.status = httpExceptions.getHttpStatus();
         this.rId = httpExceptions.getrId();
         this.wTs = httpExceptions.getwTs();
+    }
+
+    public Body(int senderId, Message message) {
+        this.senderId = senderId;
+        this.message = message;
     }
 
     public int getUserId() {

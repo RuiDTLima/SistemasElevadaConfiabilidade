@@ -101,7 +101,7 @@ Durante a realização dos testes é necessário ter os portos **8074**, **8075*
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 3 2".
   - No fim espera-se receber como mensagem na Alice "Yes".
   - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes aos clientes Alice e Bob e ao Notary devem ser encerradas.
-  - Para testar este teste uma segunda vez é necessário copiar o conteúdo do ficheiro state_copy.json para o ficheiro state.json.
+  - Para testar este teste uma segunda vez é necessário, em todas as pastas de notários, copiar o conteúdo do ficheiro state - Cópia.json para o ficheiro state.json.
 
 ## Demo 10: Falta malicious!!!!!!!!!!!!!!!!!!
   - Testa o envio por parte de um cliente malicioso de mensagens repetidas.

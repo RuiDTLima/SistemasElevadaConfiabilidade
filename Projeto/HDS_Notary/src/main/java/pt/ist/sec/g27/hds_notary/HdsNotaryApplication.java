@@ -7,12 +7,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import pt.ist.sec.g27.hds_notary.model.AppState;
+import pt.ist.sec.g27.hds_notary.model.Notary;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 
 @SpringBootApplication
 public class HdsNotaryApplication {
@@ -22,6 +24,16 @@ public class HdsNotaryApplication {
 
     private static AppState appState;
     private static int notaryId;
+
+    public static Notary getMe() {
+        return appState.getNotary(notaryId);
+    }
+
+    public static Notary[] getRemainingNotaries() {
+        return Arrays.stream(appState.getNotaries())
+                .filter(notary -> notary.getId() != notaryId)
+                .toArray(Notary[]::new);
+    }
 
     public static void main(String[] args) {
         ObjectMapper mapper = new ObjectMapper();

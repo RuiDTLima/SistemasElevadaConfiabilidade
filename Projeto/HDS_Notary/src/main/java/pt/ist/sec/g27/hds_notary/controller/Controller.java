@@ -81,6 +81,8 @@ public class Controller {
             throw new ForbiddenException("You do not have that good.", -1, wTs);
         }
 
+        // Reliable
+
         int goodwTs = good.getwTs();
         if (good.getState().equals(State.ON_SALE)) {
             String errorMessage = "The good is already on sale.";
