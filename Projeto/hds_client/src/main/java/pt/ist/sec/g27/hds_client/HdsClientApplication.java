@@ -23,7 +23,12 @@ public class HdsClientApplication {
     private static final String STATE_PATH = "state.json";
     private static final Logger log = LoggerFactory.getLogger(HdsClientApplication.class);
     private static final RestClient restClient = new RestClient();
-    public static final String YES = "YES";
+    private static final String YES = "YES";
+    private static final String NO = "NO";
+    private static final String GET_STATE_OF_GOOD_URL = "/getStateOfGood";
+    private static final String INTENTION_TO_SELL_URL = "/intentionToSell";
+    private static final String BUY_GOOD_URL = "/buyGood";
+    private static final String UPDATE_URL = "/update";
 
     private static AppState appState;
     private static User me;
@@ -195,7 +200,6 @@ public class HdsClientApplication {
     }
 
     private void getStateOfGood(String[] params) throws Exception {
-        String uri = "/getStateOfGood";
         int goodId = Integer.parseInt(params[0]);
 
         if (!goodExist(goodId))
@@ -205,7 +209,7 @@ public class HdsClientApplication {
         readList = new Value[numberOfNotaries];
         Body body = new Body(me.getId(), goodId, rId, true);
 
-        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, uri, body);
+        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, GET_STATE_OF_GOOD_URL, body);
 
         if (receivedMessages == null)
             return;
@@ -232,20 +236,20 @@ public class HdsClientApplication {
                         Good receivedGood = new Good(goodId, userId, good.getName(), State.getStateFromString(receivedBody.getState()), receivedBody.getwTs(), signedId);
                         if (!SecurityUtils.verify(signedUser.getPublicKey(), Utils.jsonObjectToByteArray(receivedGood), receivedBody.getSignature()))
                             continue;
-                        readList[notaryId] = new Value(receivedBody.getwTs(), receivedBody);
+                        readList[notaryId] = new Value(receivedBody.getwTs(), receivedMessage);
                         receives++;
                         validReceives++;
                     } else {
-                        readList[notaryId] = new Value(receivedBody.getwTs(), receivedBody);
+                        readList[notaryId] = new Value(receivedBody.getwTs(), receivedMessage);
                         receives++;
                         invalidReceives++;
                     }
                     if (receives > (numberOfNotaries + byzantineFaultsLimit) / 2) {
                         int higher = -1;
-                        Body toReturn = null;
+                        Message toReturn = null;
                         for (Value currentValue : readList) {
                             if (currentValue != null) {
-                                if(!currentValue.getValue().getStatus().is2xxSuccessful() || currentValue.getTimestamp() > higher) {
+                                if (!currentValue.getValue().getBody().getStatus().is2xxSuccessful() || currentValue.getTimestamp() > higher) {
                                     toReturn = currentValue.getValue();
                                     higher = currentValue.getTimestamp();
                                 }
@@ -254,19 +258,18 @@ public class HdsClientApplication {
                         readList = new Value[numberOfNotaries];
                         if (toReturn == null)
                             continue;
-                        if (!toReturn.getStatus().is2xxSuccessful()) {
-                            log.info(toReturn.getResponse());
-                            System.out.println(toReturn.getResponse());
+                        if (!toReturn.getBody().getStatus().is2xxSuccessful()) {
+                            log.info(toReturn.getBody().getResponse());
+                            System.out.println(toReturn.getBody().getResponse());
                             return;
                         }
 
-                        // TODO changed
-                        updateNotaries(toReturn);
+                        updateNotaries(new Body(me.getId(), toReturn));
 
                         String message = String.format("The good with id %d is owned by user with id %d and his state is %s.",
-                                body.getGoodId(),
-                                toReturn.getUserId(),
-                                toReturn.getState());
+                                goodId,
+                                toReturn.getBody().getUserId(),
+                                toReturn.getBody().getState());
 
                         log.info(message);
                         System.out.println(message);
@@ -281,7 +284,6 @@ public class HdsClientApplication {
     }
 
     private void intentionToSell(String[] params) throws Exception {
-        String uri = "/intentionToSell";
         int goodId = Integer.parseInt(params[0]);
 
         Good good = appState.getGood(goodId);
@@ -295,7 +297,7 @@ public class HdsClientApplication {
         byte[] sigma = SecurityUtils.sign(me.getPrivateKey(), Utils.jsonObjectToByteArray(new Good(goodId, me.getId(), good.getName(), State.ON_SALE, wTs, me.getId())));
         Body body = new Body(me.getId(), goodId, wTs, false, sigma);
 
-        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, uri, body);
+        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, INTENTION_TO_SELL_URL, body);
         if (receivedMessages == null)
             return;
 
@@ -361,7 +363,6 @@ public class HdsClientApplication {
     }
 
     private void buyGood(String[] params) throws Exception {
-        String uri = "/buyGood";
         int goodId, userId;
 
         try {
@@ -391,11 +392,11 @@ public class HdsClientApplication {
         }
 
         Body body = new Body(me.getId(), goodId);
-        Message receivedMessage = makeRequest(owner, uri, body);
+        Message receivedMessage = makeRequest(owner, BUY_GOOD_URL, body);
         if (receivedMessage == null)
             return;
 
-        Utils.verifyAllMessages(receivedMessage, uri);
+        Utils.verifyAllMessages(receivedMessage, BUY_GOOD_URL);
 
         Body notaryBody = receivedMessage.getBody().getMessage().getBody();
 
@@ -410,27 +411,35 @@ public class HdsClientApplication {
 
     private void updateNotaries(Body body) throws Exception {
         body.setrId(rId);
-        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, "/update", body);
+        List<Message> receivedMessages = makeRequestToMultipleNotaries(notaries, UPDATE_URL, body);
 
         if (receivedMessages == null)
             return;
 
-        int acks = 0;
+        int acks = 0, nAcks = 0;
         for (Message receivedMessage : receivedMessages) {
             Body receivedBody = receivedMessage.getBody();
-
             if (receivedBody != null) {
                 int notaryId = receivedBody.getSenderId();
                 Notary notary = appState.getNotary(notaryId);
                 if (Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage) && receivedBody.getrId() == rId) {
-                    acks++;
-
-                    if (acks > (numberOfNotaries / 2)) {
+                    if (!receivedBody.getStatus().is2xxSuccessful() || receivedBody.getResponse().equals(NO))
+                        nAcks++;
+                    else if (receivedBody.getResponse().equals(YES))
+                        acks++;
+                    if (acks > (numberOfNotaries + byzantineFaultsLimit / 2))
                         return;
+                    if (nAcks > (numberOfNotaries + byzantineFaultsLimit / 2)) {
+                        String errorMessage = "The quorum does not approved the value.";
+                        log.info(errorMessage);
+                        throw new ResponseException(errorMessage);
                     }
                 }
             }
         }
+        String errorMessage = "Could not obtained quorum for the read value.";
+        log.info(errorMessage);
+        throw new ResponseException(errorMessage);
     }
 
     private boolean validateParams(String[] params, int length, String logMessage, String outputMessage) {

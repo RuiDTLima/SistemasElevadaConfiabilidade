@@ -1,6 +1,7 @@
 package pt.ist.sec.g27.hds_notary.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -11,6 +12,9 @@ public class AppState {
 
     @JsonProperty("transfer-certificates")
     private ArrayList<TransferCertificate> transferCertificates;
+
+    public AppState() {
+    }
 
     public Notary getNotary() {
         return notary;

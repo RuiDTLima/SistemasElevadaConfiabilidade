@@ -5,6 +5,9 @@ public class Notary {
     private String name;
     private int port;
 
+    public Notary() {
+    }
+
     public int getId() {
         return id;
     }
@@ -15,8 +18,5 @@ public class Notary {
 
     public int getPort() {
         return port;
-    }
-
-    public Notary() {
     }
 }

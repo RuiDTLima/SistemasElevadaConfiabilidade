@@ -69,6 +69,12 @@ public class Body implements Serializable {
         this.goodId = goodId;
     }
 
+    public Body(int senderId, Message message) {
+        this.senderId = senderId;
+        this.status = message.getBody().getStatus();
+        this.message = message;
+    }
+
     public Body(int senderId, String response, Message message) {
         this.senderId = senderId;
         this.status = message.getBody().getStatus();

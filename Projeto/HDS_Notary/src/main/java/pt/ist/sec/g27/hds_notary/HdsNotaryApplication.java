@@ -7,6 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import pt.ist.sec.g27.hds_notary.model.AppState;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
