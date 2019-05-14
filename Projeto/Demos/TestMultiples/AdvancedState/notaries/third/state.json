@@ -1,5 +1,5 @@
 {
-  "notary": [
+  "notaries": [
     {
       "id": 0,
       "url": "http://localhost:8074",

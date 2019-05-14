@@ -2,6 +2,7 @@ Os clientes podem efetuar as seguintes operações:
 - **getStateOfGood \<good-id>** em que o **\<good-id>** é o identificador único do good.
 - **intentionToSell \<good-id>** em que o **\<good-id>** é o identificador único do good.
 - **buyGood \<good-id> \<owner-id>** em que o **\<good-id>** é o identificador único do good e o **\<owner-id>** é o identificador único do dono do good representado por **\<good-id>**.
+- **exit** em que termina a sessão de um utilizador.
 
 # Setup
 
@@ -19,12 +20,12 @@ Durante a realização dos testes é necessário ter os portos **8074**, **8075*
   - Testa a compra de um bem inexistente.
   - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
   - De seguida, deve ser executado o ficheiro script.bat na pasta Demo.
-  - Na janela pertencente à Alice, deve ser introduzida a password *alice* e assim que o spring terminar a sua inicialização deve ser introduzido o seguinte comando: "buyGood 55 2".
+  - Na janela pertencente à Alice, assim que o spring terminar a sua inicialização deve ser introduzido o seguinte comando: "buyGood 55 2".
   - No fim espera-se receber como aviso na Alice "The good with id 55 does not exist.".
 
 ## Demo 2:
   - Testa a compra de um bem que não está à venda.
-  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aoa Notaries.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta Demo.
   - Na janela pertencente ao Bob, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 1 1".
   - No fim espera-se receber como mensagem no Bob "NO".
@@ -83,7 +84,6 @@ Durante a realização dos testes é necessário ter os portos **8074**, **8075*
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 3 2".
   - No fim espera-se receber como mensagem na Alice "There was no valid responses."
   - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes aos clientes Alice e Bob e ao Notary devem ser encerradas.
-  - Para testar este teste uma segunda vez é necessário copiar o conteúdo do ficheiro state_copy.json para o ficheiro state.json.
 
 ## Demo 10: Falta State !!!!!!!!!!!!!!!!
   - Testa o envio de um intentionToSell com o wts errado.
