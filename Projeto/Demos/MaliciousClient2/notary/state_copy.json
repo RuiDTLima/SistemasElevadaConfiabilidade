@@ -32,38 +32,56 @@
             "id": 1,
             "name": "house",
             "state": "on-sale",
-            "owner-id": 1
-        },
-        {
+            "signature": "FGXQhWB91RcYhY7XARM5I4Ylw2W+LICvdbHLQCo3m5JOmQa4dh2mAbURYC7Ty5Ojka1Q6o0R8AjBVtKrYJ0lQ0YhidaNa9STCZyjpxbLs8W/N6dweAX8gkVSqLfpK9hiFbh1rTl+TcIYBXKhTchBCILDRVwHd3bO72xECAwKpxQ=",
+            "owner-id": 1,
+            "signed-id": 1,
+            "wts": 0
+          },
+          {
             "id": 2,
             "name": "car",
             "state": "not-on-sale",
-            "owner-id": 1
-        },
-        {
+            "signature": "Gowxgr286FID+aOfLWpLIyKCveVL+eMUa5cGAckmRAq3DA8GXA3ZYGGA/FqC8D8Oa/EK35u7u7kd6LezO5q/ZpiVeJOsk0tmuTDCDfsydJ7325+8I9F8WJQD4N1ilv9z1UjSX9deKnjPYrl3tbdA2/WELTESRc5l7lNEa4f8YmM=",
+            "owner-id": 1,
+            "signed-id": 1,
+            "wts": 0
+          },
+          {
             "id": 3,
             "name": "motorcycle",
             "state": "not-on-sale",
-            "owner-id": 2
-        },
-        {
+            "signature": "q8yu6kAfXJ8jkw4yRPxw/OpWctqy83AyQtfSXAkbavRaYlRNZMstpsQiWcrNwuPBS9993ujO+k/+XmoAVnaO/mbGi/mZJ8ecDFYSocvc8v0Zu+A2i72a4vGwgi9v/SZd8MIJv7NqOUBeVnk/Jjugx6rEeRIipiJO2J9hw2H9VlU=",
+            "owner-id": 2,
+            "signed-id": 2,
+            "wts": 0
+          },
+          {
             "id": 4,
             "name": "pool table",
             "state": "not-on-sale",
-            "owner-id": 2
-        },
-        {
+            "signature": "mqaP0iqAyDZzqycuPQ1q+A7kuLxGQUs9fYVjTjJ8/ThfOC2PciamOtAkPJPXBjwAtOUQysATxeXBFCEO1vJkipeTTtRlQ7ta5QFNO4bpD6pS05WwlyNg/dKl2iO4Alc2yJjg1NKNqV680B6q9wir84jmRDnitYFo3+FBUIk1ZFo=",
+            "owner-id": 2,
+            "signed-id": 2,
+            "wts": 0
+          },
+          {
             "id": 5,
             "name": "makeup set",
             "state": "not-on-sale",
-            "owner-id": 1
-        },
-        {
+            "signature": "OJFfeWF63vEO+2CgtwtOsl0zUjgZ77RSBD5f4yJDGiys58zXNOmxos+WG2IT+xIYKJf6ia/LaCn4zzEYNp7HCo14Kammx+omztaaDaCqapTAzdwFIhNEFEVCCXhxinBW299zxoySW6hPB4/dzuahzPUVG415SarLJpxQpaNMueQ=",
+            "owner-id": 1,
+            "signed-id": 1,
+            "wts": 0
+          },
+          {
             "id": 6,
             "name": "phone",
             "state": "not-on-sale",
-            "owner-id": 2
-        }
+            "signature": "R/nKAwZsV118c45sKl/v6vwYv9q0EgdVq8Px5bG0dzcOhIABO/8f/WjHsSf+qCspSZfOBsFSKaY94vX3s/JY9x1H4HPszt6yss0UxWJObX2RqTAAYSbk9xkcDCIhpRwThjDeEf3ZoQV/kOUaKqWnm97/BYDB6VjAM0voomXlTLk=",
+            "owner-id": 2,
+            "signed-id": 2,
+            "wts": 0
+          }
     ],
     "transfer-certificates": []
 }
