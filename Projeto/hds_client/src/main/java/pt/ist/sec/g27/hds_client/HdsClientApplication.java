@@ -215,8 +215,6 @@ public class HdsClientApplication {
             return;
 
         int receives = 0;
-        int validReceives = 0, invalidReceives = 0;
-        Body validBody = null, invalidBody = null;
         for (Message receivedMessage : receivedMessages) {
             Body receivedBody = receivedMessage.getBody();
 
@@ -238,11 +236,9 @@ public class HdsClientApplication {
                             continue;
                         readList[notaryId] = new Value(receivedBody.getwTs(), receivedMessage);
                         receives++;
-                        validReceives++;
                     } else {
                         readList[notaryId] = new Value(receivedBody.getwTs(), receivedMessage);
                         receives++;
-                        invalidReceives++;
                     }
                     if (receives > (numberOfNotaries + byzantineFaultsLimit) / 2) {
                         int higher = -1;

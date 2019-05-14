@@ -61,7 +61,7 @@ Durante a realização dos testes é necessário ter os portos **8074**, **8075*
 ## Demo 7:
   - Testa assinar resposta a pedidos com chaves falsas, a chave privada do Notary é falsa, usa um cartão diferente do original.
   - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
-  - Durante este teste, deve ser usado um cartão de cidadão diferente do usado para gerar a chave pública.
+  - Durante este teste, cada notário deve ter uma chave privada que não corresponda à chave pública no cliente.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta FakeKeyNotaries.
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "getStateOfGood 1".
   - No fim espera-se receber como mensagem na Alice "Did not received a valid response."
@@ -85,7 +85,7 @@ Durante a realização dos testes é necessário ter os portos **8074**, **8075*
   - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes aos clientes Alice e Bob e ao Notary devem ser encerradas.
   - Para testar este teste uma segunda vez é necessário copiar o conteúdo do ficheiro state_copy.json para o ficheiro state.json.
 
-## Demo 10: Falta State !!!!!!!!!!!!!!!!
+## Demo 10:
   - Testa o envio de um intentionToSell com o wts errado.
   - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
   - De seguida deve ser executado o ficheiro script.bat, na pasta AdvancedState.
@@ -94,11 +94,11 @@ Durante a realização dos testes é necessário ter os portos **8074**, **8075*
   - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes aos clientes Alice e Bob e ao Notary devem ser encerradas.
   - Para testar este teste uma segunda vez é necessário copiar o conteúdo do ficheiro state_copy.json para o ficheiro state.json.
 
-## Demo 11: Falta State !!!!!!!!!!!!!!!!
+## Demo 11:
   - Testa o envio de um buyGood com o wts errado.
   - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
   - De seguida deve ser executado o ficheiro script.bat, na pasta AdvancedState.
-  - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 1 1".
+  - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 3 2".
   - No fim espera-se receber como mensagem na Alice "Yes".
   - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes aos clientes Alice e Bob e ao Notary devem ser encerradas.
   - Para testar este teste uma segunda vez é necessário copiar o conteúdo do ficheiro state_copy.json para o ficheiro state.json.

@@ -29,10 +29,10 @@
       "id": 1,
       "name": "house",
       "state": "not-on-sale",
-      "signature": "l4diTbJ0J4vPQonPAqgME6xLgklNqCX+iKuu4gHVUYgzuCSmw1U44Rt0ZedfKHk9VGnq+OyPu4ChIFcpg2ICy1zIv9bAfWJYQGM69VGqfV1mQ0ZJWnXYrxoIZ5KJ5QY/kpL8cQCrwm73J4NKrqmg5uPXA2YtZbFnltUTtGf2FlA=",
+      "signature": "pJOTBrt+HjKQkk5f4LJcu8MmNyKQnzM83QgnkJNduF05ImjXdaLdMbJ1devCRh0wPE0AvxeEDzbyK4CBL5WU3Rm76wooR48ptuEQQ2LgnYxhAwq1ithfkIq0fByxIwcJdul3ZevlF3Jjm2eJVzE7+vFBtWV9/ZJt174+RRnBP8Q=",
       "owner-id": 1,
-      "signed-id": 1,
-      "wts": 0
+      "signed-id": 2,
+      "wts": 5
     },
     {
       "id": 2,
@@ -46,11 +46,11 @@
     {
       "id": 3,
       "name": "motorcycle",
-      "state": "not-on-sale",
-      "signature": "q8yu6kAfXJ8jkw4yRPxw/OpWctqy83AyQtfSXAkbavRaYlRNZMstpsQiWcrNwuPBS9993ujO+k/+XmoAVnaO/mbGi/mZJ8ecDFYSocvc8v0Zu+A2i72a4vGwgi9v/SZd8MIJv7NqOUBeVnk/Jjugx6rEeRIipiJO2J9hw2H9VlU=",
+      "state": "on-sale",
+      "signature": "ajBSMnzspVspPb2Y/zsYlT80Xqh9u9piaoVpB2VluvqdJYuLtPOEkTfro7Jrx3yjRW6UYuLp2jPKOZuIrK62qUcrn4TLcaSUHejg+Gz2UE4wH1rsn5pEA97vRaHHmQIDLdIHfisWsicrbzKpqd2r7woxgVv06X74iH3tyWRFEJA=",
       "owner-id": 2,
       "signed-id": 2,
-      "wts": 0
+      "wts": 10
     },
     {
       "id": 4,

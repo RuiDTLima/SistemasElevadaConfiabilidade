@@ -1,5 +1,6 @@
 package pt.ist.sec.g27.hds_client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.Dsl;
@@ -18,9 +19,12 @@ import pt.ist.sec.g27.hds_client.model.Body;
 import pt.ist.sec.g27.hds_client.model.Message;
 import pt.ist.sec.g27.hds_client.model.Notary;
 import pt.ist.sec.g27.hds_client.model.User;
+import pt.ist.sec.g27.hds_client.utils.ProofOfWork;
 import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +53,18 @@ public class RestClient {
     public List<Message> postToMultipleNotaries(Notary[] notaries, String uri, Body body, PrivateKey privateKey) throws Exception {
         List<Message> responses = new ArrayList<>();
         byte[] jsonBody = mapper.writeValueAsBytes(body);
-        Message message = new Message(body, SecurityUtils.sign(privateKey, jsonBody));
+
+        BigInteger proofOfWork;
+        try {
+            proofOfWork = (new ProofOfWork(body).compute());
+        } catch (NoSuchAlgorithmException | JsonProcessingException e) {
+            String errorMessage = "There was an error while trying to compute the proof of work.";
+            log.info(errorMessage);
+            System.out.println(errorMessage);
+            return null;    // TODO return null.
+        }
+
+        Message message = new Message(body, SecurityUtils.sign(privateKey, jsonBody), proofOfWork);
         String json = mapper.writeValueAsString(message);
 
         List<CompletableFuture<Optional<Message>>> completableFutures = new ArrayList<>();
