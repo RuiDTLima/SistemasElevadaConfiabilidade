@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class AppState {
-    private Notary notary;
+    private Notary[] notaries;
     private User[] users;
     private Good[] goods;
 
@@ -16,8 +16,8 @@ public class AppState {
     public AppState() {
     }
 
-    public Notary getNotary() {
-        return notary;
+    public Notary[] getNotaries() {
+        return notaries;
     }
 
     public User[] getUsers() {
@@ -42,5 +42,9 @@ public class AppState {
 
     public void addTransferCertificate(TransferCertificate transferCertificate) {
         transferCertificates.add(transferCertificate);
+    }
+
+    public Notary getNotary(int notaryId) {
+        return Arrays.stream(notaries).filter(notary -> notary.getId() == notaryId).findFirst().orElse(null);
     }
 }
