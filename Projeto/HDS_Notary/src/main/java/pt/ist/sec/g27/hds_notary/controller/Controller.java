@@ -184,6 +184,7 @@ public class Controller {
             good.setwTs(wTs);
             good.setSignature(receivedBody.getSignature());
             good.setSignedId(receivedBody.getSignedId());
+            saveState();
             return new Body(notaryId, YES, receivedBody.getrId(), wTs);
         }
 

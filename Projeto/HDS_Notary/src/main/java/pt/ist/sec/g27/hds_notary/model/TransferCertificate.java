@@ -17,6 +17,16 @@ public class TransferCertificate {
 
     private String timestamp;
 
+    public TransferCertificate() {
+    }
+
+    public TransferCertificate(int buyerId, int sellerId, int goodId) {
+        this.buyerId = buyerId;
+        this.sellerId = sellerId;
+        this.goodId = goodId;
+        this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
+    }
+
     public int getBuyerId() {
         return buyerId;
     }
@@ -31,15 +41,5 @@ public class TransferCertificate {
 
     public String getTimestamp() {
         return timestamp;
-    }
-
-    public TransferCertificate() {
-    }
-
-    public TransferCertificate(int buyerId, int sellerId, int goodId) {
-        this.buyerId = buyerId;
-        this.sellerId = sellerId;
-        this.goodId = goodId;
-        this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
     }
 }

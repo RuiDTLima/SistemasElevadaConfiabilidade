@@ -17,6 +17,9 @@ public class Good {
 
     private byte[] signature;
 
+    public Good() {
+    }
+
     public int getId() {
         return id;
     }

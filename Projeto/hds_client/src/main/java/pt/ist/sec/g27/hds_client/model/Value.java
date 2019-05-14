@@ -3,9 +3,9 @@ package pt.ist.sec.g27.hds_client.model;
 public class Value {
 
     private int timestamp;
-    private Body value;
+    private Message value;
 
-    public Value(int timestamp, Body value) {
+    public Value(int timestamp, Message value) {
         this.timestamp = timestamp;
         this.value = value;
     }
@@ -14,7 +14,7 @@ public class Value {
         return timestamp;
     }
 
-    public Body getValue() {
+    public Message getValue() {
         return value;
     }
 }
