@@ -97,7 +97,7 @@ public class ByzantineReliableBroadcast {
             throw new NotFoundException(errorMessage, -1, -1);
         }
         Body body = message.getBody();
-        if (body.getSenderId() == notaryId && !sentEcho/* && clientMessage.equals(message)*/) {
+        if (body.getSenderId() == notaryId && !sentEcho && clientMessage.equals(message.getBody().getMessage())) {
             sentEcho = true;
             log.info("To all notaries echo request.");
             toAllNotaries(ECHO_URL, new Body(notaryId, body.getMessage()));
