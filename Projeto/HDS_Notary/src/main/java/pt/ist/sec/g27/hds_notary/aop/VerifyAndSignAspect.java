@@ -91,6 +91,7 @@ public class VerifyAndSignAspect {
 
         if (message == null || message.getBody() == null) {
             String errorMessage = "The incoming message does not follow the specification.";
+            log.info(errorMessage);
             throw new NotFoundException(errorMessage, -1, -1);
         }
 

@@ -1,9 +1,27 @@
 {
-  "notary": {
-    "id": 0,
-    "name": "notary",
-    "port": 8074
-  },
+  "notaries": [
+    {
+      "id": 0,
+      "url": "http://localhost:8074",
+      "pubKey": "keys/first.pub",
+      "privKey": "keys/notary.key"
+    },
+    {
+      "id": 1,
+      "url": "http://localhost:8075",
+      "pubKey": "keys/second.pub"
+    },
+    {
+      "id": 2,
+      "url": "http://localhost:8076",
+      "pubKey": "keys/third.pub"
+    },
+    {
+      "id": 3,
+      "url": "http://localhost:8077",
+      "pubKey": "keys/fourth.pub"
+    }
+  ],
   "users": [
     {
       "id": 1,
@@ -28,11 +46,11 @@
     {
       "id": 1,
       "name": "house",
-      "state": "not-on-sale",
-      "signature": "pJOTBrt+HjKQkk5f4LJcu8MmNyKQnzM83QgnkJNduF05ImjXdaLdMbJ1devCRh0wPE0AvxeEDzbyK4CBL5WU3Rm76wooR48ptuEQQ2LgnYxhAwq1ithfkIq0fByxIwcJdul3ZevlF3Jjm2eJVzE7+vFBtWV9/ZJt174+RRnBP8Q=",
+      "state": "on-sale",
+      "signature": "gP7KCSr5m0uIIqsKhtAqER31WPSxU/I2w4/v7uAAQi8H7+Q0J4xk1b1rx877Oi5uJ9NliAR/IqnetaCDEhT2+Fs+jSPhOZnfRSVNNyaCoHBn+VaJDH/zxxpIgxa78Wr2nA8CrDwaM9MRrwu/Nz41blHM/LYbSDtGMDJyXaYGSik=",
       "owner-id": 1,
-      "signed-id": 2,
-      "wts": 5
+      "signed-id": 1,
+      "wts": 6
     },
     {
       "id": 2,

@@ -10,10 +10,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pt.ist.sec.g27.hds_notary.HdsNotaryApplication;
+import pt.ist.sec.g27.hds_notary.exceptions.NotFoundException;
 import pt.ist.sec.g27.hds_notary.model.Body;
 import pt.ist.sec.g27.hds_notary.model.Message;
 import pt.ist.sec.g27.hds_notary.model.Notary;
 import java.io.IOException;
+import java.time.chrono.HijrahDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +52,8 @@ public class ByzantineReliableBroadcast {
         readys = new Message[HdsNotaryApplication.getTotalNotaries()];
         countReadys = 0;
 
+        broadcast(message);
+
         while (true) {
             if (message != null && countReadys > (2 * HdsNotaryApplication.getByzantineFaultsLimit()) && !delivered) {
                 delivered = true;
@@ -59,12 +63,16 @@ public class ByzantineReliableBroadcast {
     }
 
     private void broadcast(Message message) {
+        log.info(String.format("Broadcast message from notary with id %d to all notaries", HdsNotaryApplication.getMe().getId()));
         toAllNotaries(DELIVER_URL, message);
     }
 
-    private void send(Message message) {
+    public void send(Message message) {
+        log.info(String.format("Send method in notary with id %d", HdsNotaryApplication.getMe().getId()));
         if (message == null || message.getBody() == null) {
-            // TODO exception
+            String errorMessage = "The message or its body cannot be null.";
+            log.info(errorMessage);
+            throw new NotFoundException(errorMessage, -1, -1);
         }
         if (message.getBody().getSenderId() == HdsNotaryApplication.getMe().getId() && !sentEcho) {
             sentEcho = true;
@@ -72,31 +80,39 @@ public class ByzantineReliableBroadcast {
         }
     }
 
-    private void echo(Message message) {
+    public void echo(Message message) {
+        log.info(String.format("Echo method in notary with id %d", HdsNotaryApplication.getMe().getId()));
         if (message == null || message.getBody() == null) {
-            // TODO exception
+            String errorMessage = "The message or its body cannot be null.";
+            log.info(errorMessage);
+            throw new NotFoundException(errorMessage, -1, -1);
         }
         if (echos[message.getBody().getSenderId()] == null) {
+            log.info(String.format("Received echo from notary with id %d for the first time.", message.getBody().getSenderId()));
             echos[message.getBody().getSenderId()] = message;
             countEchos++;
         }
 
-        if (message != null && countEchos > ((HdsNotaryApplication.getTotalNotaries() + HdsNotaryApplication.getByzantineFaultsLimit()) / 2) && !sentReady) {
+        if (countEchos > ((HdsNotaryApplication.getTotalNotaries() + HdsNotaryApplication.getByzantineFaultsLimit()) / 2) && !sentReady) {
             sentReady = true;
             toAllNotaries(READY_URL, message);
         }
     }
 
-    private void ready(Message message) {
+    public void ready(Message message) {
+        log.info(String.format("Ready method in notary with id %d", HdsNotaryApplication.getMe().getId()));
         if (message == null || message.getBody() == null) {
-            // TODO exception
+            String errorMessage = "The message or its body cannot be null.";
+            log.info(errorMessage);
+            throw new NotFoundException(errorMessage, -1, -1);
         }
         if (readys[message.getBody().getSenderId()] == null) {
+            log.info(String.format("Received ready from notary with id %d for the first time.", message.getBody().getSenderId()));
             readys[message.getBody().getSenderId()] = message;
             countReadys++;
         }
 
-        if (message != null && countReadys > HdsNotaryApplication.getByzantineFaultsLimit() && !sentReady) {
+        if (countReadys > HdsNotaryApplication.getByzantineFaultsLimit() && !sentReady) {
             sentReady = true;
             toAllNotaries(READY_URL, message);
         }

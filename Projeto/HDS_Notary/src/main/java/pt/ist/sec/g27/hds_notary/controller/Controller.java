@@ -55,7 +55,7 @@ public class Controller {
 
         log.info(String.format("The good with id %d belongs to the user with id %d", goodId, good.getOwnerId()));
 
-        return new Body(notaryId, good.getOwnerId(), good.getState(), body.getrId(), good.getwTs(), good.getSignature(), good.getSignedId());
+        return new Body(notaryId, goodId, good.getOwnerId(), good.getState(), body.getrId(), good.getwTs(), good.getSignature(), good.getSignedId());
     }
 
     @VerifyAndSign
@@ -85,7 +85,7 @@ public class Controller {
         }
 
         // Reliable
-        HdsNotaryApplication.
+        byzantineReliableBroadcast.init(message);   // TODO check validity
 
         int goodwTs = good.getwTs();
         if (good.getState().equals(State.ON_SALE)) {
@@ -147,6 +147,7 @@ public class Controller {
             throw new ForbiddenException(errorMessage, -1, wTs);
         }
 
+        byzantineReliableBroadcast.init(message);   // TODO check validity
         int goodwTs = good.getwTs();
         if (good.getState() != State.ON_SALE) {
             String errorMessage = String.format("The good with id %d is not on sale.", buyerGoodId);
@@ -172,7 +173,7 @@ public class Controller {
     @VerifyAndSign(true)
     @PostMapping("/update")
     public Object updateState(@RequestBody Message message) {
-        Body receivedBody = message.getBody();
+        Body receivedBody = message.getBody().getMessage().getBody();
         int goodId = receivedBody.getGoodId();
         int ownerId = receivedBody.getUserId();
         int wTs = receivedBody.getwTs();
@@ -184,6 +185,9 @@ public class Controller {
             log.info(errorMessage);
             throw new NotFoundException(errorMessage, receivedBody.getrId(), wTs);
         }
+
+        byzantineReliableBroadcast.init(message);
+
         if (wTs > good.getwTs()) {
             good.setState(State.getStateFromString(receivedBody.getState()));
             good.setOwnerId(ownerId);
@@ -218,16 +222,16 @@ public class Controller {
 
     @PostMapping("/deliver")
     public void deliver(@RequestBody Message message) {
-
+        byzantineReliableBroadcast.send(message);
     }
 
     @PostMapping("/echo")
     public void echo(@RequestBody Message message) {
-
+        byzantineReliableBroadcast.echo(message);
     }
 
     @PostMapping("/ready")
     public void ready(@RequestBody Message message) {
-        
+        byzantineReliableBroadcast.ready(message);
     }
 }

@@ -1,9 +1,27 @@
 {
-  "notary": {
-    "id": 0,
-    "name": "notary",
-    "port": 8074
-  },
+  "notaries": [
+    {
+      "id": 0,
+      "url": "http://localhost:8074",
+      "pubKey": "keys/first.pub"
+    },
+    {
+      "id": 1,
+      "url": "http://localhost:8075",
+      "pubKey": "keys/second.pub"
+    },
+    {
+      "id": 2,
+      "url": "http://localhost:8076",
+      "pubKey": "keys/third.pub"
+    },
+    {
+      "id": 3,
+      "url": "http://localhost:8077",
+      "pubKey": "keys/fourth.pub",
+      "privKey": "keys/notary.key"
+    }
+  ],
   "users": [
     {
       "id": 1,

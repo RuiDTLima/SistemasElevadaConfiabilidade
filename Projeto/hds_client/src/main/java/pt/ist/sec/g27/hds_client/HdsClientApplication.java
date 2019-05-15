@@ -284,8 +284,12 @@ public class HdsClientApplication {
 
         Good good = appState.getGood(goodId);
 
-        if (good == null)
+        if (good == null) {
+            String errorMessage = String.format("The good with id %d does not exist.", goodId);
+            log.info(errorMessage);
+            System.out.println(errorMessage);
             return;
+        }
 
         good.incrWts();
         int wTs = good.getwTs();
@@ -419,13 +423,13 @@ public class HdsClientApplication {
                 int notaryId = receivedBody.getSenderId();
                 Notary notary = appState.getNotary(notaryId);
                 if (Utils.verifySingleMessage(notary.getPublicKey(), receivedMessage) && receivedBody.getrId() == rId) {
-                    if (!receivedBody.getStatus().is2xxSuccessful() || receivedBody.getResponse().equals(NO))
+                    if (!receivedBody.getStatus().is2xxSuccessful())
                         nAcks++;
-                    else if (receivedBody.getResponse().equals(YES))
+                    else if (receivedBody.getResponse().equals(YES) || receivedBody.getResponse().equals(NO))
                         acks++;
-                    if (acks > (numberOfNotaries + byzantineFaultsLimit / 2))
+                    if (acks > (numberOfNotaries + byzantineFaultsLimit) / 2)
                         return;
-                    if (nAcks > (numberOfNotaries + byzantineFaultsLimit / 2)) {
+                    if (nAcks > (numberOfNotaries + byzantineFaultsLimit) / 2) {
                         String errorMessage = "The quorum does not approved the value.";
                         log.info(errorMessage);
                         throw new ResponseException(errorMessage);
