@@ -28,6 +28,7 @@ public class ByzantineReliableBroadcast {
     private final static Logger log = LoggerFactory.getLogger(ByzantineReliableBroadcast.class);
     private final static int TIMEOUT = 5000; // 5 seconds
     private final Object monitor = new Object();
+    private Message clientMessage;
 
     private boolean sentEcho;
     private boolean sentReady;
@@ -51,6 +52,7 @@ public class ByzantineReliableBroadcast {
         countEchos = 0;
         readys = new Message[HdsNotaryApplication.getTotalNotaries()];
         countReadys = 0;
+        clientMessage = message;
 
         broadcast(message);
     }
@@ -95,7 +97,7 @@ public class ByzantineReliableBroadcast {
             throw new NotFoundException(errorMessage, -1, -1);
         }
         Body body = message.getBody();
-        if (body.getSenderId() == notaryId && !sentEcho) { // TODO redefine equals in body
+        if (body.getSenderId() == notaryId && !sentEcho && clientMessage.equals(message)) {
             sentEcho = true;
             log.info("To all notaries echo request.");
             toAllNotaries(ECHO_URL, new Body(notaryId, body.getMessage()));
