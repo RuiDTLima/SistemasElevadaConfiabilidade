@@ -44,10 +44,11 @@ public class VerifyAndSignAspect {
         MethodSignature signature = (MethodSignature) proceedingJoinPoint.getSignature();
         Method method = signature.getMethod();
         VerifyAndSign verifyAndSign = method.getAnnotation(VerifyAndSign.class);
-        boolean verifyNotary = verifyAndSign.value();
+        boolean verifyInnerNotary = verifyAndSign.verifyInnerNotary();
+        boolean verifyOuterNotary = verifyAndSign.verifyOuterNotary();
         try {
             log.info("Processing before method.");
-            before(proceedingJoinPoint.getArgs(), verifyNotary);
+            before(proceedingJoinPoint.getArgs(), verifyInnerNotary, verifyOuterNotary);
         } catch (HttpExceptions e) {
             log.info(String.format("Returning before exception from notary with id %d", notaryId));
             return after(new Body(notaryId, e));
@@ -80,7 +81,7 @@ public class VerifyAndSignAspect {
         return new Message((Body) returnedValue, sign);
     }
 
-    private void before(Object[] args, boolean verifyNotary) throws JsonProcessingException, NoSuchAlgorithmException {
+    private void before(Object[] args, boolean verifyInnerNotary, boolean verifyOuterNotary) throws JsonProcessingException, NoSuchAlgorithmException {
         if (args == null || args.length == 0 || !(args[0] instanceof Message)) {
             String errorMessage = "The incoming message is not acceptable.";
             log.info(errorMessage);
@@ -95,14 +96,16 @@ public class VerifyAndSignAspect {
             throw new NotFoundException(errorMessage, -1, -1);
         }
 
-        log.info("Verifying message's proof of work.");
-        verifyProofOfWork(message);
+        if (!verifyOuterNotary) {
+            log.info("Verifying message's proof of work.");
+            verifyProofOfWork(message);
+        }
         log.info("Verifying message structure.");
-        verifyMessageStructure(message);
+        verifyOuterMessageStructure(message, verifyOuterNotary);
         log.info("Verifying inner message structure.");
-        verifyInnerMessageStructure(message, verifyNotary);
+        verifyInnerMessageStructure(message, verifyInnerNotary);
         log.info("Verifying message signature.");
-        verifySignature(message, verifyNotary);
+        verifySignature(message, verifyInnerNotary, verifyOuterNotary);
     }
 
     private void verifyProofOfWork(Message message) throws JsonProcessingException, NoSuchAlgorithmException {
@@ -113,18 +116,18 @@ public class VerifyAndSignAspect {
         }
     }
 
-    private void verifyMessageStructure(Message message) {
+    private void verifyOuterMessageStructure(Message message, boolean verifyOuterNotary) {
         Body body = message.getBody();
         int senderId = body.getSenderId();
 
-        if (senderId == -1 || appState.getUser(senderId) == null) {
+        if (senderId == -1 || (verifyOuterNotary && appState.getNotary(senderId) == null) || (!verifyOuterNotary && appState.getUser(senderId) == null)) {
             String errorMessage = "The message structure specification was not followed.";
             log.info(errorMessage);
             throw new UnauthorizedException(errorMessage, message.getBody().getrId(), message.getBody().getwTs());
         }
     }
 
-    private void verifyInnerMessageStructure(Message innerMessage, boolean isNotary) {
+    private void verifyInnerMessageStructure(Message innerMessage, boolean verifyInnerNotary) {
         if (innerMessage == null)
             return;
 
@@ -140,15 +143,15 @@ public class VerifyAndSignAspect {
             log.info(errorMessage);
             throw new UnauthorizedException(errorMessage, -1, -1);
         }
-        if ((isNotary && appState.getNotary(senderId) == null) || (!isNotary && appState.getUser(senderId) == null)) {
+        if ((verifyInnerNotary && appState.getNotary(senderId) == null) || (!verifyInnerNotary && appState.getUser(senderId) == null)) {
             String errorMessage = "The message structure specification was not followed.";
             log.info(errorMessage);
             throw new UnauthorizedException(errorMessage, -1, -1);
         }
     }
 
-    private void verifySignature(Message message, boolean verifyNotary) {
-        boolean verified = verifyOuterSignature(message) && verifyInnerSignature(message.getBody().getMessage(), verifyNotary);
+    private void verifySignature(Message message, boolean verifyInnerNotary, boolean verifyOuterNotary) {
+        boolean verified = verifyOuterSignature(message, verifyOuterNotary) && verifyInnerSignature(message.getBody().getMessage(), verifyInnerNotary);
         if (!verified) {
             String errorMessage = "This message is not authentic.";
             log.info(errorMessage);
@@ -156,17 +159,20 @@ public class VerifyAndSignAspect {
         }
     }
 
-    private boolean verifyOuterSignature(Message message) {
+    private boolean verifyOuterSignature(Message message, boolean verifyOuterNotary) {
         Body body = message.getBody();
-        return verify(message.getBody(), getPublicKeyFromUser(body), message.getSignature());
+        return verify(body, getPublicKey(body, verifyOuterNotary), message.getSignature());
     }
 
-    private boolean verifyInnerSignature(Message message, boolean isNotary) {
+    private boolean verifyInnerSignature(Message message, boolean verifyInnerNotary) {
         if (message == null)
             return true;
         Body body = message.getBody();
+        return verify(body, getPublicKey(body, verifyInnerNotary), message.getSignature());
+    }
+
+    private PublicKey getPublicKey(Body body, boolean isNotary) {
         int senderId = body.getSenderId();
-        PublicKey publicKey;
         if (isNotary) {
             Notary notary = appState.getNotary(senderId);
             if (notary == null) {
@@ -175,15 +181,14 @@ public class VerifyAndSignAspect {
                 throw new UnauthorizedException(errorMessage, body.getrId(), body.getwTs());
             }
             try {
-                publicKey = notary.getPublicKey();
+                return notary.getPublicKey();
             } catch (Exception e) {
                 String errorMessage = "Cannot find/load the public key of one notary.";
                 log.info(errorMessage);
                 throw new UnauthorizedException(errorMessage, body.getrId(), body.getwTs());
             }
-        } else
-            publicKey = getPublicKeyFromUser(body);
-        return verify(body, publicKey, message.getSignature());
+        }
+        return getPublicKeyFromUser(body);
     }
 
     private PublicKey getPublicKeyFromUser(Body body) {

@@ -9,7 +9,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface VerifyAndSign {
     /**
-     * @return if it is to verify and sign notary pass true, otherwise false
+     * @return if it is to verify and sign inner message with notary keys you must pass true, otherwise false.
      */
-    boolean value() default false;
+    boolean verifyInnerNotary() default false;
+
+    /**
+     * @return if it is to verify and sign outer message with notary keys you must pass true, otherwise false.
+     */
+    boolean verifyOuterNotary() default false;
 }

@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
 
 @SpringBootApplication
 public class HdsNotaryApplication {
@@ -59,7 +58,6 @@ public class HdsNotaryApplication {
 
         try (FileInputStream fileInputStream = new FileInputStream(STATE_PATH)) {
             appState = mapper.readValue(fileInputStream, AppState.class);
-            log.info(String.format("Successfully read the state for notary with id %d", notaryId));
         } catch (Exception e) {
             try (FileInputStream fileInputStream = new FileInputStream(BACKUP_STATE_PATH)) {
                 appState = mapper.readValue(fileInputStream, AppState.class);

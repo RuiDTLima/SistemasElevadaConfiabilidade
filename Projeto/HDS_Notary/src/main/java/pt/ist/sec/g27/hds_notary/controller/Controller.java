@@ -26,6 +26,8 @@ public class Controller {
     private static final String YES = "YES";
     private static final String NO = "NO";
 
+    private final Object monitor = new Object();
+
     private final ObjectMapper mapper;
     private final AppState appState;
     private final int notaryId;
@@ -79,32 +81,35 @@ public class Controller {
             throw new NotFoundException(errorMessage, -1, wTs);
         }
 
-        if (good.getOwnerId() != senderId) {
-            log.info(String.format("The state of the good %d could not be changed by the user %d.", goodId, senderId));
-            throw new ForbiddenException("You do not have that good.", -1, wTs);
+        synchronized (monitor) {
+            good = appState.getGood(goodId);
+
+            if (good.getOwnerId() != senderId) {
+                log.info(String.format("The state of the good %d could not be changed by the user %d.", goodId, senderId));
+                throw new ForbiddenException("You do not have that good.", -1, wTs);
+            }
+
+            // Reliable
+            byzantineReliableBroadcast.init(message);
+
+            int goodwTs = good.getwTs();
+            if (good.getState().equals(State.ON_SALE)) {
+                String errorMessage = "The good is already on sale.";
+                log.info(errorMessage);
+                return new Body(notaryId, NO, -1, wTs > goodwTs ? wTs : goodwTs);
+            }
+
+            if (wTs > goodwTs) {
+                good.setState(State.ON_SALE);
+                good.setSignature(body.getSignature());
+                good.setwTs(wTs);
+                good.setSignedId(senderId);
+                log.info(String.format("The good with id %d owned by the user with id %d is now on sale.", goodId, senderId));
+                saveState();
+                return new Body(notaryId, YES, -1, wTs);
+            }
+            return new Body(notaryId, NO, -1, goodwTs);
         }
-
-        // Reliable
-        byzantineReliableBroadcast.init(message);   // TODO check validity
-
-        int goodwTs = good.getwTs();
-        if (good.getState().equals(State.ON_SALE)) {
-            String errorMessage = "The good is already on sale.";
-            log.info(errorMessage);
-            return new Body(notaryId, NO, -1, wTs > goodwTs ? wTs : goodwTs);
-        }
-
-        if (wTs > goodwTs) {
-            good.setState(State.ON_SALE);
-            good.setSignature(body.getSignature());
-            good.setwTs(wTs);
-            good.setSignedId(senderId);
-            log.info(String.format("The good with id %d owned by the user with id %d is now on sale.", goodId, senderId));
-            saveState();
-            return new Body(notaryId, YES, -1, wTs);
-        }
-
-        return new Body(notaryId, NO, -1, goodwTs);
     }
 
     @VerifyAndSign
@@ -140,37 +145,40 @@ public class Controller {
             throw new NotFoundException(errorMessage, -1, wTs);
         }
 
-        // Check if owner id coincides
-        if (good.getOwnerId() != sellerId) {
-            String errorMessage = String.format("Good with id %d does not belong to the seller.", buyerGoodId);
-            log.info(errorMessage);
-            throw new ForbiddenException(errorMessage, -1, wTs);
-        }
+        synchronized (monitor) {
+            good = appState.getGood(buyerGoodId);
+            // Check if owner id coincides
+            if (good.getOwnerId() != sellerId) {
+                String errorMessage = String.format("Good with id %d does not belong to the seller.", buyerGoodId);
+                log.info(errorMessage);
+                throw new ForbiddenException(errorMessage, -1, wTs);
+            }
 
-        byzantineReliableBroadcast.init(message);   // TODO check validity
-        int goodwTs = good.getwTs();
-        if (good.getState() != State.ON_SALE) {
-            String errorMessage = String.format("The good with id %d is not on sale.", buyerGoodId);
-            log.info(errorMessage);
-            return new Body(notaryId, NO, -1, wTs > goodwTs ? wTs : goodwTs);
-        }
+            byzantineReliableBroadcast.init(message);
+            int goodwTs = good.getwTs();
+            if (good.getState() != State.ON_SALE) {
+                String errorMessage = String.format("The good with id %d is not on sale.", buyerGoodId);
+                log.info(errorMessage);
+                return new Body(notaryId, NO, -1, wTs > goodwTs ? wTs : goodwTs);
+            }
 
-        if (wTs > goodwTs) {
-            good.setState(State.NOT_ON_SALE);
-            good.setOwnerId(buyerId);
-            good.setSignature(sellerBody.getSignature());
-            good.setwTs(wTs);
-            good.setSignedId(sellerId);
-            TransferCertificate transferCertificate = new TransferCertificate(buyerId, sellerId, buyerGoodId);
-            appState.addTransferCertificate(transferCertificate);
-            log.info(String.format("The good with id %d was transferred from the user with id %d to the user with id %d.", buyerGoodId, sellerId, buyerId));
-            saveState();
-            return new Body(notaryId, YES, transferCertificate, wTs);
+            if (wTs > goodwTs) {
+                good.setState(State.NOT_ON_SALE);
+                good.setOwnerId(buyerId);
+                good.setSignature(sellerBody.getSignature());
+                good.setwTs(wTs);
+                good.setSignedId(sellerId);
+                TransferCertificate transferCertificate = new TransferCertificate(buyerId, sellerId, buyerGoodId);
+                appState.addTransferCertificate(transferCertificate);
+                log.info(String.format("The good with id %d was transferred from the user with id %d to the user with id %d.", buyerGoodId, sellerId, buyerId));
+                saveState();
+                return new Body(notaryId, YES, transferCertificate, wTs);
+            }
+            return new Body(notaryId, NO, -1, goodwTs);
         }
-        return new Body(notaryId, NO, -1, goodwTs);
     }
 
-    @VerifyAndSign(true)
+    @VerifyAndSign(verifyInnerNotary = true)
     @PostMapping("/update")
     public Object updateState(@RequestBody Message message) {
         Body receivedBody = message.getBody().getMessage().getBody();
@@ -178,27 +186,28 @@ public class Controller {
         int ownerId = receivedBody.getUserId();
         int wTs = receivedBody.getwTs();
 
-        Good good = appState.getGood(goodId);
+        synchronized (monitor) {
+            Good good = appState.getGood(goodId);
 
-        if (good == null) {
-            String errorMessage = "The good was not found.";
-            log.info(errorMessage);
-            throw new NotFoundException(errorMessage, receivedBody.getrId(), wTs);
+            if (good == null) {
+                String errorMessage = "The good was not found.";
+                log.info(errorMessage);
+                throw new NotFoundException(errorMessage, receivedBody.getrId(), wTs);
+            }
+            byzantineReliableBroadcast.init(message);
+
+            if (wTs > good.getwTs()) {
+                good.setState(State.getStateFromString(receivedBody.getState()));
+                good.setOwnerId(ownerId);
+                good.setwTs(wTs);
+                good.setSignature(receivedBody.getSignature());
+                good.setSignedId(receivedBody.getSignedId());
+                saveState();
+                return new Body(notaryId, YES, receivedBody.getrId(), wTs);
+            }
+
+            return new Body(notaryId, NO, receivedBody.getrId(), wTs);
         }
-
-        byzantineReliableBroadcast.init(message);
-
-        if (wTs > good.getwTs()) {
-            good.setState(State.getStateFromString(receivedBody.getState()));
-            good.setOwnerId(ownerId);
-            good.setwTs(wTs);
-            good.setSignature(receivedBody.getSignature());
-            good.setSignedId(receivedBody.getSignedId());
-            saveState();
-            return new Body(notaryId, YES, receivedBody.getrId(), wTs);
-        }
-
-        return new Body(notaryId, NO, receivedBody.getrId(), wTs);
     }
 
     private void saveState() {
@@ -219,22 +228,24 @@ public class Controller {
         }
     }
 
-
+    @VerifyAndSign(verifyOuterNotary = true)
     @PostMapping("/deliver")
     public void deliver(@RequestBody Message message) {
-        log.info(String.format("Reach deliver path of notary with id %d", HdsNotaryApplication.getMe().getId()));
+        log.info(String.format("Reach deliver path of notary with id %d", notaryId));
         byzantineReliableBroadcast.send(message);
     }
 
+    @VerifyAndSign(verifyOuterNotary = true)
     @PostMapping("/echo")
     public void echo(@RequestBody Message message) {
-        log.info(String.format("Reach echo path of notary with id %d", HdsNotaryApplication.getMe().getId()));
+        log.info(String.format("Reach echo path of notary with id %d", notaryId));
         byzantineReliableBroadcast.echo(message);
     }
 
+    @VerifyAndSign(verifyOuterNotary = true)
     @PostMapping("/ready")
     public void ready(@RequestBody Message message) {
-        log.info(String.format("Reach ready path of notary with id %d", HdsNotaryApplication.getMe().getId()));
+        log.info(String.format("Reach ready path of notary with id %d", notaryId));
         byzantineReliableBroadcast.ready(message);
     }
 }
