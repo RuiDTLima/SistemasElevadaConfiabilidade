@@ -103,7 +103,7 @@ public class VerifyAndSignAspect {
         log.info("Verifying message structure.");
         verifyOuterMessageStructure(message, verifyOuterNotary);
         log.info("Verifying inner message structure.");
-        verifyInnerMessageStructure(message, verifyInnerNotary);
+        verifyInnerMessageStructure(message.getBody().getMessage(), verifyInnerNotary);
         log.info("Verifying message signature.");
         verifySignature(message, verifyInnerNotary, verifyOuterNotary);
     }
