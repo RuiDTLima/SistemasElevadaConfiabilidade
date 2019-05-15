@@ -222,16 +222,19 @@ public class Controller {
 
     @PostMapping("/deliver")
     public void deliver(@RequestBody Message message) {
+        log.info(String.format("Reach deliver path of notary with id %d", HdsNotaryApplication.getMe().getId()));
         byzantineReliableBroadcast.send(message);
     }
 
     @PostMapping("/echo")
     public void echo(@RequestBody Message message) {
+        log.info(String.format("Reach echo path of notary with id %d", HdsNotaryApplication.getMe().getId()));
         byzantineReliableBroadcast.echo(message);
     }
 
     @PostMapping("/ready")
     public void ready(@RequestBody Message message) {
+        log.info(String.format("Reach ready path of notary with id %d", HdsNotaryApplication.getMe().getId()));
         byzantineReliableBroadcast.ready(message);
     }
 }

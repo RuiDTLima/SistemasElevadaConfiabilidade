@@ -8,26 +8,23 @@ import org.asynchttpclient.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import pt.ist.sec.g27.hds_notary.HdsNotaryApplication;
 import pt.ist.sec.g27.hds_notary.exceptions.NotFoundException;
 import pt.ist.sec.g27.hds_notary.model.Body;
 import pt.ist.sec.g27.hds_notary.model.Message;
 import pt.ist.sec.g27.hds_notary.model.Notary;
 import java.io.IOException;
-import java.time.chrono.HijrahDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-@Service
 public class ByzantineReliableBroadcast {
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final String DELIVER_URL = "/deliver";
     private static final String ECHO_URL = "/echo";
     private static final String READY_URL = "/ready";
-    private final static Logger log = LoggerFactory.getLogger(HdsNotaryApplication.class);
+    private final static Logger log = LoggerFactory.getLogger(ByzantineReliableBroadcast.class);
 
     private boolean sentEcho;
     private boolean sentReady;
@@ -52,19 +49,16 @@ public class ByzantineReliableBroadcast {
         readys = new Message[HdsNotaryApplication.getTotalNotaries()];
         countReadys = 0;
 
-        broadcast(message);
-
-        while (true) {
-            if (message != null && countReadys > (2 * HdsNotaryApplication.getByzantineFaultsLimit()) && !delivered) {
-                delivered = true;
-                return;
-            }
+        List<CompletableFuture<Optional<Message>>> completableFutures = broadcast(message);
+        log.info("Waiting for responses.");
+        for (CompletableFuture<Optional<Message>> futures : completableFutures) {
+            futures.join();
         }
     }
 
-    private void broadcast(Message message) {
+    private List<CompletableFuture<Optional<Message>>> broadcast(Message message) {
         log.info(String.format("Broadcast message from notary with id %d to all notaries", HdsNotaryApplication.getMe().getId()));
-        toAllNotaries(DELIVER_URL, message);
+        return toAllNotaries(DELIVER_URL, message);
     }
 
     public void send(Message message) {
@@ -116,9 +110,16 @@ public class ByzantineReliableBroadcast {
             sentReady = true;
             toAllNotaries(READY_URL, message);
         }
+
+        while(true) {
+            if (message != null && countReadys > (2 * HdsNotaryApplication.getByzantineFaultsLimit()) && !delivered) {
+                delivered = true;
+                return;
+            }
+        }
     }
 
-    private void toAllNotaries(String uri, Message message) {
+    private List<CompletableFuture<Optional<Message>>> toAllNotaries(String uri, Message message) {
         Notary[] notaries = HdsNotaryApplication.getNotaries();
         Body body = new Body(notaryId, message);
         byte[] jsonBody = new byte[0];
@@ -173,5 +174,7 @@ public class ByzantineReliableBroadcast {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return completableFutures;
     }
 }
