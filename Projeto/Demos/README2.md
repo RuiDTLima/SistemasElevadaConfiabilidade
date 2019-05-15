@@ -105,36 +105,14 @@ As chaves privadas dos clientes estão protegidas por uma password de forma a qu
   - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes aos clientes Alice e Bob e ao Notary devem ser encerradas.
   - Para testar este teste uma segunda vez é necessário, em todas as pastas de notários, copiar o conteúdo do ficheiro "state - Cópia.json" para o ficheiro state.json.
 
-## Demo 12: Falta malicious!!!!!!!!!!!!!!!!!!
-  - Testa o envio por parte de um cliente malicioso de mensagens repetidas.
-  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
-  - De seguida, deve ser executado o ficheiro script.bat, na pasta MaliciousClient.
-  - Depois na janela pertencente à Eve, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "getStateOfGood 1".
-  - Assim que receber a resposta a este pedido, deve ser introduzido o seguinte comando na janela pertencente à Eve: "sendLastMessage".
-  - No fim espera-se receber como mensagem na Eve "The message received is out of time, it was sent before the last one.".
-  - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes à cliente Eve e ao Notary devem ser encerradas.
-
-## Demo 13:  Falta malicious!!!!!!!!!!!!!!!!!!
-  - Testa o envio por parte de um cliente malicioso de mensagens repetidas.
-  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
-  - De seguida, deve ser executado o ficheiro script.bat, na pasta MaliciousClient2.
-  - Depois na janela pertencente à Eve, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 1 1".
-  - Assim que receber a resposta a este pedido, deve ser introduzido o seguinte comando na janela pertencente à Eve: "intentionToSell 1".
-  - De seguida, deve ser introduzido o seguinte comando na janela pertencente à Alice: "buyGood 1 3".
-  - Assim que receber a resposta a este pedido, deve ser introduzido o seguinte comando na janela pertencente à Alice: "intentionToSell 1".
-  - De seguida, deve ser introduzido o seguinte comando na janela pertencente à Eve: "sendLastMessage".
-  - No fim espera-se receber como mensagem na Eve "The message received is out of time, it was sent before the last one.".
-  - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes à cliente Alice e Eve e ao Notary devem ser encerradas.
-  - Para testar este teste uma segunda vez é necessário copiar o conteúdo do ficheiro state_copy.json para o ficheiro state.json.
-
-## Demo 14:
+## Demo 12:
   - Testa a situação de dois clientes em conluio tentarem vender o mesmo bem duas vezes.
   - Este teste não é possível de executar uma vez que as aplicações cliente e notário foram feitas usando Spring e este atende cada pedido
     numa Thread diferente. A chamada ao Controller respetivo é feita de forma síncrona. Isto quer dizer que não existe concorrência no
     método do Controller que irá ser executado. Desta forma o primeiro pedido a ser atendido será realizado e a compra será efetuada. Assim, o segundo pedido
     será atendido mas não irá produzir nenhuma alteração de estado. Nessa situação, o teste passa a ser equivalente ao teste dos Demos 2 e 3.
 
-## Demo 15:
+## Demo 13:
   - Testa a situação em que um dos notários tem o write timestamps mais alto que todos os outros notários.
   - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta InconsistentState.
