@@ -90,7 +90,7 @@ public class RestClient {
                 try {
                     cf.join().ifPresent(responses::add);
                 } catch (CancellationException | CompletionException e) {
-                    log.info("Cannot connect with one notary");
+                    log.info("Cannot connect with one of the notaries");
                 }
             }
         }

@@ -75,6 +75,8 @@ public class ByzantineReliableBroadcast {
                         }
                         break;
                     }
+                    if (delivered)
+                        break;
                     remaining = Timeouts.remaining(t);
                     if (Timeouts.isTimeout(remaining)) {
                         break;
@@ -187,7 +189,7 @@ public class ByzantineReliableBroadcast {
                 try {
                     cf.join();
                 } catch (CancellationException | CompletionException e) {
-                    log.info("Cannot connect with one notary");
+                    log.info("Cannot connect with one of the notaries");
                 }
         } catch (IOException e) {
             e.printStackTrace();

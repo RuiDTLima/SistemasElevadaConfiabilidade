@@ -7,55 +7,54 @@ Os clientes podem efetuar as seguintes operações:
 # Setup
 
 Para cada um dos casos de teste há uma pasta com o nome alice ou bob, em cada uma dessas pastas deve ser copiado o ficheiro jars\hds_client.jar, sendo que o ficheiro deve ser renomeado para o nome correspondente ao nome da pasta, por exemplo na pasta alice, deve ser copiado o jars\hds_client.jar e renomeado para alice.jar.
-Para os casos de teste que tenham uma pasta chamada eve, deve ser copiado para essas pastas o jar jars\hds_client_malicious.jar e renomeado para eve.jar.
 Para todos os casos de teste, há uma pasta com o nome notaries, e dentro dessa pasta existe pelo menos quatro pasta com os nome first, second, third and fourth e para cada uma dessas pastas deve ser copiado o jar jars\hds_notary-0.0.1-SNAPSHOT.jar.
 
 Como estes testes executam todos no mesmo computador era imprático ter cada notário com o seu cartão de cidadão e por isso, usou-se um par de chaves para os testes.
 
 Durante a realização dos testes é necessário ter os portos **8074**, **8075**, **8076**, **8077**,  **8081**, **8082** vagos. Para executar os vários testes é necessário primeiro executar o ficheiro script.bat, da pasta correspondente ao teste, e de seguida, de acordo com o teste que se deseja executar devem ser seguidos os seguintes passos.
 
-As chaves privadas dos clientes estão protegidas por uma password de forma a que se uma chave privada for _leaked_ não possa ser usada sem o conhecimento da password que a protege. Assim a password para a chave privada da Alice é _alice_ e a password para a chave privada do Bob é _bob_. Sempre que iniciar estes clientes será pedido ao utilizador para introduzir a password de forma a aplicação puder inicializar.
+As chaves privadas dos clientes estão protegidas por uma password de forma a que se uma chave privada for _leaked_ não possa ser usada sem o conhecimento da password que a protege. Assim a password para a chave privada da Alice é _alice_ e a password para a chave privada do Bob é _bob_. Sempre que iniciar estes clientes será pedido ao utilizador para introduzir a password de forma a aplicação puder ser inicializar.
 
 # Casos de Teste 
 
 ## Demo 1:
   - Testa a compra de um bem inexistente.
-  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e aos Notaries.
   - De seguida, deve ser executado o ficheiro script.bat na pasta Demo.
   - Na janela pertencente à Alice, assim que o spring terminar a sua inicialização deve ser introduzido o seguinte comando: "buyGood 55 2".
   - No fim espera-se receber como aviso na Alice "The good with id 55 does not exist.".
 
 ## Demo 2:
   - Testa a compra de um bem que não está à venda.
-  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e aos Notaries.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta Demo.
   - Na janela pertencente ao Bob, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 1 1".
   - No fim espera-se receber como mensagem no Bob "NO".
 
 ## Demo 3:
   - Testa a compra a um utilizador de um bem que não possui.
-  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e aos Notaries.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta Demo.
   - Na janela pertencente ao Bob, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 3 1".
   - No fim espera-se receber como mensagem no Bob "Good with id 3 does not belong to the seller.".
 
 ## Demo 4:
   - Testa a compra a um utilizador inexistente.
-  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e aos Notaries.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta Demo.
   - Na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 3 4".
   - No fim espera-se receber como mensagem na Alice "The user with id 4 does not exist."
 
 ## Demo 5:
   - Testa a compra do seu próprio bem.
-  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e aos Notaries.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta Demo.
   - Na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 1 1".
   - No fim espera-se receber como mensagem na Alice "The user cannot buy from itself."
 
 ## Demo 6:
   - Testa assinar pedidos no lado do cliente com chaves falsas, a Alice possui uma chave falsa e o notário deve detetar isso.
-  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e aos Notaries.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta FakeKeyAlice.
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "getStateOfGood 1".
   - No fim espera-se receber como mensagem na Alice "This message is not authentic."
@@ -63,7 +62,7 @@ As chaves privadas dos clientes estão protegidas por uma password de forma a qu
 
 ## Demo 7:
   - Testa assinar resposta a pedidos com chaves falsas, a chave privada do Notary é falsa, usa um cartão diferente do original.
-  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e aos Notaries.
   - Durante este teste, cada notário deve ter uma chave privada que não corresponda à chave pública no cliente.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta FakeKeyNotaries.
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "getStateOfGood 1".
@@ -72,7 +71,7 @@ As chaves privadas dos clientes estão protegidas por uma password de forma a qu
 
 ## Demo 8:
   - Testa assinar pedidos no lado do cliente com chaves falsas, a chave privada do Bob é falsa e o Notary e a Alice devem detetar isso.
-  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e aos Notaries.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta FakeKeyBob.
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 3 2".
   - No fim espera-se receber como mensagem na Alice e no Bob "This message is not authentic."
@@ -80,7 +79,7 @@ As chaves privadas dos clientes estão protegidas por uma password de forma a qu
 
 ## Demo 9:
   - Testa assinar resposta a pedidos com chaves falsas.
-  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e aos Notaries.
   - Durante este teste, deve ser usado um cartão de cidadão diferente do usado para gerar a chave pública.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta FakeKeyNotaries2.
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 3 2".
@@ -89,7 +88,7 @@ As chaves privadas dos clientes estão protegidas por uma password de forma a qu
 
 ## Demo 10:
   - Testa o envio de um intentionToSell com o wts errado.
-  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e aos Notaries.
   - De seguida deve ser executado o ficheiro script.bat, na pasta AdvancedState.
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "intentionToSell 1".
   - No fim espera-se receber como mensagem na Alice "Yes".
@@ -98,7 +97,7 @@ As chaves privadas dos clientes estão protegidas por uma password de forma a qu
 
 ## Demo 11:
   - Testa o envio de um buyGood com o wts errado.
-  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e aos Notaries.
   - De seguida deve ser executado o ficheiro script.bat, na pasta AdvancedState.
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 3 2".
   - No fim espera-se receber como mensagem na Alice "Yes".
@@ -114,9 +113,16 @@ As chaves privadas dos clientes estão protegidas por uma password de forma a qu
 
 ## Demo 13:
   - Testa a situação em que um dos notários tem o write timestamps mais alto que todos os outros notários.
-  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e Eve e aos Notaries.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e aos Notaries.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta InconsistentState.
   - Na janela pertencente à Alice, executar o comando "getStateOfGood 1", esperar pelo resultado "The good with id 1 is owned by user with id 1 and his state is not-on-sale." e executar o comando "exit".
   - De seguida deve terminar todas as janelas correspondestes aos notários.
   - Para verificar que os notários aceitaram o write timestamp que a Alice fez write back, deve aceder às pastas notaries/second, notaries/third, notaries/fourth e abrir o ficheiro state.json. Nesse ficheiro deve ser verificado que o wts do good com o id 1 tem o valor 7.
   - Para testar este teste uma segunda vez é necessário, em todas as pastas de notários, copiar o conteúdo do ficheiro "state - Cópia.json" para o ficheiro state.json.
+
+## Demo 14:
+  - Testa a situação em que um dos notários é bizantino. Para simular essa situação, durante este teste um dos notários de que os clientes estão à espera não estará activo.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e aos Notaries.
+  - De seguida, deve ser executado o ficheiro script.bat, na pasta OneNotaryByzantine.
+  - Na janela pertencente à Alice, assim que o spring terminar a sua inicialização deve ser introduzido o seguinte comando: "getStateOfGood 1".
+  - No fim espera-se receber como resposta na Alice "The good with id 1 is not-on-sale.".
