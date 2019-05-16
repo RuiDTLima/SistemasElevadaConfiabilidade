@@ -58,7 +58,6 @@ As chaves privadas dos clientes estão protegidas por uma password de forma a qu
   - De seguida, deve ser executado o ficheiro script.bat, na pasta FakeKeyAlice.
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "getStateOfGood 1".
   - No fim espera-se receber como mensagem na Alice "This message is not authentic."
-  - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes à cliente Alice e ao Notary devem ser encerradas.
 
 ## Demo 7:
   - Testa assinar resposta a pedidos com chaves falsas, a chave privada do Notary é falsa, usa um cartão diferente do original.
@@ -67,7 +66,6 @@ As chaves privadas dos clientes estão protegidas por uma password de forma a qu
   - De seguida, deve ser executado o ficheiro script.bat, na pasta FakeKeyNotaries.
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "getStateOfGood 1".
   - No fim espera-se receber como mensagem na Alice "Did not received a valid response."
-  - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes à cliente Alice e ao Notary devem ser encerradas.
 
 ## Demo 8:
   - Testa assinar pedidos no lado do cliente com chaves falsas, a chave privada do Bob é falsa e o Notary e a Alice devem detetar isso.
@@ -75,7 +73,6 @@ As chaves privadas dos clientes estão protegidas por uma password de forma a qu
   - De seguida, deve ser executado o ficheiro script.bat, na pasta FakeKeyBob.
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 3 2".
   - No fim espera-se receber como mensagem na Alice e no Bob "This message is not authentic."
-  - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes aos clientes Alice e Bob e ao Notary devem ser encerradas.
 
 ## Demo 9:
   - Testa assinar resposta a pedidos com chaves falsas.
@@ -84,7 +81,6 @@ As chaves privadas dos clientes estão protegidas por uma password de forma a qu
   - De seguida, deve ser executado o ficheiro script.bat, na pasta FakeKeyNotaries2.
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 3 2".
   - No fim espera-se receber como mensagem na Alice "There was no valid responses."
-  - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes aos clientes Alice e Bob e ao Notary devem ser encerradas.
 
 ## Demo 10:
   - Testa o envio de um intentionToSell com o wts errado.
@@ -92,7 +88,6 @@ As chaves privadas dos clientes estão protegidas por uma password de forma a qu
   - De seguida deve ser executado o ficheiro script.bat, na pasta AdvancedState.
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "intentionToSell 1".
   - No fim espera-se receber como mensagem na Alice "Yes".
-  - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes aos clientes Alice e Bob e ao Notary devem ser encerradas.
   - Para testar este teste uma segunda vez é necessário, em todas as pastas de notários, copiar o conteúdo do ficheiro "state - Cópia.json" para o ficheiro state.json.
 
 ## Demo 11:
@@ -101,7 +96,6 @@ As chaves privadas dos clientes estão protegidas por uma password de forma a qu
   - De seguida deve ser executado o ficheiro script.bat, na pasta AdvancedState.
   - Depois na janela pertencente à Alice, assim que o spring terminar a sua inicialização introduzir o seguinte comando: "buyGood 3 2".
   - No fim espera-se receber como mensagem na Alice "Yes".
-  - Finalmente, após a execução do teste, todas as janela de comandos, correspondentes aos clientes Alice e Bob e ao Notary devem ser encerradas.
   - Para testar este teste uma segunda vez é necessário, em todas as pastas de notários, copiar o conteúdo do ficheiro "state - Cópia.json" para o ficheiro state.json.
 
 ## Demo 12:
@@ -115,14 +109,13 @@ As chaves privadas dos clientes estão protegidas por uma password de forma a qu
   - Testa a situação em que um dos notários tem o write timestamps mais alto que todos os outros notários.
   - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e aos Notaries.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta InconsistentState.
-  - Na janela pertencente à Alice, executar o comando "getStateOfGood 1", esperar pelo resultado "The good with id 1 is owned by user with id 1 and his state is not-on-sale." e executar o comando "exit".
-  - De seguida deve terminar todas as janelas correspondestes aos notários.
+  - Na janela pertencente à Alice, executar o comando "getStateOfGood 1", esperar pelo resultado "The good with id 1 is owned by user with id 1 and his state is not-on-sale.".
   - Para verificar que os notários aceitaram o write timestamp que a Alice fez write back, deve aceder às pastas notaries/second, notaries/third, notaries/fourth e abrir o ficheiro state.json. Nesse ficheiro deve ser verificado que o wts do good com o id 1 tem o valor 7.
   - Para testar este teste uma segunda vez é necessário, em todas as pastas de notários, copiar o conteúdo do ficheiro "state - Cópia.json" para o ficheiro state.json.
 
 ## Demo 14:
-  - Testa a situação em que um dos notários é bizantino. Para simular essa situação, durante este teste um dos notários de que os clientes estão à espera não estará activo.
+  - Testa a situação em que um dos notários é bizantino. Para simular essa situação, durante este teste um dos notários de que os clientes estão à espera não estará ativo.
   - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e aos Notaries.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta OneNotaryByzantine.
   - Na janela pertencente à Alice, assim que o spring terminar a sua inicialização deve ser introduzido o seguinte comando: "getStateOfGood 1".
-  - No fim espera-se receber como resposta na Alice "The good with id 1 is not-on-sale.".
+  - No fim espera-se receber como resposta na Alice "The good with id 1 is owned by user with id 1 and his state is not-on-sale.".
