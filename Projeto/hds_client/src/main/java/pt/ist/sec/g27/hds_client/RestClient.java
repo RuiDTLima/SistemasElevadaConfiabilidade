@@ -20,12 +20,15 @@ import pt.ist.sec.g27.hds_client.model.Notary;
 import pt.ist.sec.g27.hds_client.model.User;
 import pt.ist.sec.g27.hds_client.utils.ProofOfWork;
 import pt.ist.sec.g27.hds_client.utils.SecurityUtils;
+
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 public class RestClient {
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -84,9 +87,11 @@ public class RestClient {
                 log.info(String.format("Made request to the server %d", i));
             }
             for (CompletableFuture<Optional<Message>> cf : completableFutures) {
-                Optional<Message> possibleMessage = cf.join();
-
-                possibleMessage.ifPresent(responses::add);
+                try {
+                    cf.join().ifPresent(responses::add);
+                } catch (CancellationException | CompletionException e) {
+                    log.info("Cannot connect with one notary");
+                }
             }
         }
 

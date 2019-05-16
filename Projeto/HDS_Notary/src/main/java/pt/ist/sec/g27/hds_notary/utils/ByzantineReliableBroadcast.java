@@ -18,7 +18,9 @@ import pt.ist.sec.g27.hds_notary.model.Notary;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 public class ByzantineReliableBroadcast {
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -182,7 +184,11 @@ public class ByzantineReliableBroadcast {
                 log.info(String.format("Made request to the server %d", i));
             }
             for (CompletableFuture<Response> cf : completableFutures)
-                cf.join();
+                try {
+                    cf.join();
+                } catch (CancellationException | CompletionException e) {
+                    log.info("Cannot connect with one notary");
+                }
         } catch (IOException e) {
             e.printStackTrace();
         }
