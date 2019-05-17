@@ -114,8 +114,15 @@ As chaves privadas dos clientes estão protegidas por uma password de forma a qu
   - Para testar este teste uma segunda vez é necessário, em todas as pastas de notários, copiar o conteúdo do ficheiro "state - Cópia.json" para o ficheiro state.json.
 
 ## Demo 14:
-  - Testa a situação em que um dos notários é bizantino. Para simular essa situação, durante este teste um dos notários de que os clientes estão à espera não estará ativo.
+  - Testa a situação em que um dos quatros notários é bizantino. Para simular essa situação, durante este teste um dos notários de que os clientes estão à espera não estará ativo.
   - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e aos Notaries.
   - De seguida, deve ser executado o ficheiro script.bat, na pasta OneNotaryByzantine.
   - Na janela pertencente à Alice, assim que o spring terminar a sua inicialização deve ser introduzido o seguinte comando: "getStateOfGood 1".
   - No fim espera-se receber como resposta na Alice "The good with id 1 is owned by user with id 1 and his state is not-on-sale.".
+
+## Demo 15:
+  - Testa a situação em que dois dos quatro notários são bizantinos. Para simular essa situação, durante este teste dois dos notários de que os clientes estão à espera não estarão ativos.
+  - Para este teste é necessário terminar todas as janelas de comandos, correspondentes aos clientes Alice, Bob e aos Notaries.
+  - De seguida, deve ser executado o ficheiro script.bat, na pasta TwoNotariesByzantine.
+  - Na janela pertencente à Alice, assim que o spring terminar a sua inicialização deve ser introduzido o seguinte comando: "getStateOfGood 1".
+  - No fim espera-se receber como resposta na Alice "Did not received a valid response.".
