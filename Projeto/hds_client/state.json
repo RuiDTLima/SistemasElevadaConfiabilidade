@@ -26,13 +26,13 @@
       "id": 1,
       "name": "alice",
       "pubKey": "keys/alice.pub",
-      "privKey": "keys/alice.key",
       "url": "http://localhost:8081"
     },
     {
       "id": 2,
       "name": "bob",
       "pubKey": "keys/bob.pub",
+      "privKey": "keys/bob.key",
       "url": "http://localhost:8082"
     },
     {

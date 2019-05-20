@@ -9,6 +9,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import pt.ist.sec.g27.hds_notary.exceptions.HttpExceptions;
 import pt.ist.sec.g27.hds_notary.exceptions.NotFoundException;
@@ -27,6 +28,10 @@ import java.security.PublicKey;
 @Component
 public class VerifyAndSignAspect {
     private final static Logger log = LoggerFactory.getLogger(VerifyAndSignAspect.class);
+    private final static String IS_PT_CC = "isPTCC";
+
+    @Autowired
+    private Environment env;
 
     private final AppState appState;
     private final ObjectMapper objectMapper;
@@ -67,13 +72,17 @@ public class VerifyAndSignAspect {
     }
 
     private Object after(Object returnedValue) throws Exception {
-        /*try {
-            byte[] sign = SecurityUtils.sign(Utils.jsonObjectToByteArray(returnedValue));
-            return new Message((Body) returnedValue, sign);
-        } catch (Exception e) {
-            log.warn("Cannot sign the returned object.", e);
-            throw e;
-        }*/
+        String keyValue = env.getProperty("isPTCC");
+        if (Boolean.parseBoolean(keyValue)) {
+            try {
+                byte[] sign = SecurityUtils.sign(Utils.jsonObjectToByteArray(returnedValue));
+                return new Message((Body) returnedValue, sign);
+            } catch (Exception e) {
+                log.warn("Cannot sign the returned object.", e);
+                throw e;
+            }
+        }
+
         // This code is used when the signing is done without CC.
         Notary me = appState.getNotary(notaryId);
         PrivateKey privateKey = SecurityUtils.readPrivate(me.getPrivateKeyPath());

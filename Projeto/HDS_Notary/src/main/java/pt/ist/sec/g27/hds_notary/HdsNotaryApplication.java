@@ -3,18 +3,22 @@ package pt.ist.sec.g27.hds_notary;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 import pt.ist.sec.g27.hds_notary.model.AppState;
 import pt.ist.sec.g27.hds_notary.model.Notary;
 import pt.ist.sec.g27.hds_notary.utils.ByzantineReliableBroadcast;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Properties;
 
 @SpringBootApplication
 public class HdsNotaryApplication {
