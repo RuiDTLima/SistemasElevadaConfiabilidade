@@ -2,9 +2,6 @@ package pt.ist.sec.g27.hds_notary.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-
 public class TransferCertificate {
     @JsonProperty("buyer-id")
     private int buyerId;
@@ -15,16 +12,17 @@ public class TransferCertificate {
     @JsonProperty("good-id")
     private int goodId;
 
-    private String timestamp;
+    @JsonProperty("wts")
+    private int wTs;
 
     public TransferCertificate() {
     }
 
-    public TransferCertificate(int buyerId, int sellerId, int goodId) {
+    public TransferCertificate(int buyerId, int sellerId, int goodId, int wTs) {
         this.buyerId = buyerId;
         this.sellerId = sellerId;
         this.goodId = goodId;
-        this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
+        this.wTs = wTs;
     }
 
     public int getBuyerId() {
@@ -39,7 +37,7 @@ public class TransferCertificate {
         return goodId;
     }
 
-    public String getTimestamp() {
-        return timestamp;
+    public int getwTs() {
+        return wTs;
     }
 }

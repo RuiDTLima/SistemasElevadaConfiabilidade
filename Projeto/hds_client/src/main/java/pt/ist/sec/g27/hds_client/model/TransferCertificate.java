@@ -12,7 +12,8 @@ public class TransferCertificate {
     @JsonProperty("good-id")
     private int goodId;
 
-    private String timestamp;
+    @JsonProperty("wts")
+    private int wTs;
 
     public int getBuyerId() {
         return buyerId;
@@ -26,7 +27,7 @@ public class TransferCertificate {
         return goodId;
     }
 
-    public String getTimestamp() {
-        return timestamp;
+    public int getwTs() {
+        return wTs;
     }
 }

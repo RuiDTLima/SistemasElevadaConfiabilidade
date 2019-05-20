@@ -168,7 +168,7 @@ public class Controller {
                 good.setSignature(sellerBody.getSignature());
                 good.setwTs(wTs);
                 good.setSignedId(sellerId);
-                TransferCertificate transferCertificate = new TransferCertificate(buyerId, sellerId, buyerGoodId);
+                TransferCertificate transferCertificate = new TransferCertificate(buyerId, sellerId, buyerGoodId, wTs);
                 appState.addTransferCertificate(transferCertificate);
                 log.info(String.format("The good with id %d was transferred from the user with id %d to the user with id %d.", buyerGoodId, sellerId, buyerId));
                 saveState();
