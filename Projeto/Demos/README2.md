@@ -9,7 +9,7 @@ Os clientes podem efetuar as seguintes operações:
 Para cada um dos casos de teste há uma pasta com o nome alice ou bob, em cada uma dessas pastas deve ser copiado o ficheiro jars\hds_client.jar, sendo que o ficheiro deve ser renomeado para o nome correspondente ao nome da pasta, por exemplo na pasta alice, deve ser copiado o jars\hds_client.jar e renomeado para alice.jar.
 Para todos os casos de teste, há uma pasta com o nome notaries, e dentro dessa pasta existe pelo menos quatro pasta com os nome first, second, third and fourth e para cada uma dessas pastas deve ser copiado o jar jars\hds_notary-0.0.1-SNAPSHOT.jar.
 
-Como estes testes executam todos no mesmo computador era imprático ter cada notário com o seu cartão de cidadão e por isso, usou-se um par de chaves para os testes.
+A aplicação permite executar os notários a assinarem as suas mensagens com o cartão de cidadão português ou usando um par de chaves. Para usar o par de chaves terá de ser passada a flag "--withPTCC=false", caso não passe a flag, por omissão irá usar o cartão de cidadão. Todos os scripts de demos estão preparados para correr sem o cartão de cidadão português. Para correr com o cartão de cidadão português é necessário alterar todos os scripts tirando a flag "--withPTCC=false" ou alterar esta flag passando o valor true.
 
 Durante a realização dos testes é necessário ter os portos **8074**, **8075**, **8076**, **8077**,  **8081**, **8082** vagos. Para executar os vários testes é necessário primeiro executar o ficheiro script.bat, da pasta correspondente ao teste, e de seguida, de acordo com o teste que se deseja executar devem ser seguidos os seguintes passos.
 
