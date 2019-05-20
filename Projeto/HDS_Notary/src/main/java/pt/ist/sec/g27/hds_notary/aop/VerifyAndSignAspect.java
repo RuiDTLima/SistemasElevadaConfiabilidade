@@ -28,17 +28,16 @@ import java.security.PublicKey;
 @Component
 public class VerifyAndSignAspect {
     private final static Logger log = LoggerFactory.getLogger(VerifyAndSignAspect.class);
-    private final static String IS_PT_CC = "isPTCC";
+    private final static String WITH_PT_CC = "withPTCC";
 
-    @Autowired
-    private Environment env;
-
+    private final Environment env;
     private final AppState appState;
     private final ObjectMapper objectMapper;
     private final int notaryId;
 
     @Autowired
-    public VerifyAndSignAspect(AppState appState, ObjectMapper objectMapper, int notaryId) {
+    public VerifyAndSignAspect(Environment env, AppState appState, ObjectMapper objectMapper, int notaryId) {
+        this.env = env;
         this.appState = appState;
         this.objectMapper = objectMapper;
         this.notaryId = notaryId;
@@ -72,7 +71,7 @@ public class VerifyAndSignAspect {
     }
 
     private Object after(Object returnedValue) throws Exception {
-        String keyValue = env.getProperty("isPTCC");
+        String keyValue = env.getProperty(WITH_PT_CC);
         if (Boolean.parseBoolean(keyValue)) {
             try {
                 byte[] sign = SecurityUtils.sign(Utils.jsonObjectToByteArray(returnedValue));
