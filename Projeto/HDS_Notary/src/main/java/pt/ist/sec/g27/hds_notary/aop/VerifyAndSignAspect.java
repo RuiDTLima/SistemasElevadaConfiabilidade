@@ -28,7 +28,7 @@ import java.security.PublicKey;
 @Component
 public class VerifyAndSignAspect {
     private final static Logger log = LoggerFactory.getLogger(VerifyAndSignAspect.class);
-    private final static String WITH_PT_CC = "withPTCC";
+    public final static String WITH_PT_CC = "withPTCC";
 
     private final Environment env;
     private final AppState appState;

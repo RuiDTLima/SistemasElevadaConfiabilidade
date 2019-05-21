@@ -8,7 +8,9 @@ import org.asynchttpclient.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import pt.ist.sec.g27.hds_notary.HdsNotaryApplication;
+import pt.ist.sec.g27.hds_notary.aop.VerifyAndSignAspect;
 import pt.ist.sec.g27.hds_notary.exceptions.NotFoundException;
 import pt.ist.sec.g27.hds_notary.exceptions.UnauthorizedException;
 import pt.ist.sec.g27.hds_notary.model.Body;
@@ -32,6 +34,7 @@ public class ByzantineReliableBroadcast {
     private final Object monitor = new Object();
     private Message clientMessage;
 
+    private final Environment env;
     private boolean sentEcho;
     private boolean sentReady;
     private boolean delivered;
@@ -42,7 +45,8 @@ public class ByzantineReliableBroadcast {
     private int notaryId;
 
     @Autowired
-    public ByzantineReliableBroadcast(int notaryId) {
+    public ByzantineReliableBroadcast(Environment env, int notaryId) {
+        this.env = env;
         this.notaryId = notaryId;
     }
 
@@ -159,19 +163,35 @@ public class ByzantineReliableBroadcast {
         try {
             jsonBody = mapper.writeValueAsBytes(body);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.info("Could not parse the body.");
+            return;
         }
-        Message toSendMessage = null;
-        try {
-            toSendMessage = new Message(body, SecurityUtils.sign(SecurityUtils.readPrivate(HdsNotaryApplication.getMe().getPrivateKeyPath()), jsonBody));
-        } catch (Exception e) {
-            e.printStackTrace();
+        Message toSendMessage;
+
+        String keyValue = env.getProperty(VerifyAndSignAspect.WITH_PT_CC);
+        byte[] sign;
+        if (Boolean.parseBoolean(keyValue)) {
+            try {
+                sign = SecurityUtils.sign(Utils.jsonObjectToByteArray(jsonBody));
+            } catch (Exception e) {
+                log.warn("Cannot sign the returned object with PTCC.", e);
+                return;
+            }
+        } else {
+            try {
+                sign = SecurityUtils.sign(SecurityUtils.readPrivate(HdsNotaryApplication.getMe().getPrivateKeyPath()), jsonBody);
+            } catch (Exception e) {
+                log.info("Cannot sign the returned object without PTCC.");
+                return;
+            }
         }
-        String json = null;
+        toSendMessage = new Message(body, sign);
+        String json;
         try {
             json = mapper.writeValueAsString(toSendMessage);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.info("Could not parse the value.");
+            return;
         }
 
         List<CompletableFuture<Response>> completableFutures = new ArrayList<>();
@@ -192,7 +212,7 @@ public class ByzantineReliableBroadcast {
                     log.info("Cannot connect with one of the notaries");
                 }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.info("Could not send the requested messages to the notaries.");
         }
     }
 }

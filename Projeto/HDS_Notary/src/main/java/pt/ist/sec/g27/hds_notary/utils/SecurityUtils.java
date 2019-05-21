@@ -60,7 +60,7 @@ public class SecurityUtils {
         }
     }
 
-    public static byte[] sign(byte[] toSign) throws Exception {
+    public synchronized static byte[] sign(byte[] toSign) throws Exception {
         log.info("Initialize library to sign.");
         PKCS11 pkcs11 = init();
         log.info("Initialize session to sign.");
