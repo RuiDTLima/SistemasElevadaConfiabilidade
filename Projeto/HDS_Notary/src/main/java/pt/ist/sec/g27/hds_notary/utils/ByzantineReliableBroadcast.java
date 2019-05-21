@@ -159,7 +159,7 @@ public class ByzantineReliableBroadcast {
 
     private void toAllNotaries(String uri, Body body) {
         Notary[] notaries = HdsNotaryApplication.getNotaries();
-        byte[] jsonBody = new byte[0];
+        byte[] jsonBody;
         try {
             jsonBody = mapper.writeValueAsBytes(body);
         } catch (JsonProcessingException e) {
